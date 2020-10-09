@@ -1,38 +1,39 @@
 <template>
-<div>
-  <span v-for="schema of schemas" :key="schema">{{schema}}</span>
-</div>
+  <div
+    class="container"
+    v-if="isInitializing"
+  >
+    <div class="jumbotron">
+      <h1 class="display-4">OwnYourData DataBud</h1>
+      <p class="lead">DataBud is loading...</p>
+    </div>
+  </div>
+  <router-view v-else></router-view>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { VaultifierWeb, VaultSchema, MimeTypes } from "vaultifier/dist/module";
+import { VaultifierWeb, VaultSchema, MimeType } from "vaultifier/dist/module";
+import { MutationType } from './store';
+import { initialize } from './services';
 
 interface IData {
-  schemas: VaultSchema[];
+  isInitializing: boolean,
 }
 
 export default defineComponent({
-  data: (): IData => ({
-    schemas: [],
-  }),
   created() {
     this.initialize();
   },
+  data: (): IData => ({
+    isInitializing: true,
+  }),
   methods: {
     async initialize() {
-      const vaultifier = VaultifierWeb.create('');
-      await vaultifier.initialize();
+      const vaultifier = await initialize('');
 
-      vaultifier.postItem({
-        dri: 'zQmbNDA8UVGsunvC43pekHs3hVtnFPWzPdizdwSqKVLAbWP',
-        schemaDri: 'gffA2i9tCexTwQ1S6JsXxJ8JEMHfTdaMtggBjX6jvF8N',
-        content: {foo: 'bar'},
-        mimeType: MimeTypes.JSON,
-      })
-
-      this.schemas = await vaultifier.getSchemas();
+      this.isInitializing = false;
     },
-  },
+  }
 });
 </script>
