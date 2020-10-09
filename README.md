@@ -1,24 +1,19 @@
-# oyd-databud
+# OwnYourData DataBud
 
-## Project setup
-```
+DataBud helps with displaying the data in your data vault. It's still in its early stages (so please don't be rude to our buddy). It's a simple vue.js application and runs in your browser entirely. It will also support end-to-end encryption, somewhere in the future.
+
+## Installation
+
+```bash
 npm install
 ```
 
-### Compiles and hot-reloads for development
-```
-npm run serve
+## Development
+
+```bash
+npm run serve # starts transpiling and the dev-server
 ```
 
-### Compiles and minifies for production
-```
-npm run build
-```
+---
 
-### Lints and fixes files
-```
-npm run lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+This project was bootstrapped using vue-cli
