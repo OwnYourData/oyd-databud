@@ -12,16 +12,14 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
-import { VaultifierWeb, VaultSchema, MimeType } from "vaultifier/dist/module";
-import { MutationType } from './store';
+import Vue from "vue";
 import { initialize } from './services';
 
 interface IData {
   isInitializing: boolean,
 }
 
-export default defineComponent({
+export default Vue.extend({
   created() {
     this.initialize();
   },
@@ -30,7 +28,7 @@ export default defineComponent({
   }),
   methods: {
     async initialize() {
-      const vaultifier = await initialize('');
+      await initialize('');
 
       this.isInitializing = false;
     },

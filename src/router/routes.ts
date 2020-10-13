@@ -1,5 +1,5 @@
 import SchemaList from '../views/SchemaList.vue';
-import DataList from '../views/DataList.vue';
+// import DataList from '../views/DataList.vue';
 
 export enum RoutePath {
   SCHEMA_LIST = '/',
@@ -8,5 +8,5 @@ export enum RoutePath {
 
 export const routes = [
   { path: RoutePath.SCHEMA_LIST, component: SchemaList },
-  { path: RoutePath.DATA_LIST, component: DataList },
+  // { path: RoutePath.DATA_LIST, component: DataList },
 ];

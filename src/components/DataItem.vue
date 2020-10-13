@@ -6,10 +6,11 @@
 </template>
 
 <script lang="ts">
-import { VaultItem } from 'vaultifier/dist/module';
-import { defineComponent, PropType } from 'vue'
+// @ts-ignore
+import { VaultItem } from 'vaultifier';
+import Vue, { PropType } from 'vue'
 
-export default defineComponent({
+export default Vue.extend({
   props: {
     item: {
       type: Object as PropType<VaultItem>,

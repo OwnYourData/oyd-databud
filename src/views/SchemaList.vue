@@ -28,7 +28,7 @@
 
 <script lang="ts">
 import { getInstance } from '../services';
-import { defineComponent } from 'vue';
+import Vue from 'vue';
 import { MutationType } from '../store';
 import createList from '../components/List.vue';
 import DataItem from '../components/DataItem.vue';
@@ -38,7 +38,7 @@ interface IData {
   selectedSchema?: VaultSchema,
 }
 
-export default defineComponent({
+export default Vue.extend({
   created() {
     this.initialize();
   },

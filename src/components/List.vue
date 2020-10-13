@@ -1,5 +1,5 @@
 <script lang="ts">
-import { defineComponent, PropType, h, VNode } from 'vue'
+import Vue, { PropType, VNode } from 'vue'
 
 export interface ListAdapter<T> {
   getTitle: (item: T) => string,
@@ -7,7 +7,7 @@ export interface ListAdapter<T> {
 }
 
 export default function createList<T>(adapter: ListAdapter<T>) {
-  return defineComponent({
+  return Vue.extend({
     props: {
       items: {
         type: Array as PropType<T[]>,
@@ -16,7 +16,7 @@ export default function createList<T>(adapter: ListAdapter<T>) {
         type: Object as PropType<T>,
       }
     },
-    render() {
+    render(h) {
       let listItems: VNode[];
       const listItemClass = 'list-group-item list-group-item-action';
 
@@ -31,7 +31,9 @@ export default function createList<T>(adapter: ListAdapter<T>) {
           h('button', {
             class: `${listItemClass}${x === this.selected ? ' active' : ''}`,
             key: adapter.getKey(x),
-            onClick: () => this.$emit('select', x),
+            on: {
+              click: () => this.$emit('select', x),
+            }
           },
             adapter.getTitle(x),
           )
