@@ -13,7 +13,9 @@ export interface IStore {
   },
   vaultItem: {
     all: VaultMinMeta[],
-    state: FetchState,
+    allState: FetchState,
+    current?: VaultItem,
+    currentState: FetchState,
   },
 }
 
@@ -57,7 +59,9 @@ export const getStore = () => {
       },
       vaultItem: {
         all: [],
-        state: FetchState.NONE,
+        allState: FetchState.NONE,
+        current: undefined,
+        currentState: FetchState.NONE,
       },
     }),
     mutations: {
@@ -69,6 +73,9 @@ export const getStore = () => {
       },
       [MutationType.SET_VAULT_ITEMS](state, payload: VaultItem[]) {
         state.vaultItem.all = payload;
+      },
+      [MutationType.SET_VAULT_ITEM](state, payload: VaultItem) {
+        state.vaultItem.current = payload;
       },
     },
     actions: {
@@ -85,7 +92,15 @@ export const getStore = () => {
           commit,
           () => getInstance().getValues({ schemaDri: payload.dri }),
           (commit, data) => commit(MutationType.SET_VAULT_ITEMS, data),
-          (store, state) => store.vaultItem.state = state,
+          (store, state) => store.vaultItem.allState = state,
+        )
+      },
+      async [ActionType.FETCH_VAULT_ITEM]({ commit }, payload: VaultMinMeta) {
+        doFetch<VaultItem>(
+          commit,
+          () => getInstance().getItem({ id: payload.id }),
+          (commit, data) => commit(MutationType.SET_VAULT_ITEM, data),
+          (store, state) => store.vaultItem.currentState = state,
         )
       },
     }

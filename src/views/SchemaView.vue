@@ -21,6 +21,12 @@
       </section>
     </div>
 
+    <div
+      class="center"
+      v-if="isVaultItemLoading"
+    >
+      <Spinner></Spinner>
+    </div>
     <data-visualizer
       class="ld-item"
       v-if="hasSelectedVaultItem"
@@ -35,6 +41,7 @@ import Vue from 'vue';
 import { IStore, MutationType } from '../store';
 import { createList } from '../components/List.vue';
 import DataVisualizer from '../components/DataVisualizer.vue';
+import Spinner from '../components/Spinner.vue';
 import { Vaultifier, VaultItem, VaultMinMeta, VaultSchema } from 'vaultifier/dist/module';
 import { renderForm } from '../utils';
 import { ActionType } from '@/store/action-type';
@@ -42,7 +49,6 @@ import { FetchState } from '@/store/fetch-state';
 
 interface IData {
   selectedSchema?: VaultSchema,
-  selectedVaultItem?: VaultItem,
 }
 
 export default Vue.extend({
@@ -51,10 +57,10 @@ export default Vue.extend({
   },
   data: (): IData => ({
     selectedSchema: undefined,
-    selectedVaultItem: undefined,
   }),
   components: {
     DataVisualizer,
+    Spinner,
     SchemaList: createList<VaultSchema>({
       getTitle: (item) => item.dri,
       getId: (item) => item.dri,
@@ -74,37 +80,41 @@ export default Vue.extend({
       this.$store.dispatch(ActionType.FETCH_VAULT_ITEMS, schema);
     },
     async selectVaultItem(item?: VaultMinMeta) {
-      let vaultItem: VaultItem | undefined;
-
-      if (item)
-        vaultItem = await getInstance().getItem({
-          id: item.id,
-        });
-
-      this.selectedVaultItem = vaultItem;
+      this.$store.dispatch(ActionType.FETCH_VAULT_ITEM, item);
     }
   },
   computed: {
     schemaDRIs(): VaultSchema[] {
       return this.$store.state.schemaDRI.all;
     },
-    isSchemaListLoading(): boolean  {
+    isSchemaListLoading(): boolean {
       return (this.$store.state as IStore).schemaDRI.state === FetchState.FETCHING;
     },
     vaultItems(): VaultItem[] | undefined {
       return this.$store.state.vaultItem.all;
     },
     isVaultItemListLoading(): boolean {
-      return (this.$store.state as IStore).vaultItem.state === FetchState.FETCHING;
+      return (this.$store.state as IStore).vaultItem.allState === FetchState.FETCHING;
+    },
+    selectedVaultItem(): VaultItem | undefined {
+      return (this.$store.state as IStore).vaultItem.current;
     },
     hasSelectedVaultItem(): boolean {
       return !!this.selectedVaultItem;
     },
+    isVaultItemLoading(): boolean {
+      return (this.$store.state as IStore).vaultItem.currentState == FetchState.FETCHING;
+    }
   }
 })
 </script>
 
 <style scoped>
+.center {
+  display: flex;
+  justify-content: center;
+}
+
 .flex-container {
   display: flex;
 }
