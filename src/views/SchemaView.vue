@@ -5,6 +5,7 @@
         <h2>Schemas</h2>
         <schema-list
           :items="schemaDRIs"
+          :isLoading="isSchemaListLoading"
           :selected="selectedSchema"
           @select="selectSchema"
         ></schema-list>
@@ -13,6 +14,7 @@
         <h2>Items</h2>
         <data-list
           :items="vaultItems"
+          :isLoading="isVaultItemListLoading"
           :selected="selectedVaultItem"
           @select="selectVaultItem"
         ></data-list>
@@ -30,12 +32,13 @@
 <script lang="ts">
 import { getInstance } from '../services';
 import Vue from 'vue';
-import { MutationType } from '../store';
+import { IStore, MutationType } from '../store';
 import { createList } from '../components/List.vue';
 import DataVisualizer from '../components/DataVisualizer.vue';
 import { Vaultifier, VaultItem, VaultMinMeta, VaultSchema } from 'vaultifier/dist/module';
 import { renderForm } from '../utils';
 import { ActionType } from '@/store/action-type';
+import { FetchState } from '@/store/fetch-state';
 
 interface IData {
   selectedSchema?: VaultSchema,
@@ -85,8 +88,14 @@ export default Vue.extend({
     schemaDRIs(): VaultSchema[] {
       return this.$store.state.schemaDRI.all;
     },
+    isSchemaListLoading(): boolean  {
+      return (this.$store.state as IStore).schemaDRI.state === FetchState.FETCHING;
+    },
     vaultItems(): VaultItem[] | undefined {
       return this.$store.state.vaultItem.all;
+    },
+    isVaultItemListLoading(): boolean {
+      return (this.$store.state as IStore).vaultItem.state === FetchState.FETCHING;
     },
     hasSelectedVaultItem(): boolean {
       return !!this.selectedVaultItem;

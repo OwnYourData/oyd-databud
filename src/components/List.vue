@@ -27,7 +27,11 @@ export function createList<T>(adapter: ListAdapter<T>) {
       const listItemClass = 'list-group-item list-group-item-action';
 
       if (this.isLoading) {
-        return h(Spinner);
+        listItems = [
+          h('div', {
+            class: listItemClass,
+          }, [h(Spinner)]),
+        ];
       }
       else if (!this.items || this.items.length === 0)
         listItems = [
