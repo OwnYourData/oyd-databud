@@ -1,6 +1,7 @@
 <script lang="ts">
+import Vue, { PropType, VNode } from 'vue';
+import Spinner from './Spinner.vue';
 import { dummyComponent } from '../utils';
-import Vue, { PropType, VNode } from 'vue'
 
 export interface ListAdapter<T> {
   getTitle: (item: T) => string,
@@ -10,6 +11,10 @@ export interface ListAdapter<T> {
 export function createList<T>(adapter: ListAdapter<T>) {
   return Vue.extend({
     props: {
+      isLoading: {
+        type: Boolean as PropType<boolean>,
+        default: false,
+      },
       items: {
         type: Array as PropType<T[]>,
       },
@@ -21,7 +26,10 @@ export function createList<T>(adapter: ListAdapter<T>) {
       let listItems: VNode[];
       const listItemClass = 'list-group-item list-group-item-action';
 
-      if (!this.items || this.items.length === 0)
+      if (this.isLoading) {
+        return h(Spinner);
+      }
+      else if (!this.items || this.items.length === 0)
         listItems = [
           h('div', {
             class: listItemClass,
