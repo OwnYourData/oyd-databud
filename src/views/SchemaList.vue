@@ -1,6 +1,6 @@
 <template>
   <div class="container vert-container flex-container">
-    <div class="flex-container">
+    <div class="flex-container ld-item">
       <section class="ld-item">
         <h2>Schemas</h2>
         <schema-list
@@ -18,25 +18,12 @@
         ></data-list>
       </section>
     </div>
-    <div
+
+    <data-view
       class="ld-item"
       v-if="hasSelectedDataItem"
-    >
-      <div
-        class="card"
-        v-if="hasForm"
-      >
-        <div class="card-header">Data</div>
-        <div class="card-body">
-          <form-component :form="form"></form-component>
-        </div>
-      </div>
-      <data-item
-        v-else
-        :item="selectedDataItem"
-      ></data-item>
-    </div>
-
+      :item="selectedDataItem"
+    ></data-view>
   </div>
 </template>
 
@@ -45,15 +32,12 @@ import { getInstance } from '../services';
 import Vue from 'vue';
 import { MutationType } from '../store';
 import { createList } from '../components/List.vue';
-import DataItem from '../components/DataItem.vue';
+import DataView from '../components/DataView.vue';
 import { Vaultifier, VaultItem, VaultMinMeta, VaultSchema } from 'vaultifier/dist/module';
 import { renderForm } from '../utils';
-// @ts-ignore
-import { FormBuilderGui } from 'odca-form';
 
 interface IData {
   selectedSchema?: VaultSchema,
-  form?: any,
 }
 
 export default Vue.extend({
@@ -62,11 +46,9 @@ export default Vue.extend({
   },
   data: (): IData => ({
     selectedSchema: undefined,
-    form: undefined,
   }),
   components: {
-    DataItem,
-    FormComponent: FormBuilderGui,
+    DataView,
     SchemaList: createList<VaultSchema>({
       getTitle: (item) => item.dri,
       getId: (item) => item.dri,
@@ -96,7 +78,6 @@ export default Vue.extend({
         });
 
       this.$store.commit(MutationType.SET_SELECTED_DATA_ITEM, vaultItem);
-      this.form = vaultItem ? await renderForm(vaultItem) : undefined;
     }
   },
   computed: {
@@ -112,9 +93,6 @@ export default Vue.extend({
     hasSelectedDataItem(): boolean {
       return !!this.selectedDataItem;
     },
-    hasForm(): boolean {
-      return !!this.form;
-    }
   }
 })
 </script>

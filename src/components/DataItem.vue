@@ -1,8 +1,5 @@
 <template>
-  <div class="card">
-    <div class="card-header">Data</div>
-    <pre class="card-body">{{jsonified}}</pre>
-  </div>
+  <pre>{{ jsonified }}</pre>
 </template>
 
 <script lang="ts">
