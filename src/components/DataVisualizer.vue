@@ -18,11 +18,12 @@
       </li>
     </ul>
     <div class="tab-content card-body">
+      <div class="tab-pane show active">
       <component
-        class="tab-pane show active"
         :is="visiblePanelComponent"
         v-bind="visiblePanelProps"
       ></component>
+      </div>
     </div>
   </div>
 </template>
