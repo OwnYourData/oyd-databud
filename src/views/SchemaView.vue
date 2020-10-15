@@ -12,17 +12,17 @@
       <section class="ld-item">
         <h2>Items</h2>
         <data-list
-          :items="dataItems"
-          :selected="selectedDataItem"
-          @select="selectDataItem"
+          :items="vaultItems"
+          :selected="selectedVaultItem"
+          @select="selectVaultItem"
         ></data-list>
       </section>
     </div>
 
     <data-visualizer
       class="ld-item"
-      v-if="hasSelectedDataItem"
-      :item="selectedDataItem"
+      v-if="hasSelectedVaultItem"
+      :item="selectedVaultItem"
     ></data-visualizer>
   </div>
 </template>
@@ -35,9 +35,11 @@ import { createList } from '../components/List.vue';
 import DataVisualizer from '../components/DataVisualizer.vue';
 import { Vaultifier, VaultItem, VaultMinMeta, VaultSchema } from 'vaultifier/dist/module';
 import { renderForm } from '../utils';
+import { ActionType } from '@/store/action-type';
 
 interface IData {
   selectedSchema?: VaultSchema,
+  selectedVaultItem?: VaultItem,
 }
 
 export default Vue.extend({
@@ -46,6 +48,7 @@ export default Vue.extend({
   },
   data: (): IData => ({
     selectedSchema: undefined,
+    selectedVaultItem: undefined,
   }),
   components: {
     DataVisualizer,
@@ -60,16 +63,14 @@ export default Vue.extend({
   },
   methods: {
     async initialize() {
-      this.$store.commit(MutationType.SET_SCHEMA_DRIS, await getInstance().getSchemas());
+      this.$store.dispatch(ActionType.FETCH_SCHEMA_DRIS);
     },
     async selectSchema(schema: VaultSchema) {
       this.selectedSchema = schema;
 
-      this.$store.commit(MutationType.SET_DATA_ITEMS, await getInstance().getValues({
-        schemaDri: schema.dri,
-      }));
+      this.$store.dispatch(ActionType.FETCH_VAULT_ITEMS, schema);
     },
-    async selectDataItem(item?: VaultMinMeta) {
+    async selectVaultItem(item?: VaultMinMeta) {
       let vaultItem: VaultItem | undefined;
 
       if (item)
@@ -77,21 +78,18 @@ export default Vue.extend({
           id: item.id,
         });
 
-      this.$store.commit(MutationType.SET_SELECTED_DATA_ITEM, vaultItem);
+      this.selectedVaultItem = vaultItem;
     }
   },
   computed: {
     schemaDRIs(): VaultSchema[] {
-      return this.$store.state.schemaDRIs;
+      return this.$store.state.schemaDRI.all;
     },
-    dataItems(): VaultItem[] | undefined {
-      return this.$store.state.dataItems;
+    vaultItems(): VaultItem[] | undefined {
+      return this.$store.state.vaultItem.all;
     },
-    selectedDataItem(): VaultItem | undefined {
-      return this.$store.state.selectedDataItem;
-    },
-    hasSelectedDataItem(): boolean {
-      return !!this.selectedDataItem;
+    hasSelectedVaultItem(): boolean {
+      return !!this.selectedVaultItem;
     },
   }
 })
