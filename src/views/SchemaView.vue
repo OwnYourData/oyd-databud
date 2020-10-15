@@ -19,11 +19,11 @@
       </section>
     </div>
 
-    <data-view
+    <data-visualizer
       class="ld-item"
       v-if="hasSelectedDataItem"
       :item="selectedDataItem"
-    ></data-view>
+    ></data-visualizer>
   </div>
 </template>
 
@@ -32,7 +32,7 @@ import { getInstance } from '../services';
 import Vue from 'vue';
 import { MutationType } from '../store';
 import { createList } from '../components/List.vue';
-import DataView from '../components/DataView.vue';
+import DataVisualizer from '../components/DataVisualizer.vue';
 import { Vaultifier, VaultItem, VaultMinMeta, VaultSchema } from 'vaultifier/dist/module';
 import { renderForm } from '../utils';
 
@@ -48,7 +48,7 @@ export default Vue.extend({
     selectedSchema: undefined,
   }),
   components: {
-    DataView,
+    DataVisualizer,
     SchemaList: createList<VaultSchema>({
       getTitle: (item) => item.dri,
       getId: (item) => item.dri,

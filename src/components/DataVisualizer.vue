@@ -31,7 +31,7 @@
 import Vue, { PropType } from 'vue';
 
 import { VaultItem } from 'vaultifier';
-import DataItem from './DataItem.vue';
+import RawData from './RawData.vue';
 // @ts-ignore
 import { FormBuilderGui } from 'odca-form';
 import { renderForm } from '../utils';
@@ -54,7 +54,7 @@ export default Vue.extend({
     item: Object as PropType<VaultItem>,
   },
   components: {
-    DataItem,
+    RawData,
     FormBuilderGui,
   },
   data: (): IData => ({
@@ -86,7 +86,7 @@ export default Vue.extend({
     },
     panels(): Panel[] {
       const panels: Panel[] = [
-        { name: 'data-item', title: 'Raw-Data', view: DataItem, props: { item: this.item } },
+        { name: 'raw-data', title: 'Raw-Data', view: RawData, props: { item: this.item } },
       ];
 
       if (this.hasForm)
