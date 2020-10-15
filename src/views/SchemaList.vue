@@ -1,6 +1,6 @@
 <template>
-  <div class="container vert-container ld-container">
-    <div class="ld-container">
+  <div class="container vert-container flex-container">
+    <div class="flex-container">
       <section class="ld-item">
         <h2>Schemas</h2>
         <schema-list
@@ -18,11 +18,25 @@
         ></data-list>
       </section>
     </div>
-    <data-item
+    <div
       class="ld-item"
       v-if="hasSelectedDataItem"
-      :item="selectedDataItem"
-    ></data-item>
+    >
+      <div
+        class="card"
+        v-if="hasForm"
+      >
+        <div class="card-header">Data</div>
+        <div class="card-body">
+          <form-component :form="form"></form-component>
+        </div>
+      </div>
+      <data-item
+        v-else
+        :item="selectedDataItem"
+      ></data-item>
+    </div>
+
   </div>
 </template>
 
@@ -30,12 +44,16 @@
 import { getInstance } from '../services';
 import Vue from 'vue';
 import { MutationType } from '../store';
-import createList from '../components/List.vue';
+import { createList } from '../components/List.vue';
 import DataItem from '../components/DataItem.vue';
 import { Vaultifier, VaultItem, VaultMinMeta, VaultSchema } from 'vaultifier/dist/module';
+import { renderForm } from '../utils';
+// @ts-ignore
+import { FormBuilderGui } from 'odca-form';
 
 interface IData {
   selectedSchema?: VaultSchema,
+  form?: any,
 }
 
 export default Vue.extend({
@@ -44,21 +62,22 @@ export default Vue.extend({
   },
   data: (): IData => ({
     selectedSchema: undefined,
+    form: undefined,
   }),
   components: {
     DataItem,
-    'schema-list': createList<VaultSchema>({
+    FormComponent: FormBuilderGui,
+    SchemaList: createList<VaultSchema>({
       getTitle: (item) => item.dri,
-      getKey: (item) => item.dri,
+      getId: (item) => item.dri,
     }),
-    'data-list': createList<VaultItem>({
+    DataList: createList<VaultItem>({
       getTitle: (item) => item.id.toString(),
-      getKey: (item) => item.id.toString(),
+      getId: (item) => item.id.toString(),
     }),
   },
   methods: {
     async initialize() {
-      this.$store.state.schemaDRIs;
       this.$store.commit(MutationType.SET_SCHEMA_DRIS, await getInstance().getSchemas());
     },
     async selectSchema(schema: VaultSchema) {
@@ -68,8 +87,16 @@ export default Vue.extend({
         schemaDri: schema.dri,
       }));
     },
-    selectDataItem(item?: VaultItem) {
-      this.$store.commit(MutationType.SET_SELECTED_DATA_ITEM, item);
+    async selectDataItem(item?: VaultMinMeta) {
+      let vaultItem: VaultItem | undefined;
+
+      if (item)
+        vaultItem = await getInstance().getItem({
+          id: item.id,
+        });
+
+      this.$store.commit(MutationType.SET_SELECTED_DATA_ITEM, vaultItem);
+      this.form = vaultItem ? await renderForm(vaultItem) : undefined;
     }
   },
   computed: {
@@ -84,13 +111,16 @@ export default Vue.extend({
     },
     hasSelectedDataItem(): boolean {
       return !!this.selectedDataItem;
+    },
+    hasForm(): boolean {
+      return !!this.form;
     }
   }
 })
 </script>
 
 <style scoped>
-.ld-container {
+.flex-container {
   display: flex;
 }
 

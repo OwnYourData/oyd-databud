@@ -8,7 +8,7 @@ export const getStore = () => {
   return new Vuex.Store({
     state: () => ({
       schemaDRIs: [],
-      dataItems: undefined,
+      dataItems: [],
       selectedDataItem: undefined,
     }),
     mutations: {

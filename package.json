@@ -9,6 +9,7 @@
   "dependencies": {
     "bootstrap": "^4.5.2",
     "core-js": "^3.6.5",
+    "odca-form": "0.0.36",
     "vaultifier": "github:OwnYourData/vaultifier",
     "vue": "^2.6.11",
     "vue-router": "^3.4.6",
