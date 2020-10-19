@@ -39,3 +39,10 @@ export default Vue.extend({
   }
 });
 </script>
+
+<style>
+.list-group-item {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+</style>

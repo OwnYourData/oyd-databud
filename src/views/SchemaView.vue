@@ -1,7 +1,7 @@
 <template>
   <div class="container vert-container flex-container">
-    <div class="flex-container ld-item">
-      <section class="ld-item">
+    <div class="row ld-item">
+      <section class="col-md-4">
         <h2>Schemas</h2>
         <schema-list
           :items="schemaDRIs"
@@ -10,7 +10,7 @@
           @select="selectSchema"
         ></schema-list>
       </section>
-      <section class="ld-item">
+      <section class="col-md-8">
         <h2>Items</h2>
         <data-list
           :items="vaultItems"
