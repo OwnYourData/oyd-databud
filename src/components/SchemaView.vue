@@ -1,49 +1,29 @@
 <template>
-  <div class="container vert-container flex-container">
-    <div class="row ld-item">
-      <section class="col-md-4">
-        <h2>Schemas</h2>
-        <schema-list
-          :items="schemaDRIs"
-          :isLoading="isSchemaListLoading"
-          :selected="selectedSchema"
-          @select="selectSchema"
-        ></schema-list>
-      </section>
-      <section class="col-md-8">
-        <h2>Items</h2>
-        <data-list
-          :items="vaultItems"
-          :isLoading="isVaultItemListLoading"
-          :selected="selectedVaultItem"
-          @select="selectVaultItem"
-        ></data-list>
-      </section>
-    </div>
-
-    <div
-      class="center"
-      v-if="isVaultItemLoading"
-    >
-      <Spinner></Spinner>
-    </div>
-    <data-visualizer
-      class="ld-item"
-      v-if="hasSelectedVaultItem"
-      :item="selectedVaultItem"
-    ></data-visualizer>
+  <div class="row">
+    <section class="col-md-4">
+      <schema-list
+        :items="schemaDRIs"
+        :isLoading="isSchemaListLoading"
+        :selected="selectedSchema"
+        @select="selectSchema"
+      ></schema-list>
+    </section>
+    <section class="col-md-8">
+      <data-list
+        :items="vaultItems"
+        :isLoading="isVaultItemListLoading"
+        :selected="selectedVaultItem"
+        @select="selectVaultItem"
+      ></data-list>
+    </section>
   </div>
 </template>
 
 <script lang="ts">
-import { getInstance } from '../services';
 import Vue from 'vue';
-import { IStore, MutationType } from '../store';
+import { IStore } from '../store';
 import { createList } from '../components/List.vue';
-import DataVisualizer from '../components/DataVisualizer.vue';
-import Spinner from '../components/Spinner.vue';
 import { Vaultifier, VaultItem, VaultMinMeta, VaultSchema } from 'vaultifier/dist/module';
-import { renderForm } from '../utils';
 import { ActionType } from '@/store/action-type';
 import { FetchState } from '@/store/fetch-state';
 
@@ -59,8 +39,6 @@ export default Vue.extend({
     selectedSchema: undefined,
   }),
   components: {
-    DataVisualizer,
-    Spinner,
     SchemaList: createList<VaultSchema>({
       getTitle: (item) => item.dri,
       getId: (item) => item.dri,
@@ -99,42 +77,6 @@ export default Vue.extend({
     selectedVaultItem(): VaultItem | undefined {
       return (this.$store.state as IStore).vaultItem.current;
     },
-    hasSelectedVaultItem(): boolean {
-      return !!this.selectedVaultItem;
-    },
-    isVaultItemLoading(): boolean {
-      return (this.$store.state as IStore).vaultItem.currentState == FetchState.FETCHING;
-    }
   }
 })
 </script>
-
-<style scoped>
-.center {
-  display: flex;
-  justify-content: center;
-}
-
-.flex-container {
-  display: flex;
-}
-
-.ld-item:nth-of-type(1) {
-  flex: 1;
-}
-
-.ld-item:nth-of-type(2) {
-  flex: 2;
-  margin-left: 2em;
-}
-
-.vert-container {
-  display: flex;
-  flex-direction: column;
-}
-
-.vert-container > .ld-item:nth-of-type(2) {
-  margin-left: 0;
-  margin-top: 2em;
-}
-</style>
