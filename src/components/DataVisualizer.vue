@@ -1,31 +1,15 @@
 <template>
-  <div class="card">
-    <ul
-      class="card-header nav nav-pills"
-      role="tablist"
-    >
-      <li
-        class="nav-item"
-        v-for="panel of panels"
-        :key="panel.name"
-      >
-        <a
-          class="nav-link"
-          :class="{'active': activePanel.name === panel.name}"
-          @click="selectPanel(panel)"
-          href="#"
-        >{{ panel.title }}</a>
-      </li>
-    </ul>
-    <div class="tab-content card-body">
-      <div class="tab-pane show active">
-      <component
-        :is="visiblePanelComponent"
-        v-bind="visiblePanelProps"
-      ></component>
-      </div>
-    </div>
-  </div>
+  <card-panel>
+    <panel-tab title="Raw Data">
+      <raw-data :item="item"></raw-data>
+    </panel-tab>
+    <panel-tab title="OCA-Form">
+      <form-builder-gui
+        v-if="hasForm"
+        :form="form"
+      ></form-builder-gui>
+    </panel-tab>
+  </card-panel>
 </template>
 
 <script lang="ts">
@@ -37,16 +21,10 @@ import RawData from './RawData.vue';
 import { FormBuilderGui } from 'odca-form';
 import { renderForm } from '../utils';
 
-
-interface Panel {
-  name: string,
-  title: string,
-  view: Vue.Component,
-  props: any,
-}
+import CardPanel from '../components/CardPanel.vue';
+import PanelTab from '../components/PanelTab.vue';
 
 interface IData {
-  selectedPanel?: Panel,
   form?: any,
 }
 
@@ -55,17 +33,15 @@ export default Vue.extend({
     item: Object as PropType<VaultItem>,
   },
   components: {
+    CardPanel,
+    PanelTab,
     RawData,
     FormBuilderGui,
   },
   data: (): IData => ({
-    selectedPanel: undefined,
     form: undefined,
   }),
   methods: {
-    selectPanel(panel: Panel) {
-      this.selectedPanel = panel;
-    },
     async getForm() {
       this.form = this.item ? await renderForm(this.item) : undefined;
     }
@@ -79,28 +55,9 @@ export default Vue.extend({
     }
   },
   computed: {
-    activePanel(): Panel {
-      return this.selectedPanel || this.panels[0];
-    },
     hasForm(): boolean {
       return !!this.form;
     },
-    panels(): Panel[] {
-      const panels: Panel[] = [
-        { name: 'raw-data', title: 'Raw-Data', view: RawData, props: { item: this.item } },
-      ];
-
-      if (this.hasForm)
-        panels.push({ name: 'form-builder-gui', title: 'OCA-Form', view: FormBuilderGui, props: { form: this.form } });
-
-      return panels;
-    },
-    visiblePanelComponent(): string {
-      return this.activePanel.name;
-    },
-    visiblePanelProps(): any {
-      return this.activePanel.props;
-    }
   },
 })
 </script>
