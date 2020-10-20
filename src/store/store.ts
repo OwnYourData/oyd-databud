@@ -1,5 +1,5 @@
 import { getInstance } from '@/services';
-import { VaultItem, VaultMinMeta, VaultSchema } from 'vaultifier';
+import { Vaultifier, VaultItem, VaultItemQuery, VaultItemsQuery, VaultMinMeta, VaultRepo, VaultSchema } from 'vaultifier';
 import Vue from 'vue';
 import Vuex, { Commit } from 'vuex'
 import { ActionType } from './action-type';
@@ -7,6 +7,10 @@ import { FetchState } from './fetch-state';
 import { MutationType } from './mutation-type';
 
 export interface IStore {
+  repo: {
+    all: VaultRepo[],
+    state: FetchState,
+  },
   schemaDRI: {
     all: VaultSchema[],
     state: FetchState,
@@ -19,7 +23,7 @@ export interface IStore {
   },
 }
 
-interface ISomething {
+interface IFetchState {
   state: FetchState,
   setFetchState: (store: IStore, state: FetchState) => void,
 }
@@ -30,7 +34,7 @@ async function doFetch<T>(
   setState: (commit: Commit, data: T) => void,
   setFetchState: (store: IStore, state: FetchState) => void,
 ) {
-  const commitObj: ISomething = {
+  const commitObj: IFetchState = {
     setFetchState,
     state: FetchState.FETCHING,
   }
@@ -53,6 +57,10 @@ export const getStore = () => {
 
   return new Vuex.Store({
     state: (): IStore => ({
+      repo: {
+        all: [],
+        state: FetchState.NONE,
+      },
       schemaDRI: {
         all: [],
         state: FetchState.NONE,
@@ -65,8 +73,11 @@ export const getStore = () => {
       },
     }),
     mutations: {
-      [MutationType.SET_FETCH_STATE](state, payload: ISomething) {
+      [MutationType.SET_FETCH_STATE](state, payload: IFetchState) {
         payload.setFetchState(state, payload.state);
+      },
+      [MutationType.SET_REPOS](state, payload: VaultRepo[]) {
+        state.repo.all = payload;
       },
       [MutationType.SET_SCHEMA_DRIS](state, payload: VaultSchema[]) {
         state.schemaDRI.all = payload;
@@ -79,17 +90,46 @@ export const getStore = () => {
       },
     },
     actions: {
-      async [ActionType.FETCH_SCHEMA_DRIS]({ commit }) {
+      [ActionType.RESET_VAULT_ITEMS]({ commit }) {
+        commit(MutationType.SET_VAULT_ITEMS, undefined);
+        commit(MutationType.SET_VAULT_ITEM, undefined);
+      },
+      async [ActionType.FETCH_SCHEMA_DRIS]({ commit, dispatch }) {
         doFetch<VaultSchema[]>(
           commit,
           () => getInstance().getSchemas(),
-          (commit, data) => commit(MutationType.SET_SCHEMA_DRIS, data),
+          (commit, data) => {
+            dispatch(ActionType.RESET_VAULT_ITEMS);
+            commit(MutationType.SET_SCHEMA_DRIS, data);
+          },
           (store, state) => store.schemaDRI.state = state
         );
       },
-      async [ActionType.FETCH_VAULT_ITEMS]({ commit }, payload: VaultSchema) {
+      async [ActionType.FETCH_REPOS]({ commit, dispatch }) {
+        doFetch<VaultRepo[]>(
+          commit,
+          () => getInstance().getRepos(),
+          (commit, data) => {
+            dispatch(ActionType.RESET_VAULT_ITEMS);
+            commit(MutationType.SET_REPOS, data);
+          },
+          (store, state) => store.repo.state = state
+        );
+      },
+      async [ActionType.FETCH_VAULT_ITEMS_BY_REPO]({ commit }, payload: VaultRepo) {
         doFetch<VaultMinMeta[]>(
           commit,
+          async () => (await getInstance().fromRepo(payload.name)).getValues(),
+          (commit, data) => commit(MutationType.SET_VAULT_ITEMS, data),
+          (store, state) => store.vaultItem.allState = state,
+        )
+      },
+      // the hell?
+      // here i couldn't use destructuring, as typescript has always complained about having implicit "any" type
+      // but for all other functions it works...that's strange
+      async [ActionType.FETCH_VAULT_ITEMS_BY_SCHEMA](store, payload: VaultSchema) {
+        doFetch<VaultMinMeta[]>(
+          store.commit,
           () => getInstance().getValues({ schemaDri: payload.dri }),
           (commit, data) => commit(MutationType.SET_VAULT_ITEMS, data),
           (store, state) => store.vaultItem.allState = state,

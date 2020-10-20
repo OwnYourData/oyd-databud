@@ -5,9 +5,9 @@
       <panel-tab title="Schemas">
         <schema-view></schema-view>
       </panel-tab>
-      <!-- <panel-tab title="Repos">
+      <panel-tab title="Repos">
         <repo-view></repo-view>
-      </panel-tab> -->
+      </panel-tab>
     </card-panel>
 
     <div
@@ -29,6 +29,7 @@ import { IStore, MutationType } from '../store';
 import DataVisualizer from '../components/DataVisualizer.vue';
 import Spinner from '../components/Spinner.vue';
 import SchemaView from '../components/SchemaView.vue';
+import RepoView from '../components/RepoView.vue';
 import { VaultItem } from 'vaultifier/dist/module';
 import { renderForm } from '../utils';
 import { FetchState } from '@/store/fetch-state';
@@ -43,6 +44,7 @@ export default Vue.extend({
     DataVisualizer,
     Spinner,
     SchemaView,
+    RepoView
   },
   computed: {
     selectedVaultItem(): VaultItem | undefined {

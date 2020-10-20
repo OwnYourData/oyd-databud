@@ -1,7 +1,7 @@
 <template>
   <div
-    class="tab-pane"
-    :class="{'active': isActive}"
+    class="tab-pane active"
+    v-if="isActive"
   >
     <slot />
   </div>

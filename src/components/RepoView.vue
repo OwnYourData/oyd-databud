@@ -1,12 +1,12 @@
 <template>
   <div class="row">
     <section class="col-md-4">
-      <schema-list
-        :items="schemaDRIs"
-        :isLoading="isSchemaListLoading"
-        :selected="selectedSchema"
-        @select="selectSchema"
-      ></schema-list>
+      <repo-list
+        :items="repos"
+        :isLoading="isRepoListLoading"
+        :selected="selectedRepo"
+        @select="selectRepo"
+      ></repo-list>
     </section>
     <section class="col-md-8">
       <data-list
@@ -23,12 +23,12 @@
 import Vue from 'vue';
 import { IStore } from '../store';
 import { createList } from '../components/List.vue';
-import { Vaultifier, VaultItem, VaultMinMeta, VaultSchema } from 'vaultifier/dist/module';
+import { Vaultifier, VaultItem, VaultMinMeta, VaultRepo, VaultSchema } from 'vaultifier/dist/module';
 import { ActionType } from '@/store/action-type';
 import { FetchState } from '@/store/fetch-state';
 
 interface IData {
-  selectedSchema?: VaultSchema,
+  selectedRepo?: VaultRepo,
 }
 
 export default Vue.extend({
@@ -36,12 +36,12 @@ export default Vue.extend({
     this.initialize();
   },
   data: (): IData => ({
-    selectedSchema: undefined,
+    selectedRepo: undefined,
   }),
   components: {
-    SchemaList: createList<VaultSchema>({
-      getTitle: (item) => item.dri,
-      getId: (item) => item.dri,
+    RepoList: createList<VaultRepo>({
+      getTitle: (item) => item.name,
+      getId: (item) => item.id.toString(),
     }),
     DataList: createList<VaultItem>({
       getTitle: (item) => item.id.toString(),
@@ -50,23 +50,26 @@ export default Vue.extend({
   },
   methods: {
     async initialize() {
-      this.$store.dispatch(ActionType.FETCH_SCHEMA_DRIS);
+      this.$store.dispatch(ActionType.FETCH_REPOS);
     },
-    async selectSchema(schema: VaultSchema) {
-      this.selectedSchema = schema;
+    async selectRepo(item?: VaultRepo) {
+      this.selectedRepo = item;
 
-      this.$store.dispatch(ActionType.FETCH_VAULT_ITEMS_BY_SCHEMA, schema);
+      this.$store.dispatch(ActionType.FETCH_VAULT_ITEMS_BY_REPO, item);
     },
     async selectVaultItem(item?: VaultMinMeta) {
       this.$store.dispatch(ActionType.FETCH_VAULT_ITEM, item);
     }
   },
   computed: {
-    schemaDRIs(): VaultSchema[] {
-      return this.$store.state.schemaDRI.all;
+    store(): IStore {
+      return this.$store.state as IStore;
     },
-    isSchemaListLoading(): boolean {
-      return (this.$store.state as IStore).schemaDRI.state === FetchState.FETCHING;
+    repos(): VaultRepo[] {
+      return this.store.repo.all;
+    },
+    isRepoListLoading(): boolean {
+      return this.store.repo.state === FetchState.FETCHING;
     },
     vaultItems(): VaultItem[] | undefined {
       return this.$store.state.vaultItem.all;
