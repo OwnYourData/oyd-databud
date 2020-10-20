@@ -2,6 +2,7 @@
   <div class="row">
     <section class="col-md-4">
       <repo-list
+        class="list"
         :items="repos"
         :isLoading="isRepoListLoading"
         :selected="selectedRepo"
@@ -10,6 +11,7 @@
     </section>
     <section class="col-md-8">
       <data-list
+        class="list"
         :items="vaultItems"
         :isLoading="isVaultItemListLoading"
         :selected="selectedVaultItem"
@@ -83,3 +85,10 @@ export default Vue.extend({
   }
 })
 </script>
+
+<style scoped>
+.list {
+  max-height: 250px;
+  overflow-y: auto;
+}
+</style>

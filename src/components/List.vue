@@ -54,9 +54,10 @@ export function createList<T>(adapter: ListAdapter<T>) {
           );
         });
 
-      return h('ul', {
-        class: 'list-group'
-      }, listItems);
+      return h('div', undefined, [
+        h('ul', {
+          staticClass: 'list-group'
+        }, listItems)]);
     }
   });
 }

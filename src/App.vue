@@ -44,5 +44,6 @@ export default Vue.extend({
 .list-group-item {
   overflow: hidden;
   text-overflow: ellipsis;
+  word-wrap: initial;
 }
 </style>

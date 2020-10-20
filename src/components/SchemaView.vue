@@ -2,6 +2,7 @@
   <div class="row">
     <section class="col-md-4">
       <schema-list
+        class="list"
         :items="schemaDRIs"
         :isLoading="isSchemaListLoading"
         :selected="selectedSchema"
@@ -10,6 +11,7 @@
     </section>
     <section class="col-md-8">
       <data-list
+        class="list"
         :items="vaultItems"
         :isLoading="isVaultItemListLoading"
         :selected="selectedVaultItem"
@@ -80,3 +82,10 @@ export default Vue.extend({
   }
 })
 </script>
+
+<style scoped>
+.list {
+  max-height: 250px;
+  overflow-y: auto;
+}
+</style>
