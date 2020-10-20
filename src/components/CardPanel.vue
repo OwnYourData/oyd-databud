@@ -1,5 +1,6 @@
 <script lang="ts">
-import Vue, { PropType } from 'vue';
+import Vue, { PropType, VNodeChildren, VNode } from 'vue';
+import { component } from 'vue/types/umd';
 
 interface Tab {
   title: string,
@@ -17,32 +18,44 @@ export default Vue.extend({
     if (!children)
       return h('div');
 
-    const tabs = children.map((x, idx) => h('li', {
-      staticClass: 'nav-item',
-      key: idx,
-    }, [h('a', {
-      staticClass: 'nav-link',
-      class: this.selectedPanelIndex === idx ? 'active' : null,
-      on: {
-        click: () => {
-          that.selectedPanelIndex = idx;
+    const tabs: VNode[] = [];
+    const panelChildren: VNode[] = [];
+
+    let idx = -1;
+    for (let idx = 0, size = children.length; idx < size; idx++) {
+      const child = children[idx];
+      
+      if (!child.componentOptions)
+        continue;
+
+      const props = child.componentOptions.propsData;
+
+      tabs.push(h('li', {
+        staticClass: 'nav-item',
+        key: idx,
+      }, [h('a', {
+        staticClass: 'nav-link',
+        class: this.selectedPanelIndex === idx ? 'active' : null,
+        on: {
+          click: () => {
+            that.selectedPanelIndex = idx;
+          }
+        },
+        domProps: {
+          href: '#'
         }
       },
-      domProps: {
-        href: '#'
-      }
-    },
-      // @ts-ignore
-      x.componentOptions.propsData.title,
-    )]
-    ));
+        // @ts-ignore
+        props.title,
+      )]
+      ));
 
-    const panelChildren = children.map((x, idx) => {
       // @ts-ignore
-      x.componentOptions.propsData.isActive = this.selectedPanelIndex === idx;
-
-      return { ...x };
-    });
+      props.isActive = this.selectedPanelIndex === idx;
+      panelChildren.push({
+        ...child,
+      });
+    }
 
     return h('div', { staticClass: "card" }, [
       h('ul', { staticClass: 'card-header nav nav-pills' }, tabs),

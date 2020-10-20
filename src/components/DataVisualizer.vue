@@ -3,11 +3,11 @@
     <panel-tab title="Raw Data">
       <raw-data :item="item"></raw-data>
     </panel-tab>
-    <panel-tab title="OCA-Form">
-      <form-builder-gui
-        v-if="hasForm"
-        :form="form"
-      ></form-builder-gui>
+    <panel-tab
+      title="OCA-Form"
+      v-if="hasForm"
+    >
+      <form-builder-gui :form="form"></form-builder-gui>
     </panel-tab>
   </card-panel>
 </template>
