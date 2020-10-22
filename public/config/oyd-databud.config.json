@@ -1,9 +1,9 @@
 {
   "endpoint": {
-    "url": "https://data-vault.eu",
+    "url": "http://localhost:3000",
     "credentials": {
-      "appKey": "",
-      "appSecret": ""
+      "appKey": null,
+      "appSecret": null
     }
   }
 }
