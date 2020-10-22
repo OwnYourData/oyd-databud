@@ -1,5 +1,5 @@
 import { getInstance } from '@/services';
-import { Vaultifier, VaultItem, VaultItemQuery, VaultItemsQuery, VaultMinMeta, VaultRepo, VaultSchema } from 'vaultifier';
+import { VaultItem, VaultMeta, VaultRepo, VaultSchema } from 'vaultifier';
 import Vue from 'vue';
 import Vuex, { Commit } from 'vuex'
 import { ActionType } from './action-type';
@@ -8,7 +8,7 @@ import { MutationType } from './mutation-type';
 
 export interface IStore {
   repo: {
-    all: VaultRepo[],
+    all?: VaultRepo[],
     state: FetchState,
   },
   schemaDRI: {
@@ -16,7 +16,7 @@ export interface IStore {
     state: FetchState,
   },
   vaultItem: {
-    all: VaultMinMeta[],
+    all: VaultMeta[],
     allState: FetchState,
     current?: VaultItem,
     currentState: FetchState,
@@ -106,7 +106,7 @@ export const getStore = () => {
         );
       },
       async [ActionType.FETCH_REPOS]({ commit, dispatch }) {
-        doFetch<VaultRepo[]>(
+        doFetch<VaultRepo[] | undefined>(
           commit,
           () => getInstance().getRepos(),
           (commit, data) => {
@@ -117,9 +117,9 @@ export const getStore = () => {
         );
       },
       async [ActionType.FETCH_VAULT_ITEMS_BY_REPO]({ commit }, payload: VaultRepo) {
-        doFetch<VaultMinMeta[]>(
+        doFetch<VaultMeta[]>(
           commit,
-          async () => (await getInstance().fromRepo(payload.name)).getValues(),
+          async () => (await getInstance().fromRepo(payload.name)).getMetaItems(),
           (commit, data) => commit(MutationType.SET_VAULT_ITEMS, data),
           (store, state) => store.vaultItem.allState = state,
         )
@@ -128,14 +128,14 @@ export const getStore = () => {
       // here i couldn't use destructuring, as typescript has always complained about having implicit "any" type
       // but for all other functions it works...that's strange
       async [ActionType.FETCH_VAULT_ITEMS_BY_SCHEMA](store, payload: VaultSchema) {
-        doFetch<VaultMinMeta[]>(
+        doFetch<VaultMeta[]>(
           store.commit,
-          () => getInstance().getValues({ schemaDri: payload.dri }),
+          () => getInstance().getMetaItems({ schemaDri: payload.dri }),
           (commit, data) => commit(MutationType.SET_VAULT_ITEMS, data),
           (store, state) => store.vaultItem.allState = state,
         )
       },
-      async [ActionType.FETCH_VAULT_ITEM]({ commit }, payload: VaultMinMeta) {
+      async [ActionType.FETCH_VAULT_ITEM]({ commit }, payload: VaultMeta) {
         doFetch<VaultItem>(
           commit,
           () => getInstance().getItem({ id: payload.id }),

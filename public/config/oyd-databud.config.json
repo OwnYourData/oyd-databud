@@ -1,0 +1,9 @@
+{
+  "endpoint": {
+    "url": "https://data-vault.eu",
+    "credentials": {
+      "appKey": "",
+      "appSecret": ""
+    }
+  }
+}

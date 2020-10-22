@@ -6,10 +6,19 @@ let vaultifier: Vaultifier;
 export const getInstance = (): Vaultifier => vaultifier;
 export const initialize = async (
   repo: string,
+  endpoint?: string,
+  appKey?: string,
+  appSecret?: string,
 ): Promise<Vaultifier> => {
-  vaultifier = VaultifierWeb.create(
-    repo,
-  );
+  if (endpoint && appKey && appSecret)
+    vaultifier = new Vaultifier(endpoint, repo, {
+      appKey,
+      appSecret,
+    });
+  else
+    vaultifier = VaultifierWeb.create(
+      repo,
+    );
 
   await vaultifier.initialize();
 

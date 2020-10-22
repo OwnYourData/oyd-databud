@@ -3,10 +3,16 @@ import App from './App.vue';
 import { router } from './router';
 import { getStore } from './store';
 
-import 'bootstrap/dist/css/bootstrap.css'
+import 'bootstrap/dist/css/bootstrap.css';
+import { ConfigService } from './services/config-service';
 
-new Vue({
-  router,
-  store: getStore(),
-  render: h => h(App)
-}).$mount('#app')
+(async () => {
+  await ConfigService.initialize();
+
+  new Vue({
+    router,
+    store: getStore(),
+    render: h => h(App)
+  }).$mount('#app')
+}
+)();

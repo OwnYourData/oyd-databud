@@ -15,6 +15,7 @@
 import Vue from "vue";
 import { initialize } from './services';
 import Spinner from './components/Spinner.vue'
+import { ConfigService } from './services/config-service';
 
 interface IData {
   isInitializing: boolean,
@@ -32,7 +33,11 @@ export default Vue.extend({
   }),
   methods: {
     async initialize() {
-      await initialize('');
+      const endpoint = ConfigService.get('endpoint', 'url');
+      const appKey = ConfigService.get('endpoint', 'credentials', 'appKey');
+      const appSecret = ConfigService.get('endpoint', 'credentials', 'appSecret');
+
+      await initialize('', endpoint, appKey, appSecret);
 
       this.isInitializing = false;
     },
