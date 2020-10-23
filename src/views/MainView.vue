@@ -5,7 +5,10 @@
       <panel-tab title="Schemas">
         <schema-view></schema-view>
       </panel-tab>
-      <panel-tab title="Repos">
+      <panel-tab
+        title="Repos"
+        v-if="hasRepoSupport"
+      >
         <repo-view></repo-view>
       </panel-tab>
     </card-panel>
@@ -36,6 +39,11 @@ import { FetchState } from '@/store/fetch-state';
 
 import CardPanel from '../components/CardPanel.vue';
 import PanelTab from '../components/PanelTab.vue';
+import { getInstance } from '@/services';
+
+interface Data {
+  hasRepoSupport: boolean,
+}
 
 export default Vue.extend({
   components: {
@@ -45,6 +53,12 @@ export default Vue.extend({
     Spinner,
     SchemaView,
     RepoView
+  },
+  data: (): Data => ({
+    hasRepoSupport: false,
+  }),
+  async created() {
+    this.hasRepoSupport = (await getInstance().getVaultSupport()).repos;
   },
   computed: {
     selectedVaultItem(): VaultItem | undefined {

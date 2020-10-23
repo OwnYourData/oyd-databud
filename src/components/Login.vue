@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <div class="jumbotron">
-      <h1 class="display-4">OwnYourData DataBud Login</h1>
+      <h1 class="display-5">DataBud Login</h1>
 
       <form @submit="submitForm">
         <div class="form-group">

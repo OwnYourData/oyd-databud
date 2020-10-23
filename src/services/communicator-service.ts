@@ -1,26 +1,25 @@
 import { Vaultifier } from 'vaultifier/dist/module';
 import { VaultifierWeb } from 'vaultifier/dist/module/environments';
+import { ConfigService } from './config-service';
 
 let vaultifier: Vaultifier;
 
 export const getInstance = (): Vaultifier => vaultifier;
-export const initialize = async (
-  repo: string,
-  endpoint?: string,
-  appKey?: string,
-  appSecret?: string,
-): Promise<Vaultifier> => {
-  if (endpoint && appKey && appSecret)
-    vaultifier = new Vaultifier(endpoint, repo, {
-      appKey,
-      appSecret,
-    });
-  else
-    vaultifier = VaultifierWeb.create(
-      repo,
-    );
+export const create = (): Vaultifier => {
+  const repo = '';
 
-  await vaultifier.initialize();
+  try {
+    // first of all trying to get data out of url params
+    return vaultifier = VaultifierWeb.create(repo);
+  }
+  catch {
+    // if url params do not work, we try to get the url from our config
+    let endpoint = ConfigService.get('endpoint', 'url');
 
-  return vaultifier;
+    // ...still not working? Just take the document's origin
+    if (!endpoint)
+      endpoint = window.location.origin;
+
+    return vaultifier = new Vaultifier(endpoint, repo);
+  }
 }

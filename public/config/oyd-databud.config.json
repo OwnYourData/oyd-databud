@@ -1,6 +1,6 @@
 {
   "endpoint": {
-    "url": "http://localhost:3000",
+    "url": null,
     "credentials": {
       "appKey": null,
       "appSecret": null

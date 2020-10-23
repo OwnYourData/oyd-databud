@@ -1,36 +1,23 @@
 <template>
   <div class="row">
-    <template v-if="isReposSupported">
-      <section class="col-md-4">
-        <repo-list
-          class="list"
-          :items="repos"
-          :isLoading="isRepoListLoading"
-          :selected="selectedRepo"
-          @select="selectRepo"
-        ></repo-list>
-      </section>
-      <section class="col-md-8">
-        <data-list
-          class="list"
-          :items="vaultItems"
-          :isLoading="isVaultItemListLoading"
-          :selected="selectedVaultItem"
-          @select="selectVaultItem"
-        ></data-list>
-      </section>
-    </template>
-    <div
-      class="col-md-12"
-      v-else
-    >
-      <div
-        class="alert alert-warning"
-        role="alert"
-      >
-        Repos are not supported by this endpoint.
-      </div>
-    </div>
+    <section class="col-md-4">
+      <repo-list
+        class="list"
+        :items="repos"
+        :isLoading="isRepoListLoading"
+        :selected="selectedRepo"
+        @select="selectRepo"
+      ></repo-list>
+    </section>
+    <section class="col-md-8">
+      <data-list
+        class="list"
+        :items="vaultItems"
+        :isLoading="isVaultItemListLoading"
+        :selected="selectedVaultItem"
+        @select="selectVaultItem"
+      ></data-list>
+    </section>
   </div>
 </template>
 
@@ -79,9 +66,6 @@ export default Vue.extend({
   computed: {
     store(): IStore {
       return this.$store.state as IStore;
-    },
-    isReposSupported(): boolean {
-      return this.repos !== undefined;
     },
     repos(): VaultRepo[] | undefined {
       return this.store.repo.all;

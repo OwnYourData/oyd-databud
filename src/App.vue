@@ -4,9 +4,20 @@
     v-if="isInitializing"
   >
     <div class="jumbotron">
-      <h1 class="display-4">OwnYourData DataBud</h1>
+      <h1 class="display-5">OwnYourData DataBud</h1>
       <p class="lead">
         DataBud is loading <spinner></spinner>
+      </p>
+    </div>
+  </div>
+  <div
+    class="container"
+    v-else-if="hasMessage"
+  >
+    <div class="jumbotron">
+      <h1 class="display-5">Buddy Message</h1>
+      <p class="lead">
+        {{message}}
       </p>
     </div>
   </div>
@@ -19,14 +30,16 @@
 
 <script lang="ts">
 import Vue from "vue";
-import { initialize } from './services';
+import { create, getInstance } from './services';
 import Spinner from './components/Spinner.vue'
 import Login, { Data as LoginData } from './components/Login.vue'
 import { ConfigService } from './services/config-service';
+import { Vaultifier } from 'vaultifier';
 
 interface IData {
   isInitializing: boolean,
   isLoggedIn: boolean,
+  message?: string,
 }
 
 export default Vue.extend({
@@ -43,31 +56,41 @@ export default Vue.extend({
   }),
   methods: {
     async initialize() {
-      const appKey = ConfigService.get('endpoint', 'credentials', 'appKey');
-      const appSecret = ConfigService.get('endpoint', 'credentials', 'appSecret');
+      const vaultifier = create();
 
-      this.tryInitializeVaultifier(appKey, appSecret)
+      this.tryInitializeVaultifier();
     },
-    async tryInitializeVaultifier(appKey: string, appSecret: string) {
+    async tryInitializeVaultifier() {
+      const vaultifier = getInstance();
       this.isInitializing = true;
 
       try {
-        const endpoint = ConfigService.get('endpoint', 'url');
+        const supports = await vaultifier.getVaultSupport();
 
-        const vaultifier = await initialize('', endpoint, appKey, appSecret);
-        this.isLoggedIn = vaultifier.isValid();
+        if (!supports.authentication) {
+          this.isLoggedIn = true;
+        }
+        else if (vaultifier.hasCredentials()) {
+          await vaultifier.initialize();
+
+          this.isLoggedIn = await vaultifier.isValid();
+        }
       }
       catch {
-        /* if there is no data provided */
+        this.message = `I'm not sure ${vaultifier.baseUrl} is the correct endpoint I should connect to. Please check this again.`;
       }
 
       this.isInitializing = false;
     },
-    logIn({ appKey, appSecret }: LoginData) {
-      this.tryInitializeVaultifier(appKey, appSecret);
+    logIn(credentials: LoginData) {
+      getInstance().setCredentials(credentials);
+      this.tryInitializeVaultifier();
     }
   },
   computed: {
+    hasMessage(): boolean {
+      return !!this.message;
+    },
     isLoginFormShowed(): boolean {
       return !this.isInitializing && !this.isLoggedIn;
     }
