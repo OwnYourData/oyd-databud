@@ -1,5 +1,8 @@
 import { tryGet } from '../utils';
 
+// @ts-ignore
+export * as PACKAGE from '../../package.json';
+
 export class ConfigService {
 
   static INSTANCE: ConfigService;
