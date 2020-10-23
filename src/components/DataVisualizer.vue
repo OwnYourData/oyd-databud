@@ -18,7 +18,7 @@ import Vue, { PropType } from 'vue';
 import { VaultItem } from 'vaultifier';
 import RawData from './RawData.vue';
 // @ts-ignore
-import { FormBuilderGui } from 'odca-form';
+import { FormBuilderGui } from '@gebsl/oca.js-vue';
 import { renderForm } from '../utils';
 
 import CardPanel from '../components/CardPanel.vue';

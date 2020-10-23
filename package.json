@@ -7,12 +7,13 @@
     "docker": "npm run build && docker build -t gebsl/oyd-databud .",
     "docker-deploy": "npm run docker && docker push gebsl/oyd-databud",
     "deploy": "sh ./scripts/deploy.sh",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint",
+    "postinstall": "sh ./scripts/postinstall.sh"
   },
   "dependencies": {
+    "@gebsl/oca.js-vue": "0.0.37",
     "bootstrap": "^4.5.2",
     "core-js": "^3.6.5",
-    "odca-form": "0.0.36",
     "vaultifier": "github:OwnYourData/vaultifier",
     "vue": "^2.6.11",
     "vue-router": "^3.4.6",

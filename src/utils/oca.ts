@@ -1,6 +1,6 @@
 import { VaultItem } from 'vaultifier'
 // @ts-ignore
-import * as oca from 'odca-form';
+import * as oca from '@gebsl/oca.js-vue';
 
 const fillForm = (form: any, content: any) => {
   for (const section of form.sections) {
