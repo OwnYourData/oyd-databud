@@ -1,6 +1,7 @@
 <template>
   <div class="row">
     <section class="col-md-4">
+      <refresh-button @click="fetchSchemas"></refresh-button>
       <schema-list
         class="list"
         :items="schemaDRIs"
@@ -10,6 +11,7 @@
       ></schema-list>
     </section>
     <section class="col-md-8">
+      <refresh-button @click="fetchVaultItems"></refresh-button>
       <data-list
         class="list"
         :items="vaultItems"
@@ -25,6 +27,7 @@
 import Vue from 'vue';
 import { IStore } from '../store';
 import { createList } from '../components/List.vue';
+import RefreshButton from '../components/RefreshButton.vue';
 import { Vaultifier, VaultItem, VaultMinMeta, VaultSchema } from 'vaultifier/dist/module';
 import { ActionType } from '@/store/action-type';
 import { FetchState } from '@/store/fetch-state';
@@ -41,6 +44,7 @@ export default Vue.extend({
     selectedSchema: undefined,
   }),
   components: {
+    RefreshButton,
     SchemaList: createList<VaultSchema>({
       getTitle: (item) => item.dri,
       getId: (item) => item.dri,
@@ -52,15 +56,21 @@ export default Vue.extend({
   },
   methods: {
     async initialize() {
-      this.$store.dispatch(ActionType.FETCH_SCHEMA_DRIS);
+      this.fetchSchemas();
     },
     async selectSchema(schema: VaultSchema) {
       this.selectedSchema = schema;
 
-      this.$store.dispatch(ActionType.FETCH_VAULT_ITEMS_BY_SCHEMA, schema);
+      this.fetchVaultItems();
     },
     async selectVaultItem(item?: VaultMinMeta) {
       this.$store.dispatch(ActionType.FETCH_VAULT_ITEM, item);
+    },
+    async fetchSchemas() {
+      this.$store.dispatch(ActionType.FETCH_SCHEMA_DRIS);
+    },
+    async fetchVaultItems() {
+      this.$store.dispatch(ActionType.FETCH_VAULT_ITEMS_BY_SCHEMA, this.selectedSchema);
     }
   },
   computed: {
