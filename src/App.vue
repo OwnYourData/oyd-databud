@@ -4,10 +4,10 @@
     v-if="isInitializing"
   >
     <div class="jumbotron">
-      <h1 class="display-5">OwnYourData DataBud</h1>
-      <p class="lead">
-        DataBud is loading <spinner></spinner>
-      </p>
+      <span class="lead">
+        OwnYourData DataBud <span class="text-muted">is loading <spinner></spinner></span>
+      </span>
+
     </div>
   </div>
   <div

@@ -1,7 +1,7 @@
 <template>
   <div
     class="spinner-border"
-    style="width: 3rem; height: 3rem;"
+    style="width: 1.25em; height: 1.25em;"
     role="status"
   >
     <span class="sr-only">Loading...</span>
