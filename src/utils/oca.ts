@@ -25,7 +25,7 @@ export const renderForm = async (item: VaultItem): Promise<any | undefined> => {
 
   const { schema_base, overlays } = json;
 
-  if (false === (schema_base && overlays))
+  if (!(schema_base && overlays))
     return;
 
   const allSchemas = [

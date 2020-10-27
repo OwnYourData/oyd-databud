@@ -5,9 +5,19 @@
     </panel-tab>
     <panel-tab
       title="OCA-Form"
-      v-if="hasForm"
+      v-if="hasSchema"
     >
-      <form-builder-gui :form="form"></form-builder-gui>
+      <form-builder-gui
+        v-if="hasForm"
+        :form="form"
+      ></form-builder-gui>
+      <div
+        v-else
+        class="alert alert-warning"
+        role="alert"
+      >
+        It seems the schema with DRI <code>{{item.schemaDri}}</code> is not a valid OCA schema.
+      </div>
     </panel-tab>
   </card-panel>
 </template>
@@ -58,6 +68,9 @@ export default Vue.extend({
     hasForm(): boolean {
       return !!this.form;
     },
+    hasSchema(): boolean {
+      return !!this.item.schemaDri;
+    }
   },
 })
 </script>
