@@ -14,7 +14,16 @@ const fillForm = (form: any, content: any) => {
   }
 }
 
-export const renderForm = async (item: VaultItem): Promise<any | undefined> => {
+export const getLanguages = (overlays: any[]) => {
+  return overlays.reduce((prev: string[], curr: any) => {
+    if (curr.type.indexOf('label') !== -1)
+      return [...prev, curr.language];
+
+    return prev;
+  }, []);
+}
+
+export const fetchOverlays = async (item: VaultItem): Promise<any[] | undefined> => {
   if (!item.schemaDri)
     return;
 
@@ -23,17 +32,22 @@ export const renderForm = async (item: VaultItem): Promise<any | undefined> => {
   const response = await fetch(url);
   const json = await response.json();
 
-  const { schema_base, overlays } = json;
+  let { schema_base, overlays } = json;
 
   if (!(schema_base && overlays))
     return;
 
-  const allSchemas = [
+  return [
     schema_base,
     ...overlays,
   ];
+}
 
-  const form = oca.renderForm(allSchemas).form;
+export const renderForm = (overlays: any[], item: VaultItem, language?: string): any => {
+  if (language)
+    overlays = overlays.filter((x: any) => !x.language || x.language === language);
+    
+  const form = oca.renderForm(overlays).form;
 
   if (item.content)
     fillForm(form, item.content);

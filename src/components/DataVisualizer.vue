@@ -7,17 +7,7 @@
       title="OCA-Form"
       v-if="hasSchema"
     >
-      <form-builder-gui
-        v-if="hasForm"
-        :form="form"
-      ></form-builder-gui>
-      <div
-        v-else
-        class="alert alert-warning"
-        role="alert"
-      >
-        It seems the schema with DRI <code>{{item.schemaDri}}</code> is not a valid OCA schema.
-      </div>
+      <oca-view :item="item"></oca-view>
     </panel-tab>
   </card-panel>
 </template>
@@ -27,16 +17,10 @@ import Vue, { PropType } from 'vue';
 
 import { VaultItem } from 'vaultifier';
 import RawData from './RawData.vue';
-// @ts-ignore
-import { FormBuilderGui } from '@gebsl/oca.js-vue';
-import { renderForm } from '../utils';
 
 import CardPanel from '../components/CardPanel.vue';
 import PanelTab from '../components/PanelTab.vue';
-
-interface IData {
-  form?: any,
-}
+import OcaView from '../components/OCAView.vue';
 
 export default Vue.extend({
   props: {
@@ -46,28 +30,9 @@ export default Vue.extend({
     CardPanel,
     PanelTab,
     RawData,
-    FormBuilderGui,
-  },
-  data: (): IData => ({
-    form: undefined,
-  }),
-  methods: {
-    async getForm() {
-      this.form = this.item ? await renderForm(this.item) : undefined;
-    }
-  },
-  created() {
-    this.getForm()
-  },
-  watch: {
-    item(item: VaultItem) {
-      this.getForm();
-    }
+    OcaView,
   },
   computed: {
-    hasForm(): boolean {
-      return !!this.form;
-    },
     hasSchema(): boolean {
       return !!this.item.schemaDri;
     }
