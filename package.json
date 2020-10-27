@@ -4,8 +4,7 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "docker": "npm run build && docker build -t gebsl/oyd-databud .",
-    "docker-deploy": "npm run docker && docker push gebsl/oyd-databud",
+    "dockerize": "docker build -t gebsl/oyd-databud .",
     "deploy": "sh ./scripts/deploy.sh",
     "lint": "vue-cli-service lint",
     "postinstall": "sh ./scripts/postinstall.sh"
