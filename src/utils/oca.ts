@@ -23,9 +23,14 @@ export const renderForm = async (item: VaultItem): Promise<any | undefined> => {
   const response = await fetch(url);
   const json = await response.json();
 
+  const { schema_base, overlays } = json;
+
+  if (false === (schema_base && overlays))
+    return;
+
   const allSchemas = [
-    json.schema_base,
-    ...json.overlays,
+    schema_base,
+    ...overlays,
   ];
 
   const form = oca.renderForm(allSchemas).form;
