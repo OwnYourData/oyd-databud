@@ -13,7 +13,7 @@ const fillForm = (form: any, content: any) => {
 
         if (control.type === 'select') {
           const option = control.dataOptions.find((x: any) => x.text === value);
-          
+
           value = option ? option.id : undefined;
         }
 
@@ -25,7 +25,7 @@ const fillForm = (form: any, content: any) => {
 
 export const getLanguages = (overlays: any[]) => {
   return overlays.reduce((prev: string[], curr: any) => {
-    if (curr.type.indexOf('label') !== -1)
+    if (curr.language)
       return [...prev, curr.language];
 
     return prev;
@@ -55,7 +55,7 @@ export const fetchOverlays = async (item: VaultItem): Promise<any[] | undefined>
 export const renderForm = (overlays: any[], item: VaultItem, language?: string): any => {
   if (language)
     overlays = overlays.filter((x: any) => !x.language || x.language === language);
-    
+
   const form = oca.renderForm(overlays).form;
 
   if (item.content)
