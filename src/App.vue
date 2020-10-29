@@ -43,6 +43,7 @@ import Spinner from './components/Spinner.vue'
 import Login, { Data as LoginData } from './components/Login.vue'
 import { ConfigService, PACKAGE } from './services/config-service';
 import { Vaultifier } from 'vaultifier';
+import { RoutePath } from './router';
 
 interface IData {
   isInitializing: boolean,
@@ -67,6 +68,12 @@ export default Vue.extend({
       const vaultifier = create();
 
       this.tryInitializeVaultifier();
+
+      const { searchParams } = new URL(window.location.href);
+      const schema = searchParams.get('schemaDri');
+
+      if (schema && this.$router.currentRoute.path !== RoutePath.SCHEMA_VIEW)
+        this.$router.push(RoutePath.SCHEMA_VIEW);
     },
     async tryInitializeVaultifier() {
       const vaultifier = getInstance();

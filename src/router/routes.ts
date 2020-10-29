@@ -1,12 +1,21 @@
 import MainView from '../views/MainView.vue';
-// import DataList from '../views/DataList.vue';
+import SchemaView from '../views/SchemaView.vue';
 
 export enum RoutePath {
   MAIN_VIEW = '/',
-  DATA_LIST = '/data-list',
+  SCHEMA_VIEW = '/schema',
 }
 
 export const routes = [
-  { path: RoutePath.MAIN_VIEW, component: MainView },
-  // { path: RoutePath.DATA_LIST, component: DataList },
+  {
+    path: RoutePath.MAIN_VIEW,
+    component: MainView
+  },
+  {
+    path: RoutePath.SCHEMA_VIEW,
+    component: SchemaView,
+    props: () => {
+      return { schemaDri: new URL(window.location.href).searchParams.get('schemaDri') }
+    },
+  },
 ];

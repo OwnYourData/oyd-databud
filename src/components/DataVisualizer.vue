@@ -1,6 +1,9 @@
 <template>
   <card-panel>
-    <panel-tab title="Raw Data">
+    <panel-tab
+      title="Raw Data"
+      v-if="showRawView"
+    >
       <raw-data :item="item"></raw-data>
     </panel-tab>
     <panel-tab
@@ -25,6 +28,10 @@ import OcaView from '../components/OCAView.vue';
 export default Vue.extend({
   props: {
     item: Object as PropType<VaultItem>,
+    showRawView: {
+      default: true,
+      type: Boolean as PropType<boolean>,
+    },
   },
   components: {
     CardPanel,

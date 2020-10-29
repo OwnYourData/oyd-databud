@@ -13,7 +13,7 @@ export default Vue.extend({
   }),
   render(h) {
     const that = this;
-    const children = this.$slots.default;
+    const children = this.$slots.default?.filter(x => !!x.componentOptions);
 
     if (!children)
       return h('div');
@@ -21,7 +21,6 @@ export default Vue.extend({
     const tabs: VNode[] = [];
     const panelChildren: VNode[] = [];
 
-    let idx = -1;
     for (let idx = 0, size = children.length; idx < size; idx++) {
       const child = children[idx];
       
