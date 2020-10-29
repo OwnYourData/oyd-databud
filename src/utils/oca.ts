@@ -5,20 +5,11 @@ import * as oca from '@gebsl/oca.js-vue';
 const fillForm = (form: any, content: any) => {
   for (const section of form.sections) {
     for (const control of section.row.controls) {
-      if (!content[control.attrName]) {
+      if (!content[control.attrName])
         // TODO: Error handling
-      }
-      else {
-        let value = content[control.attrName];
+        continue;
 
-        if (control.type === 'select') {
-          const option = control.dataOptions.find((x: any) => x.text === value);
-
-          value = option ? option.id : undefined;
-        }
-
-        control.value = value;
-      }
+      control.value = content[control.attrName];
     }
   }
 }
