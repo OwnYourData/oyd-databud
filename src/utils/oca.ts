@@ -25,7 +25,7 @@ const fillForm = (form: any, content: any) => {
 
 export const getLanguages = (overlays: any[]) => {
   return overlays.reduce((prev: string[], curr: any) => {
-    if (curr.language)
+    if (curr.language && prev.indexOf(curr.language) === -1)
       return [...prev, curr.language];
 
     return prev;
