@@ -1,7 +1,7 @@
 <template>
   <div class="row">
     <section class="col-md-4">
-      <refresh-button @click="fetchRepos"></refresh-button>
+      <refresh-button @click="fetchRepos">Refresh</refresh-button>
       <repo-list
         class="list"
         :items="repos"
@@ -11,7 +11,7 @@
       ></repo-list>
     </section>
     <section class="col-md-8">
-      <refresh-button @click="fetchVaultItems"></refresh-button>
+      <refresh-button @click="fetchVaultItems">Refresh</refresh-button>
       <data-list
         class="list"
         :items="vaultItems"
@@ -27,7 +27,7 @@
 import Vue from 'vue';
 import { IStore } from '../store';
 import { createList } from '../components/List.vue';
-import RefreshButton from '../components/RefreshButton.vue';
+import RefreshButton from '../components/Button.vue';
 import { Vaultifier, VaultItem, VaultMinMeta, VaultRepo, VaultSchema } from 'vaultifier/dist/module';
 import { ActionType } from '@/store/action-type';
 import { FetchState } from '@/store/fetch-state';
@@ -67,6 +67,7 @@ export default Vue.extend({
       this.$store.dispatch(ActionType.FETCH_VAULT_ITEM, item);
     },
     async fetchRepos() {
+      this.selectedRepo = undefined;
       this.$store.dispatch(ActionType.FETCH_REPOS);
     },
     async fetchVaultItems() {

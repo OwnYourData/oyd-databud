@@ -1,7 +1,7 @@
 <template>
   <div class="row">
     <section class="col-md-4">
-      <refresh-button @click="fetchSchemas"></refresh-button>
+      <custom-button @click="fetchSchemas">Refresh</custom-button>
       <schema-list
         class="list"
         :items="schemaDRIs"
@@ -11,7 +11,12 @@
       ></schema-list>
     </section>
     <section class="col-md-8">
-      <refresh-button @click="fetchVaultItems"></refresh-button>
+      <custom-button @click="fetchVaultItems">Refresh</custom-button>
+      <custom-button
+        type="danger"
+        @click="deleteSelectedVaultItem"
+        :disabled="isDeleteButtonDisabled"
+      >Delete</custom-button>
       <data-list
         class="list"
         :items="vaultItems"
@@ -27,7 +32,7 @@
 import Vue from 'vue';
 import { IStore } from '../store';
 import { createList } from '../components/List.vue';
-import RefreshButton from '../components/RefreshButton.vue';
+import CustomButton from '../components/Button.vue';
 import { Vaultifier, VaultItem, VaultMinMeta, VaultSchema } from 'vaultifier/dist/module';
 import { ActionType } from '@/store/action-type';
 import { FetchState } from '@/store/fetch-state';
@@ -44,7 +49,7 @@ export default Vue.extend({
     selectedSchema: undefined,
   }),
   components: {
-    RefreshButton,
+    CustomButton,
     SchemaList: createList<VaultSchema>({
       getTitle: (item) => item.dri,
       getId: (item) => item.dri,
@@ -67,10 +72,15 @@ export default Vue.extend({
       this.$store.dispatch(ActionType.FETCH_VAULT_ITEM, item);
     },
     async fetchSchemas() {
+      this.selectedSchema = undefined;
       this.$store.dispatch(ActionType.FETCH_SCHEMA_DRIS);
     },
     async fetchVaultItems() {
       this.$store.dispatch(ActionType.FETCH_VAULT_ITEMS_BY_SCHEMA, this.selectedSchema);
+    },
+    async deleteSelectedVaultItem() {
+      await this.$store.dispatch(ActionType.DELETE_VAULT_ITEM, this.selectedVaultItem);
+      this.fetchSchemas();
     }
   },
   computed: {
@@ -89,6 +99,12 @@ export default Vue.extend({
     selectedVaultItem(): VaultItem | undefined {
       return (this.$store.state as IStore).vaultItem.current;
     },
+    hasSelectedVaultItem(): boolean {
+      return !!this.selectedVaultItem;
+    },
+    isDeleteButtonDisabled(): boolean {
+      return !this.hasSelectedVaultItem;
+    }
   }
 })
 </script>

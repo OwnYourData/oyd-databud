@@ -94,6 +94,14 @@ export const getStore = () => {
         commit(MutationType.SET_VAULT_ITEMS, undefined);
         commit(MutationType.SET_VAULT_ITEM, undefined);
       },
+      async [ActionType.DELETE_VAULT_ITEM]({ state, commit, dispatch }, payload: VaultMeta) {
+        await getInstance().deleteItem({
+          id: payload.id,
+        });
+
+        if (state.vaultItem.current?.id === payload.id)
+          commit(MutationType.SET_VAULT_ITEM, undefined);
+      },
       async [ActionType.FETCH_SCHEMA_DRIS]({ commit, dispatch }) {
         doFetch<VaultSchema[]>(
           commit,
