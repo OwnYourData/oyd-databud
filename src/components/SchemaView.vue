@@ -13,6 +13,10 @@
     <section class="col-md-8">
       <custom-button @click="fetchVaultItems">Refresh</custom-button>
       <custom-button
+        @click="addItem"
+        :disabled="isAddItemButtonDisabled"
+      >New</custom-button>
+      <custom-button
         type="danger"
         @click="deleteSelectedVaultItem"
         :disabled="isDeleteButtonDisabled"
@@ -25,6 +29,13 @@
         @select="selectVaultItem"
       ></data-list>
     </section>
+    <oca-edit-view
+      v-if="showEditView"
+      class="col-md-12"
+      :schemaDri="selectedSchema.dri"
+      @save="saveVaultItem"
+      @cancel="hideEditView"
+    ></oca-edit-view>
   </div>
 </template>
 
@@ -33,12 +44,14 @@ import Vue from 'vue';
 import { IStore } from '../store';
 import { createList } from '../components/List.vue';
 import CustomButton from '../components/Button.vue';
-import { Vaultifier, VaultItem, VaultMinMeta, VaultSchema } from 'vaultifier/dist/module';
+import OcaEditView from '../components/OCAEditView.vue';
+import { Vaultifier, VaultItem, VaultMinMeta, VaultPostItem, VaultSchema } from 'vaultifier/dist/module';
 import { ActionType } from '@/store/action-type';
 import { FetchState } from '@/store/fetch-state';
 
 interface IData {
   selectedSchema?: VaultSchema,
+  showEditView: boolean,
 }
 
 export default Vue.extend({
@@ -47,9 +60,11 @@ export default Vue.extend({
   },
   data: (): IData => ({
     selectedSchema: undefined,
+    showEditView: false,
   }),
   components: {
     CustomButton,
+    OcaEditView,
     SchemaList: createList<VaultSchema>({
       getTitle: (item) => item.dri,
       getId: (item) => item.dri,
@@ -81,6 +96,22 @@ export default Vue.extend({
     async deleteSelectedVaultItem() {
       await this.$store.dispatch(ActionType.DELETE_VAULT_ITEM, this.selectedVaultItem);
       this.fetchSchemas();
+    },
+    async addItem() {
+      if (!this.selectedSchema)
+        return;
+
+      this.selectVaultItem(undefined);
+      this.showEditView = true;
+    },
+    async saveVaultItem(postItem: VaultPostItem) {
+      await this.$store.dispatch(ActionType.UPDATE_VAULT_ITEM, postItem);
+
+      this.fetchVaultItems();
+      this.hideEditView();
+    },
+    hideEditView() {
+      this.showEditView = false;
     }
   },
   computed: {
@@ -104,6 +135,12 @@ export default Vue.extend({
     },
     isDeleteButtonDisabled(): boolean {
       return !this.hasSelectedVaultItem;
+    },
+    hasSelectedSchema(): boolean {
+      return !!this.selectedSchema;
+    },
+    isAddItemButtonDisabled(): boolean {
+      return !this.hasSelectedSchema;
     }
   }
 })

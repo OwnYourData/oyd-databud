@@ -59,7 +59,8 @@ export default Vue.extend({
     isLoading: true,
   }),
   props: {
-    item: Object as PropType<VaultItem>,
+    item: Object as PropType<VaultItem | undefined>,
+    schemaDri: String as PropType<string>,
   },
   components: {
     FormBuilderGui,
@@ -69,7 +70,7 @@ export default Vue.extend({
     this.getOverlays();
   },
   watch: {
-    item() {
+    schemaDri() {
       this.getOverlays();
     },
     overlays() {
@@ -79,7 +80,7 @@ export default Vue.extend({
   methods: {
     async getOverlays() {
       this.isLoading = true;
-      this.overlays = await fetchOverlays(this.item);
+      this.overlays = await fetchOverlays(this.schemaDri);
       this.isLoading = false;
     },
   },

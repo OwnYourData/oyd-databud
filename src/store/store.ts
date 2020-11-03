@@ -1,5 +1,5 @@
 import { getInstance } from '@/services';
-import { VaultItem, VaultMeta, VaultRepo, VaultSchema } from 'vaultifier';
+import { VaultItem, VaultMeta, VaultPostItem, VaultRepo, VaultSchema } from 'vaultifier';
 import Vue from 'vue';
 import Vuex, { Commit } from 'vuex'
 import { ActionType } from './action-type';
@@ -93,6 +93,9 @@ export const getStore = () => {
       [ActionType.RESET_VAULT_ITEMS]({ commit }) {
         commit(MutationType.SET_VAULT_ITEMS, undefined);
         commit(MutationType.SET_VAULT_ITEM, undefined);
+      },
+      async [ActionType.UPDATE_VAULT_ITEM]({state, commit, dispatch}, payload: VaultPostItem) {
+        await getInstance().postItem(payload);
       },
       async [ActionType.DELETE_VAULT_ITEM]({ state, commit, dispatch }, payload: VaultMeta) {
         await getInstance().deleteItem({

@@ -2,16 +2,32 @@ import { VaultItem } from 'vaultifier'
 // @ts-ignore
 import * as oca from '@gebsl/oca.js-vue';
 
-const fillForm = (form: any, content: any) => {
+const iterateForm = (form: any, callback: (control: any) => void) => {
   for (const section of form.sections) {
     for (const control of section.row.controls) {
-      if (!content[control.attrName])
-        // TODO: Error handling
-        continue;
-
-      control.value = content[control.attrName];
+      callback(control);
     }
   }
+}
+
+const fillForm = (form: any, content: any) => {
+  iterateForm(form, (control) => {
+    if (!content[control.attrName])
+      // TODO: Error handling
+      return;
+
+    control.value = content[control.attrName];
+  });
+}
+
+export const getObjectFromForm = (form: any) => {
+  const obj: any = {}
+  
+  iterateForm(form, (control) => {
+    obj[control.attrName] = control.value;
+  });
+
+  return obj;
 }
 
 export const getLanguages = (overlays: any[]) => {
@@ -23,12 +39,9 @@ export const getLanguages = (overlays: any[]) => {
   }, []);
 }
 
-export const fetchOverlays = async (item: VaultItem): Promise<any[] | undefined> => {
-  if (!item.schemaDri)
-    return;
-
+export const fetchOverlays = async (schemaDri: string): Promise<any[] | undefined> => {
   // TODO: this url should be configurable
-  const url = `https://repository.oca.argo.colossi.network/api/v2/schemas/hcf/${item.schemaDri}`;
+  const url = `https://repository.oca.argo.colossi.network/api/v2/schemas/_any/${schemaDri}`;
   const response = await fetch(url);
   const json = await response.json();
 
@@ -43,13 +56,13 @@ export const fetchOverlays = async (item: VaultItem): Promise<any[] | undefined>
   ];
 }
 
-export const renderForm = (overlays: any[], item: VaultItem, language?: string): any => {
+export const renderForm = (overlays: any[], item?: VaultItem, language?: string): any => {
   if (language)
     overlays = overlays.filter((x: any) => !x.language || x.language === language);
 
   const form = oca.renderForm(overlays).form;
 
-  if (item.content)
+  if (item?.content)
     fillForm(form, item.content);
 
   return form;

@@ -10,7 +10,10 @@
       title="OCA-Form"
       v-if="hasSchema"
     >
-      <oca-view :item="item"></oca-view>
+      <oca-view
+        :item="item"
+        :schemaDri="schemaDri"
+      ></oca-view>
     </panel-tab>
   </card-panel>
 </template>
@@ -40,8 +43,11 @@ export default Vue.extend({
     OcaView,
   },
   computed: {
+    schemaDri(): string | undefined {
+      return this.item.schemaDri;
+    },
     hasSchema(): boolean {
-      return !!this.item.schemaDri;
+      return !!this.schemaDri;
     }
   },
 })

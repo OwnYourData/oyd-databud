@@ -6,4 +6,5 @@ export enum ActionType {
   FETCH_VAULT_ITEMS_BY_REPO = 'fetchVaultItemsByRepo',
   FETCH_VAULT_ITEM = 'fetchVaultItem',
   RESET_VAULT_ITEMS = 'resetVaultItems',
+  UPDATE_VAULT_ITEM = 'updateVaultItem',
 }
