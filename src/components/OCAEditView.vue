@@ -34,7 +34,7 @@ export default Vue.extend({
       const postItem: VaultPostItem = {
         content: getObjectFromForm((this.$refs.ocaView as any).form),
         // TODO:
-        dri: 'shouldbesetbyclient',
+        dri: Date.now() + '___shouldbesetbyclient',
         schemaDri: this.schemaDri,
         mimeType: MimeType.JSON,
       };

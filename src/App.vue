@@ -90,6 +90,8 @@ export default Vue.extend({
 
           this.isLoggedIn = await vaultifier.isValid();
         }
+
+        await vaultifier.setEnd2EndEncryption(true);
       }
       catch {
         this.message = `I'm not sure ${vaultifier.baseUrl} is the correct endpoint I should connect to. Please check this again.`;

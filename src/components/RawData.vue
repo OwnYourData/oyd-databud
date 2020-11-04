@@ -1,11 +1,12 @@
 <template>
   <div class="row">
     <div class="col-md-6">
-      <h3>Meta</h3>
+      <h3 class="heading">Meta</h3>
       <pre class="card">{{jsonifiedMeta}}</pre>
     </div>
     <div class="col-md-6">
-      <h3>Content</h3>
+      <h3 class="heading">Content</h3>
+      <span class="text-muted" v-if="isEncrypted"> (e2e encrypted)</span>
       <pre class="card">{{ jsonifiedData }}</pre>
     </div>
   </div>
@@ -13,7 +14,7 @@
 
 <script lang="ts">
 // @ts-ignore
-import { VaultItem } from 'vaultifier';
+import { VaultItem, isEncrypted } from 'vaultifier';
 import Vue, { PropType } from 'vue'
 
 export default Vue.extend({
@@ -36,6 +37,9 @@ export default Vue.extend({
     },
     jsonifiedData(): string {
       return this.jsonify(this.item.content);
+    },
+    isEncrypted(): boolean {
+      return this.item.isEncrypted;
     }
   }
 });
@@ -53,5 +57,9 @@ export default Vue.extend({
 .card:hover {
   overflow: auto;
   text-overflow: clip;
+}
+
+.heading {
+  display: inline-block;
 }
 </style>
