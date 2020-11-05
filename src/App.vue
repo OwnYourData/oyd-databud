@@ -3,7 +3,8 @@
     <div class="container">
       <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <span class="navbar-brand">DataBud</span>
-        <small class="text-muted">v{{version}}</small>
+        <small class="navbar-text">v{{version}}</small>
+        <small class="navbar-text">{{encryptionMessage}}</small>
       </nav>
     </div>
     <div
@@ -42,13 +43,14 @@ import { create, getInstance } from './services';
 import Spinner from './components/Spinner.vue'
 import Login, { Data as LoginData } from './components/Login.vue'
 import { ConfigService, PACKAGE } from './services/config-service';
-import { Vaultifier } from 'vaultifier';
+import { Vaultifier, VaultEncryptionSupport } from 'vaultifier';
 import { RoutePath } from './router';
 
 interface IData {
   isInitializing: boolean,
   isLoggedIn: boolean,
   message?: string,
+  encryptionSupport?: VaultEncryptionSupport,
 }
 
 export default Vue.extend({
@@ -62,6 +64,8 @@ export default Vue.extend({
   data: (): IData => ({
     isInitializing: true,
     isLoggedIn: false,
+    message: undefined,
+    encryptionSupport: undefined,
   }),
   methods: {
     async initialize() {
@@ -91,7 +95,7 @@ export default Vue.extend({
           this.isLoggedIn = await vaultifier.isValid();
         }
 
-        await vaultifier.setEnd2EndEncryption(true);
+        this.encryptionSupport = await vaultifier.setEnd2EndEncryption(true);
       }
       catch {
         this.message = `I'm not sure ${vaultifier.baseUrl} is the correct endpoint I should connect to. Please check this again.`;
@@ -113,6 +117,17 @@ export default Vue.extend({
     },
     version(): string {
       return PACKAGE.version;
+    },
+    encryptionMessage(): string {
+      if (!this.encryptionSupport)
+        return '';
+
+      const { supportsEncryption, supportsDecryption } = this.encryptionSupport;
+
+      if (supportsEncryption && supportsDecryption)
+        return 'encryption/decryption supported';
+
+      return `encryption ${!supportsEncryption ? 'not' : ''} supported/decryption ${!supportsDecryption ? 'not' : ''} supported`
     }
   }
 });
@@ -121,6 +136,10 @@ export default Vue.extend({
 <style scoped>
 .navbar {
   margin-bottom: 1em;
+}
+
+.navbar-text {
+  margin-right: 1em;
 }
 </style>
 

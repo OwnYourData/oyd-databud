@@ -6,7 +6,7 @@
     </div>
     <div class="col-md-6">
       <h3 class="heading">Content</h3>
-      <span class="text-muted" v-if="isEncrypted"> (e2e encrypted)</span>
+      <span class="text-muted" v-if="isEncrypted"> (encrypted)</span>
       <pre class="card">{{ jsonifiedData }}</pre>
     </div>
   </div>
@@ -14,7 +14,7 @@
 
 <script lang="ts">
 // @ts-ignore
-import { VaultItem, isEncrypted } from 'vaultifier';
+import { VaultItem } from 'vaultifier';
 import Vue, { PropType } from 'vue'
 
 export default Vue.extend({

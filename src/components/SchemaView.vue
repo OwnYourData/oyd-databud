@@ -11,16 +11,18 @@
       ></schema-list>
     </section>
     <section class="col-md-8">
-      <custom-button @click="fetchVaultItems">Refresh</custom-button>
-      <custom-button
-        @click="addItem"
-        :disabled="isAddItemButtonDisabled"
-      >New</custom-button>
-      <custom-button
-        type="danger"
-        @click="deleteSelectedVaultItem"
-        :disabled="isDeleteButtonDisabled"
-      >Delete</custom-button>
+      <inline-group>
+        <custom-button @click="fetchVaultItems">Refresh</custom-button>
+        <custom-button
+          @click="addItem"
+          :disabled="isAddItemButtonDisabled"
+        >New</custom-button>
+        <custom-button
+          type="danger"
+          @click="deleteSelectedVaultItem"
+          :disabled="isDeleteButtonDisabled"
+        >Delete</custom-button>
+      </inline-group>
       <data-list
         class="list"
         :items="vaultItems"
@@ -45,6 +47,7 @@ import { IStore } from '../store';
 import { createList } from '../components/List.vue';
 import CustomButton from '../components/Button.vue';
 import OcaEditView from '../components/OCAEditView.vue';
+import InlineGroup from '../components/InlineGroup.vue';
 import { Vaultifier, VaultItem, VaultMinMeta, VaultPostItem, VaultSchema } from 'vaultifier/dist/module';
 import { ActionType } from '@/store/action-type';
 import { FetchState } from '@/store/fetch-state';
@@ -65,6 +68,7 @@ export default Vue.extend({
   components: {
     CustomButton,
     OcaEditView,
+    InlineGroup,
     SchemaList: createList<VaultSchema>({
       getTitle: (item) => item.dri,
       getId: (item) => item.dri,

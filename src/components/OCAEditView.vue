@@ -1,8 +1,12 @@
 <template>
   <div>
-    <custom-button @click="saveEdit">Save</custom-button>
-    <custom-button @click="cancelEdit">Cancel</custom-button>
-
+    <inline-group>
+      <custom-button @click="saveEdit">Save</custom-button>
+      <custom-button
+        @click="cancelEdit"
+        type="danger"
+      >Cancel</custom-button>
+    </inline-group>
     <oca-view
       ref="ocaView"
       :item="item"
@@ -14,8 +18,9 @@
 <script lang="ts">
 import Vue, { PropType } from 'vue';
 
-import { MimeType, VaultItem, VaultPostItem} from 'vaultifier';
+import { MimeType, VaultItem, VaultPostItem } from 'vaultifier';
 import OcaView from './OCAView.vue';
+import InlineGroup from './InlineGroup.vue';
 import CustomButton from './Button.vue';
 import { getObjectFromForm } from '@/utils';
 
@@ -23,6 +28,7 @@ export default Vue.extend({
   components: {
     OcaView,
     CustomButton,
+    InlineGroup,
   },
   props: {
     schemaDri: String as PropType<string>,
