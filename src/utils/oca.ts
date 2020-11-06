@@ -39,23 +39,6 @@ export const getLanguages = (overlays: any[]) => {
   }, []);
 }
 
-export const fetchOverlays = async (schemaDri: string): Promise<any[] | undefined> => {
-  // TODO: this url should be configurable
-  const url = `https://repository.oca.argo.colossi.network/api/v2/schemas/_any/${schemaDri}`;
-  const response = await fetch(url);
-  const json = await response.json();
-
-  let { schema_base, overlays } = json;
-
-  if (!(schema_base && overlays))
-    return;
-
-  return [
-    schema_base,
-    ...overlays,
-  ];
-}
-
 export const renderForm = (overlays: any[], item?: VaultItem, language?: string): any => {
   if (language)
     overlays = overlays.filter((x: any) => !x.language || x.language === language);
@@ -66,4 +49,8 @@ export const renderForm = (overlays: any[], item?: VaultItem, language?: string)
     fillForm(form, item.content);
 
   return form;
+}
+
+export const getTitle = (overlays: any[]): string | undefined => {
+  return overlays.find(x => x.name)?.name;
 }

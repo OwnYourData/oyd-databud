@@ -42,9 +42,10 @@
 import { VaultItem } from 'vaultifier';
 import Vue, { PropType } from 'vue'
 import Spinner from './Spinner.vue';
+import { SchemaService } from '../services/schema-service';
 // @ts-ignore
 import { FormBuilderGui } from '@gebsl/oca.js-vue';
-import { fetchOverlays, getLanguages, renderForm } from '../utils';
+import { getLanguages, renderForm } from '../utils';
 
 interface Data {
   overlays?: any[],
@@ -80,7 +81,7 @@ export default Vue.extend({
   methods: {
     async getOverlays() {
       this.isLoading = true;
-      this.overlays = await fetchOverlays(this.schemaDri);
+      this.overlays = await SchemaService.getOverlays(this.schemaDri);
       this.isLoading = false;
     },
   },

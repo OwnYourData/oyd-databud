@@ -1,6 +1,7 @@
 export enum ActionType {
   DELETE_VAULT_ITEM = 'deleteSelectedVaultItem',
   FETCH_SCHEMA_DRIS = 'fetchSchemaDRIs',
+  FETCH_SCHEMAS_TITLE = 'fetchSchemasTitle',
   FETCH_REPOS = 'fetchRepos',
   FETCH_VAULT_ITEMS_BY_SCHEMA = 'fetchVaultItemsBySchema',
   FETCH_VAULT_ITEMS_BY_REPO = 'fetchVaultItemsByRepo',

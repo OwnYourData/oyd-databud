@@ -70,7 +70,7 @@ export default Vue.extend({
     OcaEditView,
     InlineGroup,
     SchemaList: createList<VaultSchema>({
-      getTitle: (item) => item.dri,
+      getTitle: (item) => item.title || item.dri,
       getId: (item) => item.dri,
     }),
     DataList: createList<VaultItem>({

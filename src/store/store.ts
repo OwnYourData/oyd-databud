@@ -1,4 +1,6 @@
 import { getInstance } from '@/services';
+import { SchemaService } from '@/services/schema-service';
+import { getTitle } from '@/utils';
 import { VaultItem, VaultMeta, VaultPostItem, VaultRepo, VaultSchema } from 'vaultifier';
 import Vue from 'vue';
 import Vuex, { Commit } from 'vuex'
@@ -88,13 +90,19 @@ export const getStore = () => {
       [MutationType.SET_VAULT_ITEM](state, payload: VaultItem) {
         state.vaultItem.current = payload;
       },
+      [MutationType.SET_SCHEMA_DRI_TITLE](state, payload: VaultSchema) {
+        const item = state.schemaDRI.all.find(x => x.dri === payload.dri);
+
+        if (item)
+          item.title = payload.title;
+      }
     },
     actions: {
       [ActionType.RESET_VAULT_ITEMS]({ commit }) {
         commit(MutationType.SET_VAULT_ITEMS, undefined);
         commit(MutationType.SET_VAULT_ITEM, undefined);
       },
-      async [ActionType.UPDATE_VAULT_ITEM]({state, commit, dispatch}, payload: VaultPostItem) {
+      async [ActionType.UPDATE_VAULT_ITEM]({ state, commit, dispatch }, payload: VaultPostItem) {
         await getInstance().postItem(payload);
       },
       async [ActionType.DELETE_VAULT_ITEM]({ state, commit, dispatch }, payload: VaultMeta) {
@@ -112,6 +120,7 @@ export const getStore = () => {
           (commit, data) => {
             dispatch(ActionType.RESET_VAULT_ITEMS);
             commit(MutationType.SET_SCHEMA_DRIS, data);
+            dispatch(ActionType.FETCH_SCHEMAS_TITLE);
           },
           (store, state) => store.schemaDRI.state = state
         );
@@ -154,6 +163,16 @@ export const getStore = () => {
           (store, state) => store.vaultItem.currentState = state,
         )
       },
+      async [ActionType.FETCH_SCHEMAS_TITLE]({ commit, state }) {
+        for (const schema of state.schemaDRI.all) {
+          SchemaService.getOverlays(schema.dri).then(overlays => {
+            if (overlays) {
+              schema.title = getTitle(overlays);
+              commit(MutationType.SET_SCHEMA_DRI_TITLE, schema);
+            }
+          });
+        }
+      }
     }
   });
 }
