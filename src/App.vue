@@ -126,8 +126,10 @@ export default Vue.extend({
 
       if (supportsEncryption && supportsDecryption)
         return 'encryption/decryption supported';
-
-      return `encryption ${!supportsEncryption ? 'not' : ''} supported/decryption ${!supportsDecryption ? 'not' : ''} supported`
+      else if (!supportsEncryption && !supportsDecryption)
+        return 'encryption/decryption not supported';
+      else
+        return `encryption ${!supportsEncryption ? 'not' : ''} supported/decryption ${!supportsDecryption ? 'not' : ''} supported`
     }
   }
 });
