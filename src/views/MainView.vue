@@ -3,7 +3,7 @@
 
     <card-panel>
       <panel-tab title="Schemas">
-        <schema-view></schema-view>
+        <schema-view @showEditView="handleShowEditView"></schema-view>
       </panel-tab>
       <panel-tab
         title="Repos"
@@ -69,6 +69,12 @@ export default Vue.extend({
     },
     isVaultItemLoading(): boolean {
       return (this.$store.state as IStore).vaultItem.currentState == FetchState.FETCHING;
+    }
+  },
+  methods: {
+    handleShowEditView(isShown: boolean) {
+      if (isShown)
+        this.$store.commit(MutationType.SET_VAULT_ITEM, undefined);
     }
   }
 })

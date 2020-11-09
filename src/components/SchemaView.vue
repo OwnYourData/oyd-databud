@@ -33,10 +33,10 @@
     </section>
     <oca-edit-view
       v-if="showEditView"
-      class="col-md-12"
+      class="col-md-12 oca-edit-view"
       :schemaDri="selectedSchema.dri"
       @save="saveVaultItem"
-      @cancel="hideEditView"
+      @cancel="() => _showEditView(false)"
     ></oca-edit-view>
   </div>
 </template>
@@ -106,16 +106,18 @@ export default Vue.extend({
         return;
 
       this.selectVaultItem(undefined);
-      this.showEditView = true;
+      this._showEditView(true);
     },
     async saveVaultItem(postItem: VaultPostItem) {
       await this.$store.dispatch(ActionType.UPDATE_VAULT_ITEM, postItem);
 
       this.fetchVaultItems();
-      this.hideEditView();
+      this._showEditView(false);
     },
-    hideEditView() {
-      this.showEditView = false;
+    _showEditView(show: boolean) {
+      this.showEditView = show;
+
+      this.$emit('showEditView', show);
     }
   },
   computed: {
@@ -154,5 +156,9 @@ export default Vue.extend({
 .list {
   max-height: 250px;
   overflow-y: auto;
+}
+
+.oca-edit-view {
+  margin-top: 2em;
 }
 </style>
