@@ -13,10 +13,7 @@
     <section class="col-md-8">
       <inline-group>
         <custom-button @click="fetchVaultItems">Refresh</custom-button>
-        <custom-button
-          @click="addItem"
-          :disabled="isAddItemButtonDisabled"
-        >New</custom-button>
+        <custom-button @click="addItem">New</custom-button>
         <custom-button
           type="danger"
           @click="deleteSelectedVaultItem"
@@ -34,7 +31,7 @@
     <oca-edit-view
       v-if="showEditView"
       class="col-md-12 oca-edit-view"
-      :schemaDri="selectedSchema.dri"
+      :schemaDri="editViewSchemaDri"
       @save="saveVaultItem"
       @cancel="() => _showEditView(false)"
     ></oca-edit-view>
@@ -55,6 +52,7 @@ import { FetchState } from '@/store/fetch-state';
 interface IData {
   selectedSchema?: VaultSchema,
   showEditView: boolean,
+  editViewSchema?: VaultSchema,
 }
 
 export default Vue.extend({
@@ -64,6 +62,7 @@ export default Vue.extend({
   data: (): IData => ({
     selectedSchema: undefined,
     showEditView: false,
+    editViewSchema: undefined,
   }),
   components: {
     CustomButton,
@@ -102,9 +101,6 @@ export default Vue.extend({
       this.fetchSchemas();
     },
     async addItem() {
-      if (!this.selectedSchema)
-        return;
-
       this.selectVaultItem(undefined);
       this._showEditView(true);
     },
@@ -116,9 +112,10 @@ export default Vue.extend({
     },
     _showEditView(show: boolean) {
       this.showEditView = show;
+      this.editViewSchema = this.selectedSchema;
 
-      this.$emit('showEditView', show);
-    }
+      this.$emit('showEditView', this.showEditView);
+    },
   },
   computed: {
     schemaDRIs(): VaultSchema[] {
@@ -145,8 +142,8 @@ export default Vue.extend({
     hasSelectedSchema(): boolean {
       return !!this.selectedSchema;
     },
-    isAddItemButtonDisabled(): boolean {
-      return !this.hasSelectedSchema;
+    editViewSchemaDri(): string | undefined {
+      return this.editViewSchema?.dri;
     }
   }
 })

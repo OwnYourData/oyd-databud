@@ -1,3 +1,5 @@
+import { getTitle } from '../utils';
+
 interface CacheItem {
   schemaDri: string,
   overlays: any[],
@@ -7,6 +9,15 @@ export class SchemaService {
   private static INSTANCE = new SchemaService();
 
   private overlaysCache: CacheItem[] = [];
+
+  private getTitle = async (schemaDri: string): Promise<string | undefined> => {
+    const overlays = await this.getOverlays(schemaDri);
+
+    if (overlays)
+      return getTitle(overlays);
+
+    return;
+  }
 
   private getOverlays = async (schemaDri: string): Promise<any[] | undefined> => {
     let item = this.overlaysCache.find(x => x.schemaDri === schemaDri);
@@ -38,4 +49,5 @@ export class SchemaService {
 
   static getInstance = () => SchemaService.INSTANCE;
   static getOverlays = async (schemaDri: string) => SchemaService.getInstance().getOverlays(schemaDri);
+  static getTitle = async (schemaDri: string) => SchemaService.getInstance().getTitle(schemaDri);
 }

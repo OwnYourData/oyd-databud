@@ -7,7 +7,6 @@
       class="col-md-12"
       v-if="hasLanguages"
     >
-      <h3>Language</h3>
       <div
         class="form-check form-check-inline"
         v-for="lang of languages"

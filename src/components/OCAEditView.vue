@@ -7,10 +7,32 @@
         type="danger"
       >Cancel</custom-button>
     </inline-group>
+
+    <div class="form-inline">
+      <div class="input-group">
+        <div class="input-group-prepend">
+          <span class="input-group-text">{{selectedSchemaTitle}}</span>
+        </div>
+        <input
+          class="form-control"
+          placeholder="Schema DRI"
+          type="text"
+          v-model="editableSchemaDri"
+        />
+        <div class="input-group-append">
+          <button
+            class="btn btn-primary"
+            @click="handleConfirm"
+          >Confirm</button>
+        </div>
+      </div>
+    </div>
+
     <oca-view
+      v-if="hasSelectedSchemaDri"
       ref="ocaView"
       :item="item"
-      :schemaDri="schemaDri"
+      :schemaDri="selectedSchemaDri"
     ></oca-view>
   </div>
 </template>
@@ -22,7 +44,14 @@ import { MimeType, VaultItem, VaultPostItem } from 'vaultifier';
 import OcaView from './OCAView.vue';
 import InlineGroup from './InlineGroup.vue';
 import CustomButton from './Button.vue';
-import { getObjectFromForm } from '@/utils';
+import { getObjectFromForm, getTitle } from '@/utils';
+import { SchemaService } from '@/services/schema-service';
+
+interface Data {
+  editableSchemaDri?: string,
+  selectedSchemaDri?: string,
+  selectedSchemaTitle?: string,
+}
 
 export default Vue.extend({
   components: {
@@ -31,17 +60,28 @@ export default Vue.extend({
     InlineGroup,
   },
   props: {
-    schemaDri: String as PropType<string>,
+    schemaDri: String as PropType<string | undefined>,
     item: Object as PropType<VaultItem>,
+  },
+  data: (): Data => ({
+    editableSchemaDri: undefined,
+    selectedSchemaDri: undefined,
+    selectedSchemaTitle: undefined,
+  }),
+  mounted() {
+    this.selectSchemaDri(this.schemaDri);
   },
   methods: {
     async saveEdit() {
+      if (!this.selectedSchemaDri)
+        return;
+
       const content = getObjectFromForm((this.$refs.ocaView as any).form);
       const postItem: VaultPostItem = {
         content: getObjectFromForm((this.$refs.ocaView as any).form),
         // TODO:
         dri: Date.now() + '___shouldbesetbyclient',
-        schemaDri: this.schemaDri,
+        schemaDri: this.selectedSchemaDri,
         mimeType: MimeType.JSON,
       };
 
@@ -50,6 +90,36 @@ export default Vue.extend({
     cancelEdit() {
       this.$emit('cancel');
     },
+    selectSchemaDri(schemaDri?: string) {
+      this.selectedSchemaDri = this.editableSchemaDri = schemaDri;
+    },
+    handleConfirm() {
+      this.selectSchemaDri(this.editableSchemaDri);
+    }
+  },
+  computed: {
+    hasSelectedSchemaDri() {
+      return !!this.selectedSchemaDri;
+    },
+  },
+  watch: {
+    async selectedSchemaDri(value?: string) {
+      if (!value) {
+        this.selectedSchemaTitle = undefined;
+        return;
+      }
+
+      this.selectedSchemaTitle = await SchemaService.getTitle(value);
+    },
+    schemaDri(value?: string) {
+      this.selectSchemaDri(value);
+    }
   }
 })
 </script>
+
+<style scoped>
+.form-inline {
+  margin-bottom: 2em;
+}
+</style>
