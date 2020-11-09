@@ -31,6 +31,7 @@
     </div>
     <login
       v-else-if="isLoginFormShowed"
+      :scopes="vaultSupport.scopes"
       @login="logIn"
     ></login>
     <router-view v-else></router-view>
@@ -43,7 +44,7 @@ import { create, getInstance } from './services';
 import Spinner from './components/Spinner.vue'
 import Login, { Data as LoginData } from './components/Login.vue'
 import { ConfigService, PACKAGE } from './services/config-service';
-import { Vaultifier, VaultEncryptionSupport } from 'vaultifier';
+import { Vaultifier, VaultEncryptionSupport, VaultSupport } from 'vaultifier';
 import { RoutePath } from './router';
 
 interface IData {
@@ -51,6 +52,7 @@ interface IData {
   isLoggedIn: boolean,
   message?: string,
   encryptionSupport?: VaultEncryptionSupport,
+  vaultSupport?: VaultSupport,
 }
 
 export default Vue.extend({
@@ -66,6 +68,7 @@ export default Vue.extend({
     isLoggedIn: false,
     message: undefined,
     encryptionSupport: undefined,
+    vaultSupport: undefined,
   }),
   methods: {
     async initialize() {
@@ -84,9 +87,9 @@ export default Vue.extend({
       this.isInitializing = true;
 
       try {
-        const supports = await vaultifier.getVaultSupport();
+        this.vaultSupport = await vaultifier.getVaultSupport();
 
-        if (!supports.authentication) {
+        if (!this.vaultSupport?.authentication) {
           this.isLoggedIn = true;
         }
         else if (vaultifier.hasCredentials()) {

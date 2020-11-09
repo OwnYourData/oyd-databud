@@ -20,6 +20,22 @@
               v-model="appSecret"
             /></label>
         </div>
+        <div
+          v-if="scopes"
+          class="form-group"
+        >
+          <label>Scope:
+            <select
+              class="form-control"
+              v-model="scope"
+            >
+              <option
+                v-for="scope of scopes"
+                :key="scope"
+              >{{scope}}</option>
+            </select>
+          </label>
+        </div>
 
         <button
           type="submit"
@@ -34,14 +50,23 @@
 export interface Data {
   appKey: string,
   appSecret: string,
+  scope?: string,
 }
 
-import Vue from 'vue'
+import Vue, { PropType } from 'vue'
 export default Vue.extend({
-  data: () => ({
+  props: {
+    scopes: Array as PropType<string[] | undefined>
+  },
+  data: (): Data => ({
     appKey: '',
     appSecret: '',
+    scope: undefined,
   }),
+  created() {
+    if (this.scopes && this.scopes.length > 0)
+      this.scope = this.scopes[0];
+  },
   methods: {
     submitForm(event: Event) {
       event.preventDefault();
@@ -49,6 +74,7 @@ export default Vue.extend({
       this.$emit('login', {
         appKey: this.appKey,
         appSecret: this.appSecret,
+        scope: this.scope,
       } as Data);
     }
   }
