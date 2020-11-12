@@ -40,7 +40,7 @@
 
 <script lang="ts">
 import Vue from "vue";
-import { create, getInstance } from './services';
+import { create as createVaultifier, getInstance as getVaultifier } from './services';
 import Spinner from './components/Spinner.vue'
 import Login, { Data as LoginData } from './components/Login.vue'
 import { ConfigService, PACKAGE } from './services/config-service';
@@ -72,7 +72,7 @@ export default Vue.extend({
   }),
   methods: {
     async initialize() {
-      const vaultifier = create();
+      const vaultifier = await createVaultifier();
 
       this.tryInitializeVaultifier();
 
@@ -83,7 +83,7 @@ export default Vue.extend({
         this.$router.push(RoutePath.SCHEMA_VIEW);
     },
     async tryInitializeVaultifier() {
-      const vaultifier = getInstance();
+      const vaultifier = getVaultifier();
       this.isInitializing = true;
 
       try {
@@ -101,13 +101,13 @@ export default Vue.extend({
         this.encryptionSupport = await vaultifier.setEnd2EndEncryption(true);
       }
       catch {
-        this.message = `I'm not sure ${vaultifier.baseUrl} is the correct endpoint I should connect to. Please check this again.`;
+        this.message = `I'm not sure ${vaultifier.urls.baseUrl} is the correct endpoint I should connect to. Please check this again.`;
       }
 
       this.isInitializing = false;
     },
     logIn(credentials: LoginData) {
-      getInstance().setCredentials(credentials);
+      getVaultifier().setCredentials(credentials);
       this.tryInitializeVaultifier();
     }
   },

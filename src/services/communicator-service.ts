@@ -5,12 +5,10 @@ import { ConfigService } from './config-service';
 let vaultifier: Vaultifier;
 
 export const getInstance = (): Vaultifier => vaultifier;
-export const create = (): Vaultifier => {
-  const repo = '';
-
+export const create = async (): Promise<Vaultifier> => {
   try {
-    // first of all trying to get data out of url params
-    return vaultifier = VaultifierWeb.create(repo);
+    // first of all trying to create an instance out of url params
+    return vaultifier = await VaultifierWeb.create();
   }
   catch {
     // if url params do not work, we try to get the url from our config
@@ -20,6 +18,6 @@ export const create = (): Vaultifier => {
     if (!endpoint)
       endpoint = window.location.origin;
 
-    return vaultifier = new Vaultifier(endpoint, repo);
+    return vaultifier = new Vaultifier(endpoint);
   }
 }
