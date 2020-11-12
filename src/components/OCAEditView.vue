@@ -98,7 +98,7 @@ export default Vue.extend({
     }
   },
   computed: {
-    hasSelectedSchemaDri() {
+    hasSelectedSchemaDri(): boolean {
       return !!this.selectedSchemaDri;
     },
   },
