@@ -1,5 +1,6 @@
 <template>
-  <div v-if="hasForm">
+  <spinner v-if="isLoading" />
+  <div v-else-if="hasForm">
     <div class="row">
       <div class="col-md-3">
         <b-form-select
@@ -14,7 +15,6 @@
       <form-builder-gui :form="form"></form-builder-gui>
     </div>
   </div>
-  <spinner v-else-if="isLoading" />
   <b-alert
     variant="warning"
     v-else

@@ -6,6 +6,8 @@
 
 <style scoped>
 .inline-group {
+  display: flex;
+  align-items: center;
   margin-bottom: 1em;
 }
 

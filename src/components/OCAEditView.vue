@@ -1,27 +1,39 @@
 <template>
   <div>
     <inline-group>
-      <custom-button @click="saveEdit">Save</custom-button>
+      <b-form
+        inline
+        @submit.prevent
+        v-if="showTypeahead || !hasSelectedSchemaDri"
+      >
+        <b-typeahead
+          prepend="Search Schema..."
+          v-model="editableText"
+          :serializer="s => s.title"
+          :data="suggestItems"
+          @hit="selectFromTypeahead"
+        >{{editableText}}</b-typeahead>
+
+      </b-form>
+      <b-button
+        v-else
+        @click="showTypeahead = true"
+      >{{selectedSchemaTitle}}</b-button>
+
+      <custom-button
+        @click="saveEdit"
+        :disabled="!hasSelectedSchemaDri"
+      >Save</custom-button>
       <custom-button
         @click="cancelEdit"
         type="danger"
+        :disabled="!hasSelectedSchemaDri"
       >Cancel</custom-button>
     </inline-group>
 
-    <b-form inline>
-      <b-input-group :prepend="selectedSchemaTitle">
-        <b-form-input
-          placeholder="Schema DRI"
-          v-model="editableSchemaDri"
-        ></b-form-input>
-        <b-input-group-append>
-          <b-button @click="handleConfirm">Confirm</b-button>
-        </b-input-group-append>
-      </b-input-group>
-    </b-form>
-
+    <spinner v-if="isLoading" />
     <oca-view
-      v-if="hasSelectedSchemaDri"
+      v-else-if="hasSelectedSchemaDri"
       ref="ocaView"
       :item="item"
       :schemaDri="selectedSchemaDri"
@@ -36,13 +48,17 @@ import { MimeType, VaultItem, VaultPostItem } from 'vaultifier';
 import OcaView from './OCAView.vue';
 import InlineGroup from './InlineGroup.vue';
 import CustomButton from './Button.vue';
-import { getObjectFromForm, getTitle } from '@/utils';
-import { SchemaService } from '@/services/schema-service';
+import { getObjectFromForm } from '@/utils';
+import { SchemaService, SuggestItem } from '@/services/schema-service';
+import Spinner from './Spinner.vue';
 
 interface Data {
-  editableSchemaDri?: string,
-  selectedSchemaDri?: string,
+  editableText?: string,
   selectedSchemaTitle?: string,
+  selectedSchemaDri?: string,
+  suggestItems: SuggestItem[],
+  isLoading: boolean,
+  showTypeahead: boolean,
 }
 
 export default Vue.extend({
@@ -50,18 +66,23 @@ export default Vue.extend({
     OcaView,
     CustomButton,
     InlineGroup,
+    Spinner,
   },
   props: {
     schemaDri: String as PropType<string | undefined>,
     item: Object as PropType<VaultItem>,
   },
   data: (): Data => ({
-    editableSchemaDri: undefined,
-    selectedSchemaDri: undefined,
+    editableText: '',
     selectedSchemaTitle: undefined,
+    selectedSchemaDri: undefined,
+    suggestItems: [],
+    isLoading: false,
+    showTypeahead: false,
   }),
   mounted() {
-    this.selectSchemaDri(this.schemaDri);
+    if (this.schemaDri)
+      this.selectSchemaDri(this.schemaDri);
   },
   methods: {
     async saveEdit() {
@@ -79,14 +100,26 @@ export default Vue.extend({
 
       this.$emit('save', postItem);
     },
-    cancelEdit() {
+    cancelEdit(): void {
       this.$emit('cancel');
     },
-    selectSchemaDri(schemaDri?: string) {
-      this.selectedSchemaDri = this.editableSchemaDri = schemaDri;
+    async selectSchemaDri(schemaDri?: string) {
+      this.selectedSchemaDri = schemaDri;
+
+      this.editableText = this.selectedSchemaTitle = schemaDri ? await SchemaService.getTitle(schemaDri) : '';
+      this.showTypeahead = false;
     },
-    handleConfirm() {
-      this.selectSchemaDri(this.editableSchemaDri);
+    async selectFromTypeahead(item: SuggestItem): Promise<void> {
+      this.isLoading = true;
+
+      const list = await SchemaService.getOverlaySchemaDRIsFromSchemaBase(item.schemaBaseDri);
+
+      if (list && list.length > 0)
+        this.selectSchemaDri(list[0]);
+      else
+        this.selectSchemaDri(undefined);
+
+      this.isLoading = false;
     }
   },
   computed: {
@@ -95,23 +128,15 @@ export default Vue.extend({
     },
   },
   watch: {
-    async selectedSchemaDri(value?: string) {
-      if (!value) {
-        this.selectedSchemaTitle = undefined;
-        return;
-      }
-
-      this.selectedSchemaTitle = await SchemaService.getTitle(value);
-    },
     schemaDri(value?: string) {
       this.selectSchemaDri(value);
+    },
+    async editableText(value: string) {
+      if (!value)
+        this.suggestItems = [];
+      else
+        this.suggestItems = await SchemaService.getSuggestions(value);
     }
   }
 })
 </script>
-
-<style scoped>
-.form-inline {
-  margin-bottom: 2em;
-}
-</style>
