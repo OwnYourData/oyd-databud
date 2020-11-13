@@ -5,6 +5,10 @@
 </template>
 
 <style scoped>
+.inline-group {
+  margin-bottom: 1em;
+}
+
 .inline-group > :not(:last-child) {
   margin-right: 1em;
 }

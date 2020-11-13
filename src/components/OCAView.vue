@@ -1,27 +1,13 @@
 <template>
-  <div
-    v-if="hasForm"
-    class="row"
-  >
-    <div
-      class="col-md-12"
-      v-if="hasLanguages"
-    >
-      <div
-        class="form-check form-check-inline"
-        v-for="lang of languages"
-        :key="lang"
-      >
-        <label class="form-check-label">
-          <input
-            class="form-check-input"
-            name="language"
-            type="radio"
-            :value="lang"
-            v-model="selectedLanguage"
-          >
-          {{lang}}
-        </label>
+  <div v-if="hasForm">
+    <div class="row">
+      <div class="col-md-3">
+        <b-form-select
+          class="languages"
+          v-model="selectedLanguage"
+          :options="languageOptions"
+          v-if="hasLanguages"
+        ></b-form-select>
       </div>
     </div>
     <div class="row">
@@ -29,13 +15,12 @@
     </div>
   </div>
   <spinner v-else-if="isLoading" />
-  <div
+  <b-alert
+    variant="warning"
     v-else
-    class="alert alert-warning"
-    role="alert"
   >
     It seems the schema with DRI <code>{{item.schemaDri}}</code> is not a valid OCA schema.
-  </div>
+  </b-alert>
 </template>
 <script lang="ts">
 import { VaultItem } from 'vaultifier';
@@ -100,12 +85,18 @@ export default Vue.extend({
     hasLanguages(): boolean {
       return !!(this.languages && this.languages.length > 0);
     },
+    languageOptions(): any {
+      return this.languages ? this.languages.map((x) => ({
+        value: x,
+        text: x,
+      })) : undefined;
+    }
   }
 })
 </script>
 
 <style scoped>
-.form-check {
+.languages {
   margin-bottom: 2em;
 }
 </style>

@@ -8,25 +8,17 @@
       >Cancel</custom-button>
     </inline-group>
 
-    <div class="form-inline">
-      <div class="input-group">
-        <div class="input-group-prepend">
-          <span class="input-group-text">{{selectedSchemaTitle}}</span>
-        </div>
-        <input
-          class="form-control"
+    <b-form inline>
+      <b-input-group :prepend="selectedSchemaTitle">
+        <b-form-input
           placeholder="Schema DRI"
-          type="text"
           v-model="editableSchemaDri"
-        />
-        <div class="input-group-append">
-          <button
-            class="btn btn-primary"
-            @click="handleConfirm"
-          >Confirm</button>
-        </div>
-      </div>
-    </div>
+        ></b-form-input>
+        <b-input-group-append>
+          <b-button @click="handleConfirm">Confirm</b-button>
+        </b-input-group-append>
+      </b-input-group>
+    </b-form>
 
     <oca-view
       v-if="hasSelectedSchemaDri"

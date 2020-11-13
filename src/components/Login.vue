@@ -1,48 +1,36 @@
 <template>
-  <div class="container">
-    <div class="jumbotron">
-      <h1 class="display-5">DataBud Login</h1>
+  <div class="jumbotron">
+    <h1 class="display-5">DataBud Login</h1>
 
-      <form @submit="submitForm">
-        <div class="form-group">
-          <label>App Key:
-            <input
-              class="form-control"
-              type="text"
-              v-model="appKey"
-            /></label>
-        </div>
-        <div class="form-group">
-          <label>App Secret:
-            <input
-              class="form-control"
-              type="password"
-              v-model="appSecret"
-            /></label>
-        </div>
-        <div
-          v-if="scopes"
-          class="form-group"
-        >
-          <label>Scope:
-            <select
-              class="form-control"
-              v-model="scope"
-            >
-              <option
-                v-for="scope of scopes"
-                :key="scope"
-              >{{scope}}</option>
-            </select>
-          </label>
-        </div>
+    <b-form @submit="submitForm">
+      <b-form-group label="App Key:">
+        <b-form-input
+          required
+          v-model="appKey"
+        ></b-form-input>
+      </b-form-group>
+      <b-form-group label="App Secret:">
+        <b-form-input
+          required
+          type="password"
+          v-model="appSecret"
+        ></b-form-input>
+      </b-form-group>
+      <b-form-group
+        label="Scope:"
+        v-if="scopeOptions"
+      >
+        <b-form-select
+          required
+          :options="scopeOptions"
+        ></b-form-select>
+      </b-form-group>
 
-        <button
-          type="submit"
-          class="btn btn-primary"
-        >Login</button>
-      </form>
-    </div>
+      <b-button
+        type="submit"
+        variant="primary"
+      >Login</b-button>
+    </b-form>
   </div>
 </template>
 
@@ -76,6 +64,14 @@ export default Vue.extend({
         appSecret: this.appSecret,
         scope: this.scope,
       } as Data);
+    }
+  },
+  computed: {
+    scopeOptions() {
+      return this.scopes?.map((x) => ({
+        text: x,
+        value: x,
+      }));
     }
   }
 })

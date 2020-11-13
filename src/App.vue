@@ -1,39 +1,34 @@
 <template>
   <div>
-    <div class="container">
-      <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <span class="navbar-brand">DataBud</span>
-        <small class="navbar-text">v{{version}}</small>
-        <small class="navbar-text">{{encryptionMessage}}</small>
-      </nav>
-    </div>
-    <div
-      class="container"
-      v-if="isInitializing"
-    >
+    <b-container>
+      <b-navbar toggleable="lg" type="dark" variant="dark">
+        <b-navbar-brand>DataBud</b-navbar-brand>
+        <b-nav-text>v{{version}}</b-nav-text>
+        <b-nav-text>{{encryptionMessage}}</b-nav-text>
+      </b-navbar>
+    </b-container>
+    <b-container v-if="isInitializing">
       <div class="jumbotron">
         <span class="lead">
           OwnYourData DataBud <span class="text-muted">is loading <spinner></spinner></span>
         </span>
 
       </div>
-    </div>
-    <div
-      class="container"
-      v-else-if="hasMessage"
-    >
+    </b-container>
+    <b-container v-else-if="hasMessage">
       <div class="jumbotron">
         <h1 class="display-5">Buddy Message</h1>
         <p class="lead">
           {{message}}
         </p>
       </div>
-    </div>
-    <login
-      v-else-if="isLoginFormShowed"
-      :scopes="vaultSupport.scopes"
-      @login="logIn"
-    ></login>
+    </b-container>
+    <b-container v-else-if="isLoginFormShowed">
+      <login
+        :scopes="vaultSupport.scopes"
+        @login="logIn"
+      ></login>
+    </b-container>
     <router-view v-else></router-view>
   </div>
 </template>

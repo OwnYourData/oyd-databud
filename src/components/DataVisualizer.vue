@@ -1,21 +1,26 @@
 <template>
-  <card-panel>
-    <panel-tab
-      title="Raw Data"
-      v-if="showRawView"
+  <b-card no-body>
+    <b-tabs
+      pills
+      card
     >
-      <raw-data :item="item"></raw-data>
-    </panel-tab>
-    <panel-tab
-      title="OCA-Form"
-      v-if="hasSchema"
-    >
-      <oca-view
-        :item="item"
-        :schemaDri="schemaDri"
-      ></oca-view>
-    </panel-tab>
-  </card-panel>
+      <b-tab
+        title="Raw Data"
+        v-if="showRawView"
+      >
+        <raw-data :item="item"></raw-data>
+      </b-tab>
+      <b-tab
+        title="OCA-Form"
+        v-if="hasSchema"
+      >
+        <oca-view
+          :item="item"
+          :schemaDri="schemaDri"
+        ></oca-view>
+      </b-tab>
+    </b-tabs>
+  </b-card>
 </template>
 
 <script lang="ts">
@@ -24,8 +29,6 @@ import Vue, { PropType } from 'vue';
 import { VaultItem } from 'vaultifier';
 import RawData from './RawData.vue';
 
-import CardPanel from '../components/CardPanel.vue';
-import PanelTab from '../components/PanelTab.vue';
 import OcaView from '../components/OCAView.vue';
 
 export default Vue.extend({
@@ -37,8 +40,6 @@ export default Vue.extend({
     },
   },
   components: {
-    CardPanel,
-    PanelTab,
     RawData,
     OcaView,
   },

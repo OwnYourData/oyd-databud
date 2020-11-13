@@ -1,7 +1,9 @@
 <template>
   <div class="row">
     <section class="col-md-4">
-      <custom-button @click="fetchSchemas">Refresh</custom-button>
+      <inline-group>
+        <custom-button @click="fetchSchemas">Refresh</custom-button>
+      </inline-group>
       <schema-list
         class="list"
         :items="schemaDRIs"

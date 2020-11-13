@@ -1,17 +1,19 @@
 <template>
   <div class="container">
 
-    <card-panel>
-      <panel-tab title="Schemas">
-        <schema-view @showEditView="handleShowEditView"></schema-view>
-      </panel-tab>
-      <panel-tab
-        title="Repos"
-        v-if="hasRepoSupport"
-      >
-        <repo-view></repo-view>
-      </panel-tab>
-    </card-panel>
+    <b-card no-body>
+      <b-tabs pills card>
+        <b-tab title="Schemas">
+          <schema-view @showEditView="handleShowEditView"></schema-view>
+        </b-tab>
+        <b-tab
+          title="Repos"
+          v-if="hasRepoSupport"
+        >
+          <repo-view></repo-view>
+        </b-tab>
+      </b-tabs>
+    </b-card>
 
     <div
       class="center"
@@ -37,8 +39,6 @@ import { VaultItem } from 'vaultifier/dist/module';
 import { renderForm } from '../utils';
 import { FetchState } from '@/store/fetch-state';
 
-import CardPanel from '../components/CardPanel.vue';
-import PanelTab from '../components/PanelTab.vue';
 import { getInstance } from '@/services';
 
 interface Data {
@@ -47,8 +47,6 @@ interface Data {
 
 export default Vue.extend({
   components: {
-    CardPanel,
-    PanelTab,
     DataVisualizer,
     Spinner,
     SchemaView,

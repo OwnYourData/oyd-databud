@@ -1,7 +1,9 @@
 <template>
   <div class="row">
     <section class="col-md-4">
-      <refresh-button @click="fetchRepos">Refresh</refresh-button>
+      <inline-group>
+        <refresh-button @click="fetchRepos">Refresh</refresh-button>
+      </inline-group>
       <repo-list
         class="list"
         :items="repos"
@@ -11,7 +13,9 @@
       ></repo-list>
     </section>
     <section class="col-md-8">
-      <refresh-button @click="fetchVaultItems">Refresh</refresh-button>
+      <inline-group>
+        <refresh-button @click="fetchVaultItems">Refresh</refresh-button>
+      </inline-group>
       <data-list
         class="list"
         :items="vaultItems"
@@ -28,6 +32,7 @@ import Vue from 'vue';
 import { IStore } from '../store';
 import { createList } from '../components/List.vue';
 import RefreshButton from '../components/Button.vue';
+import InlineGroup from '../components/InlineGroup.vue';
 import { Vaultifier, VaultItem, VaultMinMeta, VaultRepo, VaultSchema } from 'vaultifier/dist/module';
 import { ActionType } from '@/store/action-type';
 import { FetchState } from '@/store/fetch-state';
@@ -45,6 +50,7 @@ export default Vue.extend({
   }),
   components: {
     RefreshButton,
+    InlineGroup,
     RepoList: createList<VaultRepo>({
       getTitle: (item) => item.name,
       getId: (item) => item.id.toString(),

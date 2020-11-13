@@ -1,11 +1,10 @@
 <template>
-  <button
-    class="btn"
-    :class="generatedClassList"
+  <b-button
+    :variant="type"
     @click="click"
   >
     <slot />
-  </button>
+  </b-button>
 </template>
 
 <script lang="ts">
@@ -22,16 +21,5 @@ export default Vue.extend({
       this.$emit('click', ...arguments);
     }
   },
-  computed: {
-    generatedClassList() {
-      return `btn-outline-${this.type}`;
-    }
-  }
 })
 </script>
-
-<style scoped>
-.btn {
-  margin-bottom: 1em;
-}
-</style>
