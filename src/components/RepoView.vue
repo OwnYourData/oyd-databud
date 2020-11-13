@@ -2,7 +2,10 @@
   <div class="row">
     <section class="col-md-4">
       <inline-group>
-        <refresh-button @click="fetchRepos">Refresh</refresh-button>
+        <refresh-button
+          @click="fetchRepos"
+          type="refresh"
+        ></refresh-button>
       </inline-group>
       <repo-list
         class="list"
@@ -14,7 +17,10 @@
     </section>
     <section class="col-md-8">
       <inline-group>
-        <refresh-button @click="fetchVaultItems">Refresh</refresh-button>
+        <refresh-button
+          @click="fetchVaultItems"
+          type="refresh"
+        ></refresh-button>
       </inline-group>
       <data-list
         class="list"

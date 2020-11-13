@@ -2,7 +2,10 @@
   <div class="row">
     <section class="col-md-4">
       <inline-group>
-        <custom-button @click="fetchSchemas">Refresh</custom-button>
+        <custom-button
+          type="refresh"
+          @click="fetchSchemas"
+        ></custom-button>
       </inline-group>
       <schema-list
         class="list"
@@ -14,7 +17,10 @@
     </section>
     <section class="col-md-8">
       <inline-group>
-        <custom-button @click="fetchVaultItems">Refresh</custom-button>
+        <custom-button
+          @click="fetchVaultItems"
+          type="refresh"
+        ></custom-button>
         <custom-button @click="addItem">New</custom-button>
         <custom-button
           type="danger"

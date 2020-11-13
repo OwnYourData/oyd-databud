@@ -1,9 +1,16 @@
 <template>
   <b-button
-    :variant="type"
+    :variant="computedType"
     @click="click"
   >
-    <slot />
+    <template v-if="type === 'refresh'">
+      <b-icon
+        icon="arrow-clockwise"
+        aria-label="Refresh"
+      ></b-icon>
+      <slot />
+    </template>
+    <slot v-else />
   </b-button>
 </template>
 
@@ -21,5 +28,10 @@ export default Vue.extend({
       this.$emit('click', ...arguments);
     }
   },
+  computed: {
+    computedType() {
+      return this.type === 'refresh' ? 'outline-primary' : this.type;
+    }
+  }
 })
 </script>
