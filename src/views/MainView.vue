@@ -2,7 +2,10 @@
   <div class="container">
 
     <b-card no-body>
-      <b-tabs pills card>
+      <b-tabs
+        pills
+        card
+      >
         <b-tab title="Schemas">
           <schema-view @showEditView="handleShowEditView"></schema-view>
         </b-tab>
@@ -22,6 +25,7 @@
       <Spinner></Spinner>
     </div>
     <data-visualizer
+      class="data-visualizer"
       v-if="hasSelectedVaultItem"
       :item="selectedVaultItem"
     ></data-visualizer>
@@ -84,13 +88,7 @@ export default Vue.extend({
   justify-content: center;
 }
 
-.vert-container {
-  display: flex;
-  flex-direction: column;
-}
-
-.vert-container > .ld-item:nth-of-type(2) {
-  margin-left: 0;
-  margin-top: 2em;
+.data-visualizer {
+  margin-top: 1em;
 }
 </style>
