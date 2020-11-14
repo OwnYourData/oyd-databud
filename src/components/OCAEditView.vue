@@ -4,7 +4,7 @@
       <b-form
         inline
         @submit.prevent
-        v-if="showTypeahead || !hasSelectedSchemaDri"
+        v-if="allowSelectSchema && (showTypeahead || !hasSelectedSchemaDri)"
       >
         <b-typeahead
           prepend="Search Schema..."
@@ -19,15 +19,15 @@
         v-else
         @click="showTypeahead = true"
       >{{selectedSchemaTitle}}</b-button>
-
+      <div class="spacer"></div>
       <custom-button
         @click="saveEdit"
         :disabled="!hasSelectedSchemaDri"
       >Save</custom-button>
       <custom-button
+        v-if="hasCancel"
         @click="cancelEdit"
         type="danger"
-        :disabled="!hasSelectedSchemaDri"
       >Cancel</custom-button>
     </inline-group>
 
@@ -70,7 +70,15 @@ export default Vue.extend({
   },
   props: {
     schemaDri: String as PropType<string | undefined>,
-    item: Object as PropType<VaultItem>,
+    item: Object as PropType<VaultItem | undefined>,
+    hasCancel: {
+      type: Boolean as PropType<boolean>,
+      default: true
+    },
+    allowSelectSchema: {
+      type: Boolean as PropType<boolean>,
+      default: true,
+    }
   },
   data: (): Data => ({
     editableText: '',
@@ -89,11 +97,11 @@ export default Vue.extend({
       if (!this.selectedSchemaDri)
         return;
 
-      const content = getObjectFromForm((this.$refs.ocaView as any).form);
       const postItem: VaultPostItem = {
         content: getObjectFromForm((this.$refs.ocaView as any).form),
         // TODO:
-        dri: Date.now() + '___shouldbesetbyclient',
+        id: this.item?.id,
+        dri: this.item?.dri ?? Date.now() + '___shouldbesetbyclient',
         schemaDri: this.selectedSchemaDri,
         mimeType: MimeType.JSON,
       };
@@ -140,3 +148,9 @@ export default Vue.extend({
   }
 })
 </script>
+
+<style scoped>
+.spacer {
+  flex: 1;
+}
+</style>

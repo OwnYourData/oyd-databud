@@ -14,10 +14,13 @@
         title="OCA-Form"
         v-if="hasSchema"
       >
-        <oca-view
+        <oca-edit-view
           :item="item"
           :schemaDri="schemaDri"
-        ></oca-view>
+          :allowSelectSchema="false"
+          :hasCancel="false"
+          @save="saveVaultItem"
+        ></oca-edit-view>
       </b-tab>
     </b-tabs>
   </b-card>
@@ -26,10 +29,12 @@
 <script lang="ts">
 import Vue, { PropType } from 'vue';
 
-import { VaultItem } from 'vaultifier';
+import { VaultItem, VaultPostItem } from 'vaultifier';
 import RawData from './RawData.vue';
 
-import OcaView from '../components/OCAView.vue';
+import OcaEditView from '../components/OCAEditView.vue';
+import { IStore } from '@/store';
+import { ActionType } from '@/store/action-type';
 
 export default Vue.extend({
   props: {
@@ -41,7 +46,7 @@ export default Vue.extend({
   },
   components: {
     RawData,
-    OcaView,
+    OcaEditView,
   },
   computed: {
     schemaDri(): string | undefined {
@@ -51,5 +56,10 @@ export default Vue.extend({
       return !!this.schemaDri;
     }
   },
+  methods: {
+    saveVaultItem(item: VaultPostItem) {
+      this.$store.dispatch(ActionType.UPDATE_VAULT_ITEM, item);
+    }
+  }
 })
 </script>

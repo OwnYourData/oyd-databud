@@ -103,7 +103,10 @@ export const getStore = () => {
         commit(MutationType.SET_VAULT_ITEM, undefined);
       },
       async [ActionType.UPDATE_VAULT_ITEM]({ state, commit, dispatch }, payload: VaultPostItem) {
-        await getInstance().postItem(payload);
+        if (payload.id)
+          await getInstance().updateItem(payload);
+        else
+          await getInstance().postItem(payload);
       },
       async [ActionType.DELETE_VAULT_ITEM]({ state, commit, dispatch }, payload: VaultMeta) {
         await getInstance().deleteItem({
