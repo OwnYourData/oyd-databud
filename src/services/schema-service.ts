@@ -12,10 +12,10 @@ export interface SuggestItem {
 
 const baseUrl = 'https://repository.oca.argo.colossi.network';
 
-const getItemUrl = (schemaDri: string) => `${baseUrl}/api/v2/schemas/_any/${schemaDri}`;
+const getItemUrl = (schemaDri: string) => `${baseUrl}/api/v3/schemas/${schemaDri}`;
 
-const getSuggestUrl = (query: string) => `${baseUrl}/api/v2/schemas?suggest=${query}`;
-const getOverlaysForSchemaBase = (schemaBaseDri: string) => `${baseUrl}/api/v2/schemas?_index=branch&schema_base=${schemaBaseDri}`;
+const getSuggestUrl = (query: string) => `${baseUrl}/api/v3/schemas?suggest=${query}`;
+const getOverlaysForSchemaBase = (schemaBaseDri: string) => `${baseUrl}/api/v3/schemas?q=${schemaBaseDri}`;
 
 export class SchemaService {
   private static INSTANCE = new SchemaService();
