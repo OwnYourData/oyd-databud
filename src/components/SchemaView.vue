@@ -40,6 +40,7 @@
       v-if="showEditView"
       class="col-md-12 oca-edit-view"
       :schemaDri="editViewSchemaDri"
+      :isSaving="isSaving"
       @save="saveVaultItem"
       @cancel="() => _showEditView(false)"
     ></oca-edit-view>
@@ -61,6 +62,7 @@ interface IData {
   selectedSchema?: VaultSchema,
   showEditView: boolean,
   editViewSchema?: VaultSchema,
+  isSaving: boolean,
 }
 
 export default Vue.extend({
@@ -71,6 +73,7 @@ export default Vue.extend({
     selectedSchema: undefined,
     showEditView: false,
     editViewSchema: undefined,
+    isSaving: false,
   }),
   components: {
     CustomButton,
@@ -113,10 +116,12 @@ export default Vue.extend({
       this._showEditView(true);
     },
     async saveVaultItem(postItem: VaultPostItem) {
+      this.isSaving = true;
       await this.$store.dispatch(ActionType.UPDATE_VAULT_ITEM, postItem);
 
       this.fetchVaultItems();
       this._showEditView(false);
+      this.isSaving = false;
     },
     _showEditView(show: boolean) {
       this.showEditView = show;
