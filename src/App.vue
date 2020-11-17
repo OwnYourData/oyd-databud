@@ -9,6 +9,9 @@
         <b-navbar-brand>DataBud</b-navbar-brand>
         <b-nav-text>v{{version}}</b-nav-text>
         <b-nav-text>{{encryptionMessage}}</b-nav-text>
+        <b-navbar-nav v-if="tdaUrl" class="ml-auto">
+          <b-nav-item :href="tdaUrl" target="_blank">TDA</b-nav-item>
+        </b-navbar-nav>
       </b-navbar>
     </b-container>
     <b-container v-if="isInitializing">
@@ -39,7 +42,7 @@
 
 <script lang="ts">
 import Vue from "vue";
-import { create as createVaultifier, getInstance as getVaultifier } from './services';
+import { create as createVaultifier, getInstance as getVaultifier, TDAService } from './services';
 import Spinner from './components/Spinner.vue'
 import Login, { Data as LoginData } from './components/Login.vue'
 import { ConfigService, PACKAGE } from './services/config-service';
@@ -52,6 +55,7 @@ interface IData {
   message?: string,
   encryptionSupport?: VaultEncryptionSupport,
   vaultSupport?: VaultSupport,
+  tdaUrl?: string,
 }
 
 export default Vue.extend({
@@ -68,6 +72,7 @@ export default Vue.extend({
     message: undefined,
     encryptionSupport: undefined,
     vaultSupport: undefined,
+    tdaUrl: undefined
   }),
   methods: {
     async initialize() {
@@ -106,7 +111,27 @@ export default Vue.extend({
           this.message = `I could not find any endpoint to connect to.`
       }
 
+      if (this.isLoggedIn)
+        await this.initializeTDA();
+
       this.isInitializing = false;
+    },
+    async initializeTDA() {
+      const vaultifier = await getVaultifier();
+
+      const configurationItems = await vaultifier.getValues({
+        // That's the dri of "ConfigurationItem", basically it's a key value pair
+        schemaDri: '4ktjMzvwbhAeGM8Dwu67VcCnuJc52K3fVdq7V1qCPWLw',
+      });
+
+      const tdaItem = configurationItems.find((x: any) => x.key === 'tda.backend.uri');
+      const tdaFrontendItem = configurationItems.find((x: any) => x.key === 'tda.frontend.uri');
+
+      if (tdaItem && tdaFrontendItem) {
+        const tdaService = TDAService.getInstance();
+        tdaService.setTDAUrl(tdaItem.value);
+        this.tdaUrl = await tdaService.createAdminInvitationUrl(tdaFrontendItem.value);
+      }
     },
     logIn(credentials: LoginData) {
       getVaultifier().setCredentials(credentials);
