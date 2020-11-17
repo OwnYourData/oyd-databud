@@ -14,6 +14,12 @@ npm install
 npm run serve # starts transpiling and the dev-server
 ```
 
+## Build for production
+
+```bash
+npm run build
+```
+
 ---
 
 This project was bootstrapped using vue-cli

@@ -19,6 +19,7 @@
           :schemaDri="schemaDri"
           :allowSelectSchema="false"
           :hasCancel="false"
+          :isSaving="isSaving"
           @save="saveVaultItem"
         ></oca-edit-view>
       </b-tab>
@@ -36,6 +37,10 @@ import OcaEditView from '../components/OCAEditView.vue';
 import { IStore } from '@/store';
 import { ActionType } from '@/store/action-type';
 
+interface Data {
+  isSaving: boolean,
+}
+
 export default Vue.extend({
   props: {
     item: Object as PropType<VaultItem>,
@@ -44,6 +49,9 @@ export default Vue.extend({
       type: Boolean as PropType<boolean>,
     },
   },
+  data: (): Data => ({
+    isSaving: false,
+  }),
   components: {
     RawData,
     OcaEditView,
@@ -57,8 +65,10 @@ export default Vue.extend({
     }
   },
   methods: {
-    saveVaultItem(item: VaultPostItem) {
-      this.$store.dispatch(ActionType.UPDATE_VAULT_ITEM, item);
+    async saveVaultItem(item: VaultPostItem) {
+      this.isSaving = true;
+      await this.$store.dispatch(ActionType.UPDATE_VAULT_ITEM, item);
+      this.isSaving = false;
     }
   }
 })

@@ -22,8 +22,14 @@
       <div class="spacer"></div>
       <custom-button
         @click="saveEdit"
-        :disabled="!hasSelectedSchemaDri"
-      >Save</custom-button>
+        :type="isSaving ? 'primary-outline' : undefined"
+        :disabled="!hasSelectedSchemaDri || isSaving"
+      >
+        <spinner v-if="isSaving" />
+        <template v-else>
+          Save
+        </template>
+      </custom-button>
       <custom-button
         v-if="hasCancel"
         @click="cancelEdit"
@@ -71,6 +77,10 @@ export default Vue.extend({
   props: {
     schemaDri: String as PropType<string | undefined>,
     item: Object as PropType<VaultItem | undefined>,
+    isSaving: {
+      type: Boolean as PropType<boolean>,
+      default: false,
+    },
     hasCancel: {
       type: Boolean as PropType<boolean>,
       default: true
