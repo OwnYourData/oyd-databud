@@ -10,9 +10,16 @@ export class TDAService {
     this._tdaUrl = url;
   }
 
-  createAdminInvitationUrl = async (tdaFrontendUrl: string): Promise<any> => {
-    const res = await fetch(`${this._tdaUrl}/connections/create-admin-invitation-url`, { method: 'POST' });
-    const data: any = await res.json();
+  createAdminInvitationUrl = async (tdaFrontendUrl: string): Promise<string | undefined> => {
+    let data: any;
+
+    try {
+      const res = await fetch(`${this._tdaUrl}/connections/create-admin-invitation-url`, { method: 'POST' });
+      data = await res.json();
+    }
+    catch {
+      return;
+    }
 
     return `${tdaFrontendUrl}?invitation_url=${data.invitation_url}`;
   }
