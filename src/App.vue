@@ -1,7 +1,11 @@
 <template>
   <div>
     <b-container>
-      <b-navbar toggleable="lg" type="dark" variant="dark">
+      <b-navbar
+        toggleable="lg"
+        type="dark"
+        variant="dark"
+      >
         <b-navbar-brand>DataBud</b-navbar-brand>
         <b-nav-text>v{{version}}</b-nav-text>
         <b-nav-text>{{encryptionMessage}}</b-nav-text>
@@ -96,7 +100,10 @@ export default Vue.extend({
         this.encryptionSupport = await vaultifier.setEnd2EndEncryption(true);
       }
       catch {
-        this.message = `I'm not sure ${vaultifier.urls.baseUrl} is the correct endpoint I should connect to. Please check this again.`;
+        if (vaultifier.urls.baseUrl)
+          this.message = `I'm not sure ${vaultifier.urls.baseUrl} is the correct endpoint I should connect to. Please check this again.`;
+        else
+          this.message = `I could not find any endpoint to connect to.`
       }
 
       this.isInitializing = false;

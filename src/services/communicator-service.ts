@@ -6,18 +6,17 @@ let vaultifier: Vaultifier;
 
 export const getInstance = (): Vaultifier => vaultifier;
 export const create = async (): Promise<Vaultifier> => {
+  let isValid: boolean = false;
+
   try {
-    // first of all trying to create an instance out of url params
-    return vaultifier = await VaultifierWeb.create();
+    // first of all trying to create an instance out of url params or default values
+    vaultifier = await VaultifierWeb.create();
+    isValid = await vaultifier.isValid()
   }
-  catch {
-    // if url params do not work, we try to get the url from our config
-    let endpoint = ConfigService.get('endpoint', 'url');
+  catch { /* */ }
 
-    // ...still not working? Just take the document's origin
-    if (!endpoint)
-      endpoint = window.location.origin;
+  if (isValid)
+    return vaultifier;
 
-    return vaultifier = new Vaultifier(endpoint);
-  }
+  return vaultifier = new Vaultifier(ConfigService.get('endpoint', 'url') || undefined);
 }
