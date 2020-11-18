@@ -9,8 +9,22 @@
         <b-navbar-brand>DataBud</b-navbar-brand>
         <b-nav-text>v{{version}}</b-nav-text>
         <b-nav-text>{{encryptionMessage}}</b-nav-text>
-        <b-navbar-nav v-if="tdaUrl" class="ml-auto">
-          <b-nav-item :href="tdaUrl" target="_blank">TDA</b-nav-item>
+        <b-navbar-nav
+          v-if="hasTDA"
+          class="ml-auto"
+        >
+          <b-nav-item
+            href="#"
+            target="_blank"
+            @click.prevent="openTDA"
+          >
+            TDA
+            <spinner
+              v-if="isTDALoading"
+              variant="light"
+              small="true"
+            />
+          </b-nav-item>
         </b-navbar-nav>
       </b-navbar>
     </b-container>
@@ -55,7 +69,9 @@ interface IData {
   message?: string,
   encryptionSupport?: VaultEncryptionSupport,
   vaultSupport?: VaultSupport,
-  tdaUrl?: string,
+  tdaFrontendUrl?: string,
+  tdaBackendUrl?: string,
+  isTDALoading: boolean,
 }
 
 export default Vue.extend({
@@ -72,7 +88,9 @@ export default Vue.extend({
     message: undefined,
     encryptionSupport: undefined,
     vaultSupport: undefined,
-    tdaUrl: undefined
+    tdaFrontendUrl: undefined,
+    tdaBackendUrl: undefined,
+    isTDALoading: false,
   }),
   methods: {
     async initialize() {
@@ -124,14 +142,27 @@ export default Vue.extend({
         schemaDri: '4ktjMzvwbhAeGM8Dwu67VcCnuJc52K3fVdq7V1qCPWLw',
       });
 
-      const tdaItem = configurationItems.find((x: any) => x.key === 'tda.backend.uri');
-      const tdaFrontendItem = configurationItems.find((x: any) => x.key === 'tda.frontend.uri');
+      const backend = configurationItems.find((x: any) => x.key === 'tda.backend.uri');
+      const frontend = configurationItems.find((x: any) => x.key === 'tda.frontend.uri');
 
-      if (tdaItem && tdaFrontendItem) {
-        const tdaService = TDAService.getInstance();
-        tdaService.setTDAUrl(tdaItem.value);
-        this.tdaUrl = await tdaService.createAdminInvitationUrl(tdaFrontendItem.value);
+      if (backend && frontend) {
+        this.tdaFrontendUrl = frontend.value;
+        this.tdaBackendUrl = backend.value;
       }
+    },
+    async openTDA() {
+      if (!this.tdaFrontendUrl || !this.tdaBackendUrl)
+        return;
+
+      this.isTDALoading = true;
+
+      const tdaService = TDAService.getInstance();
+      tdaService.setTDAUrl(this.tdaBackendUrl);
+
+      const url = await tdaService.createAdminInvitationUrl(this.tdaFrontendUrl);
+      window.open(url);
+
+      this.isTDALoading = false;
     },
     logIn(credentials: LoginData) {
       getVaultifier().setCredentials(credentials);
@@ -160,7 +191,10 @@ export default Vue.extend({
         return 'encryption/decryption not supported';
       else
         return `encryption ${!supportsEncryption ? 'not' : ''} supported/decryption ${!supportsDecryption ? 'not' : ''} supported`
-    }
+    },
+    hasTDA(): boolean {
+      return !!(this.tdaFrontendUrl && this.tdaBackendUrl);
+    },
   }
 });
 </script>
