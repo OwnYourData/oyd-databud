@@ -23,4 +23,23 @@ export class TDAService {
 
     return `${tdaFrontendUrl}?invitation_url=${data.invitation_url}`;
   }
+
+  setupPDSSettings = async (
+    clientId: string,
+    clientSecret: string,
+    grantType: string,
+  ) => {
+    await fetch(`${this._tdaUrl}/pds/settings`, {
+      method: 'POST', body: JSON.stringify({
+        settings:
+        {
+          own_your_data: {
+            client_id: clientId,
+            client_secret: clientSecret,
+            grant_type: grantType,
+          }
+        }
+      }),
+    });
+  }
 }

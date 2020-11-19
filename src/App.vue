@@ -16,6 +16,7 @@
           <b-nav-item
             href="#"
             target="_blank"
+            :disabled="isTDALoading"
             @click.prevent="openTDA"
           >
             TDA
@@ -135,6 +136,8 @@ export default Vue.extend({
       this.isInitializing = false;
     },
     async initializeTDA() {
+      this.isTDALoading = true;
+
       const vaultifier = await getVaultifier();
 
       const configurationItems = await vaultifier.getValues({
@@ -146,9 +149,26 @@ export default Vue.extend({
       const frontend = configurationItems.find((x: any) => x.key === 'tda.frontend.uri');
 
       if (backend && frontend) {
-        this.tdaFrontendUrl = frontend.value;
-        this.tdaBackendUrl = backend.value;
+        this.tdaFrontendUrl = frontend.value as string;
+        this.tdaBackendUrl = backend.value as string;
+
+        if (vaultifier.credentials) {
+          const { appKey, appSecret } = vaultifier.credentials;
+          const { oAuth } = await vaultifier.getVaultSupport();
+
+          if (appKey && appSecret && oAuth) {
+            const tdaService = TDAService.getInstance();
+            tdaService.setTDAUrl(this.tdaBackendUrl);
+            await tdaService.setupPDSSettings(
+              appKey,
+              appSecret,
+              oAuth.type,
+            );
+          }
+        }
       }
+
+      this.isTDALoading = false;
     },
     async openTDA() {
       if (!this.tdaFrontendUrl || !this.tdaBackendUrl)
@@ -157,8 +177,6 @@ export default Vue.extend({
       this.isTDALoading = true;
 
       const tdaService = TDAService.getInstance();
-      tdaService.setTDAUrl(this.tdaBackendUrl);
-
       const url = await tdaService.createAdminInvitationUrl(this.tdaFrontendUrl);
       window.open(url);
 
