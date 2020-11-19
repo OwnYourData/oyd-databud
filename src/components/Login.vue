@@ -23,6 +23,7 @@
         <b-form-select
           required
           :options="scopeOptions"
+          v-model="scope"
         ></b-form-select>
       </b-form-group>
 
