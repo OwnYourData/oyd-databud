@@ -25,6 +25,7 @@ export class TDAService {
   }
 
   setupPDSSettings = async (
+    apiUrl: string,
     clientId: string,
     clientSecret: string,
     grantType: string,
@@ -34,6 +35,7 @@ export class TDAService {
         settings:
         {
           own_your_data: {
+            api_url: apiUrl,
             client_id: clientId,
             client_secret: clientSecret,
             grant_type: grantType,

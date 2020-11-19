@@ -160,6 +160,7 @@ export default Vue.extend({
             const tdaService = TDAService.getInstance();
             tdaService.setTDAUrl(this.tdaBackendUrl);
             await tdaService.setupPDSSettings(
+              vaultifier.urls.baseUrl,
               appKey,
               appSecret,
               oAuth.type,
