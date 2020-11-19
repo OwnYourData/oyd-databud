@@ -6,12 +6,14 @@
       <b-form-group label="App Key:">
         <b-form-input
           required
+          name="username"
           v-model="appKey"
         ></b-form-input>
       </b-form-group>
       <b-form-group label="App Secret:">
         <b-form-input
           required
+          name="password"
           type="password"
           v-model="appSecret"
         ></b-form-input>
