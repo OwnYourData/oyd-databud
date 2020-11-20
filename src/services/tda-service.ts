@@ -29,19 +29,28 @@ export class TDAService {
     clientId: string,
     clientSecret: string,
     grantType: string,
+    name: string = 'Data Store',
+    scope?: string,
   ) => {
-    await fetch(`${this._tdaUrl}/pds/settings`, {
-      method: 'POST', body: JSON.stringify({
-        settings:
-        {
-          own_your_data: {
-            api_url: apiUrl,
-            client_id: clientId,
-            client_secret: clientSecret,
-            grant_type: grantType,
-          }
+    const obj: any = {
+      settings:
+      {
+        own_your_data: {
+          api_url: apiUrl,
+          client_id: clientId,
+          client_secret: clientSecret,
+          grant_type: grantType,
+          optional_instance_name: name,
         }
-      }),
+      }
+    };
+
+    if (scope)
+      obj.settings.own_your_data.scope = scope;
+
+    await fetch(`${this._tdaUrl}/pds/settings`, {
+      method: 'POST',
+      body: JSON.stringify(obj),
     });
   }
 }

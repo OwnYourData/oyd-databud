@@ -153,8 +153,8 @@ export default Vue.extend({
         this.tdaBackendUrl = backend.value as string;
 
         if (vaultifier.credentials) {
-          const { appKey, appSecret } = vaultifier.credentials;
-          const { oAuth } = await vaultifier.getVaultSupport();
+          const { appKey, appSecret, scope } = vaultifier.credentials;
+          const { oAuth, name } = await vaultifier.getVaultSupport();
 
           if (appKey && appSecret && oAuth) {
             const tdaService = TDAService.getInstance();
@@ -164,6 +164,8 @@ export default Vue.extend({
               appKey,
               appSecret,
               oAuth.type,
+              name,
+              scope,
             );
           }
         }
