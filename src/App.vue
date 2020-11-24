@@ -13,7 +13,7 @@
           <spinner
             v-if="isTDALoading"
             variant="light"
-            small="true"
+            :small="true"
           />
         </b-nav-item>
       </nav-bar>
