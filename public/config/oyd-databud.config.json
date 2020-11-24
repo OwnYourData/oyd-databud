@@ -5,5 +5,10 @@
       "appKey": null,
       "appSecret": null
     }
+  },
+  "settings": {
+    "actions": {
+
+    }
   }
 }

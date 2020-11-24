@@ -1,15 +1,8 @@
 <template>
   <div>
     <b-container>
-      <b-navbar
-        toggleable="lg"
-        type="dark"
-        variant="dark"
-      >
-        <b-navbar-brand>DataBud</b-navbar-brand>
-        <b-nav-text>v{{version}}</b-nav-text>
-        <b-nav-text>{{encryptionMessage}}</b-nav-text>
-      </b-navbar>
+      <nav-bar :encryptionSupport="encryptionSupport">
+      </nav-bar>
     </b-container>
     <b-container v-if="isInitializing">
       <div class="jumbotron">
@@ -41,10 +34,12 @@
 import Vue from "vue";
 import { create as createVaultifier, getInstance as getVaultifier } from './services';
 import Spinner from './components/Spinner.vue'
+import NavBar from './components/NavBar.vue'
 import Login, { Data as LoginData } from './components/Login.vue'
-import { ConfigService, PACKAGE } from './services/config-service';
+import { ConfigService } from './services/config-service';
 import { Vaultifier, VaultEncryptionSupport, VaultSupport } from 'vaultifier';
 import { RoutePath } from './router';
+import { ConfigurationItem } from './constants/well-known-schemas';
 
 interface IData {
   isInitializing: boolean,
@@ -58,6 +53,7 @@ export default Vue.extend({
   components: {
     Spinner,
     Login,
+    NavBar,
   },
   created() {
     this.initialize();
@@ -120,35 +116,9 @@ export default Vue.extend({
     isLoginFormShowed(): boolean {
       return !this.isInitializing && !this.isLoggedIn;
     },
-    version(): string {
-      return PACKAGE.version;
-    },
-    encryptionMessage(): string {
-      if (!this.encryptionSupport)
-        return '';
-
-      const { supportsEncryption, supportsDecryption } = this.encryptionSupport;
-
-      if (supportsEncryption && supportsDecryption)
-        return 'encryption/decryption supported';
-      else if (!supportsEncryption && !supportsDecryption)
-        return 'encryption/decryption not supported';
-      else
-        return `encryption ${!supportsEncryption ? 'not' : ''} supported/decryption ${!supportsDecryption ? 'not' : ''} supported`
-    }
   }
 });
 </script>
-
-<style scoped>
-.navbar {
-  margin-bottom: 1em;
-}
-
-.navbar-text {
-  margin-right: 1em;
-}
-</style>
 
 <style>
 .list-group-item {
