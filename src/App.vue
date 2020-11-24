@@ -1,33 +1,22 @@
 <template>
   <div>
     <b-container>
-      <b-navbar
-        toggleable="lg"
-        type="dark"
-        variant="dark"
-      >
-        <b-navbar-brand>DataBud</b-navbar-brand>
-        <b-nav-text>v{{version}}</b-nav-text>
-        <b-nav-text>{{encryptionMessage}}</b-nav-text>
-        <b-navbar-nav
+      <nav-bar :encryptionSupport="encryptionSupport">
+        <b-nav-item
           v-if="hasTDA"
-          class="ml-auto"
+          href="#"
+          target="_blank"
+          :disabled="isTDALoading"
+          @click.prevent="openTDA"
         >
-          <b-nav-item
-            href="#"
-            target="_blank"
-            :disabled="isTDALoading"
-            @click.prevent="openTDA"
-          >
-            TDA
-            <spinner
-              v-if="isTDALoading"
-              variant="light"
-              small="true"
-            />
-          </b-nav-item>
-        </b-navbar-nav>
-      </b-navbar>
+          TDA
+          <spinner
+            v-if="isTDALoading"
+            variant="light"
+            small="true"
+          />
+        </b-nav-item>
+      </nav-bar>
     </b-container>
     <b-container v-if="isInitializing">
       <div class="jumbotron">
@@ -59,8 +48,9 @@
 import Vue from "vue";
 import { create as createVaultifier, getInstance as getVaultifier, TDAService } from './services';
 import Spinner from './components/Spinner.vue'
+import NavBar from './components/NavBar.vue'
 import Login, { Data as LoginData } from './components/Login.vue'
-import { ConfigService, PACKAGE } from './services/config-service';
+import { ConfigService } from './services/config-service';
 import { Vaultifier, VaultEncryptionSupport, VaultSupport } from 'vaultifier';
 import { RoutePath } from './router';
 
@@ -79,6 +69,7 @@ export default Vue.extend({
   components: {
     Spinner,
     Login,
+    NavBar,
   },
   created() {
     this.initialize();
@@ -197,38 +188,12 @@ export default Vue.extend({
     isLoginFormShowed(): boolean {
       return !this.isInitializing && !this.isLoggedIn;
     },
-    version(): string {
-      return PACKAGE.version;
-    },
-    encryptionMessage(): string {
-      if (!this.encryptionSupport)
-        return '';
-
-      const { supportsEncryption, supportsDecryption } = this.encryptionSupport;
-
-      if (supportsEncryption && supportsDecryption)
-        return 'encryption/decryption supported';
-      else if (!supportsEncryption && !supportsDecryption)
-        return 'encryption/decryption not supported';
-      else
-        return `encryption ${!supportsEncryption ? 'not' : ''} supported/decryption ${!supportsDecryption ? 'not' : ''} supported`
-    },
     hasTDA(): boolean {
       return !!(this.tdaFrontendUrl && this.tdaBackendUrl);
     },
   }
 });
 </script>
-
-<style scoped>
-.navbar {
-  margin-bottom: 1em;
-}
-
-.navbar-text {
-  margin-right: 1em;
-}
-</style>
 
 <style>
 .list-group-item {
