@@ -48,9 +48,12 @@ export class TDAService {
     if (scope)
       obj.settings.own_your_data.scope = scope;
 
-    await fetch(`${this._tdaUrl}/pds/settings`, {
-      method: 'POST',
-      body: JSON.stringify(obj),
-    });
+    try {
+      await fetch(`${this._tdaUrl}/pds/settings`, {
+        method: 'POST',
+        body: JSON.stringify(obj),
+      });
+    }
+    catch { /* */ }
   }
 }
