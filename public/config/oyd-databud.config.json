@@ -8,7 +8,11 @@
   },
   "settings": {
     "actions": {
-
+      "send_emails": {
+        "title": "Send Emails",
+        "url": "{{base_url}}/api/send_emails",
+        "method": "POST"
+      }
     }
   }
 }
