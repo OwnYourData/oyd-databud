@@ -46,6 +46,7 @@ interface Action {
   key: string,
   title: string,
   url: string,
+  usesAuth: boolean,
   method: string,
 }
 
@@ -65,14 +66,29 @@ export default Vue.extend({
     async executeAction(action: Action) {
       this.workingAction = action;
 
-      try {
-        const url = action.url.replace('{{base_url}}', getInstance().urls.baseUrl);
-        const req = await fetch(url, { method: action.method });
-        await req.text();
+      const { key, title, method, url, usesAuth } = action;
+      const vaultifier = getInstance();
+      const baseUrlPlaceholder = '{{base_url}}'
 
-        this.$bvModal.msgBoxOk(`The action "${action.title}" was executed succssfully.`);
+      try {
+        if (url.indexOf(baseUrlPlaceholder) !== -1) {
+          const vaultifierUrl = url.replace(baseUrlPlaceholder, '');
+
+          if (method === 'POST')
+            await vaultifier.post(vaultifierUrl, usesAuth);
+          else if (method === 'GET')
+            await vaultifier.get(vaultifierUrl, usesAuth);
+          else
+            throw new Error(`Invalid method for action ${key}`);
+        }
+        else {
+          const req = await fetch(url, { method });
+          await req.text();
+        }
+
+        this.$bvModal.msgBoxOk(`The action "${title}" was executed succssfully.`);
       } catch {
-        this.$bvModal.msgBoxOk(`The action "${action.title}" has failed.`);
+        this.$bvModal.msgBoxOk(`The action "${title}" has failed.`);
       }
 
       this.workingAction = undefined;
@@ -101,6 +117,7 @@ export default Vue.extend({
 
       for (const key in actionsObj) {
         arr.push({
+          usesAuth: false,
           ...actionsObj[key],
           key,
         });
