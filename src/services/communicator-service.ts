@@ -1,4 +1,4 @@
-import { Vaultifier } from 'vaultifier/dist/module';
+import { Vaultifier } from 'vaultifier';
 import { VaultifierWeb } from 'vaultifier/dist/module/environments';
 import { ConfigService } from './config-service';
 

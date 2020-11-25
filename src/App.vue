@@ -39,7 +39,6 @@ import Login, { Data as LoginData } from './components/Login.vue'
 import { ConfigService } from './services/config-service';
 import { Vaultifier, VaultEncryptionSupport, VaultSupport } from 'vaultifier';
 import { RoutePath } from './router';
-import { ConfigurationItem } from './constants/well-known-schemas';
 
 interface IData {
   isInitializing: boolean,
