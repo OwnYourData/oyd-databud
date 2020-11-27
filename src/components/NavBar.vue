@@ -5,8 +5,14 @@
     variant="dark"
   >
     <b-navbar-brand>DataBud</b-navbar-brand>
-    <b-nav-text>v{{version}}</b-nav-text>
-    <b-nav-text>{{encryptionMessage}}</b-nav-text>
+    <b-nav-text>
+      v{{version}}
+      <b-icon
+        class="ml-2"
+        v-if="encryptionIcon"
+        :icon="encryptionIcon"
+      ></b-icon>
+    </b-nav-text>
 
     <b-navbar-nav class="ml-auto">
       <slot />
@@ -21,7 +27,7 @@
             :animation="gearAnimation"
             aria-label="Settings"
           ></b-icon>
-          <span class="ml-1">{{workingActionTitle}}</span>
+          <span class="ml-2">{{workingActionTitle}}</span>
         </template>
         <b-dropdown-item
           href="#"
@@ -98,18 +104,18 @@ export default Vue.extend({
     version() {
       return PACKAGE.version;
     },
-    encryptionMessage(): string {
+    encryptionIcon(): string | undefined {
       if (!this.encryptionSupport)
         return '';
 
       const { supportsEncryption, supportsDecryption } = this.encryptionSupport;
 
       if (supportsEncryption && supportsDecryption)
-        return 'encryption/decryption supported';
+        return 'lock-fill'
       else if (!supportsEncryption && !supportsDecryption)
-        return 'encryption/decryption not supported';
+        return undefined;
       else
-        return `encryption ${!supportsEncryption ? 'not' : ''} supported/decryption ${!supportsDecryption ? 'not' : ''} supported`
+        return 'lock';
     },
     actions(): Action[] {
       const actionsObj = ConfigService.get('settings', 'actions');
