@@ -10,7 +10,10 @@
     </inline-group>
     <div class="list-container">
       <spinner v-if="isLoading" />
-      <b-list-group v-else>
+      <b-list-group
+        v-else
+        class="list"
+      >
         <slot />
       </b-list-group>
     </div>
@@ -83,5 +86,10 @@ export default Vue.extend({
 .list-container {
   height: 250px;
   overflow-y: auto;
+}
+
+.list > * {
+  overflow-x: hidden;
+  text-overflow: ellipsis;
 }
 </style>
