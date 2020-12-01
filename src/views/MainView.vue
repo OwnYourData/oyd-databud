@@ -5,6 +5,7 @@
       <b-tabs
         pills
         card
+        @activate-tab="handleActivateTab"
       >
         <b-tab title="Schemas">
           <schema-view @showEditView="handleShowEditView"></schema-view>
@@ -44,6 +45,7 @@ import { renderForm } from '../utils';
 import { FetchState } from '@/store/fetch-state';
 
 import { getInstance } from '@/services';
+import { ActionType } from '@/store/action-type';
 
 interface Data {
   hasRepoSupport: boolean,
@@ -77,6 +79,9 @@ export default Vue.extend({
     handleShowEditView(isShown: boolean) {
       if (isShown)
         this.$store.commit(MutationType.SET_VAULT_ITEM, undefined);
+    },
+    handleActivateTab() {
+      this.$store.dispatch(ActionType.RESET_VAULT_ITEMS);
     }
   }
 })
