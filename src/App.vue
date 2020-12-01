@@ -121,7 +121,7 @@ export default Vue.extend({
 
 <style>
 .list-group-item {
-  overflow: hidden;
+  /* overflow: hidden; */
   text-overflow: ellipsis;
   word-wrap: initial;
 }

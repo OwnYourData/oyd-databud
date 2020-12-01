@@ -5,4 +5,5 @@ export enum MutationType {
   SET_VAULT_ITEMS = 'setVaultItems',
   SET_VAULT_ITEM = 'setVaultItem',
   SET_FETCH_STATE = 'setSchemaDRIFetchState',
+  SET_VAULT_ITEMS_PAGING = 'setVaultItemsPaging',
 }

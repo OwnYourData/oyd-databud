@@ -2,13 +2,16 @@
   <div class="container">
     <div class="row">
       <div class="col-md-4">
-        <data-list
-          class="list"
-          :items="vaultItems"
-          :isLoading="isVaultItemListLoading"
-          :selected="selectedVaultItem"
-          @select="selectVaultItem"
-        ></data-list>
+        <list :isLoading="isVaultItemListLoading">
+          <b-list-group-item
+            v-for="item of vaultItems"
+            :key="item.id"
+            :active="item.id === selectedVaultItem.id"
+            @click="() => selectVaultItem(item)"
+          >
+            {{item.id}}
+          </b-list-group-item>
+        </list>
       </div>
       <div class="col-md-8">
         <data-visualizer
@@ -24,7 +27,7 @@
 <script lang="ts">
 import Vue, { PropType } from 'vue'
 import { VaultItem, VaultMinMeta, VaultSchema } from 'vaultifier';
-import { createList } from '../components/List.vue';
+import List from '../components/List.vue';
 import DataVisualizer from '../components/DataVisualizer.vue';
 import { IStore } from '@/store';
 import { FetchState } from '@/store/fetch-state';
@@ -36,10 +39,7 @@ export default Vue.extend({
   },
   components: {
     DataVisualizer,
-    DataList: createList<VaultItem>({
-      getTitle: (item) => item.id.toString(),
-      getId: (item) => item.id.toString(),
-    }),
+    List,
   },
   created() {
     this.initialize();
@@ -52,7 +52,7 @@ export default Vue.extend({
       this.$store.dispatch(ActionType.FETCH_VAULT_ITEM, item);
     },
     async fetchVaultItems() {
-      this.$store.dispatch(ActionType.FETCH_VAULT_ITEMS_BY_SCHEMA, { dri: this.schemaDri });
+      this.$store.dispatch(ActionType.FETCH_VAULT_ITEMS, { schema: { dri: this.schemaDri } });
     }
   },
   computed: {

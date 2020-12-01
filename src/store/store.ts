@@ -1,12 +1,23 @@
 import { getInstance } from '@/services';
 import { SchemaService } from '@/services/schema-service';
 import { getTitle } from '@/utils';
-import { VaultItem, VaultMeta, VaultPostItem, VaultRepo, VaultSchema } from 'vaultifier';
+import { MultiResponse, VaultItem, VaultMeta, VaultPostItem, VaultRepo, VaultSchema } from 'vaultifier';
 import Vue from 'vue';
 import Vuex, { Commit } from 'vuex'
 import { ActionType } from './action-type';
 import { FetchState } from './fetch-state';
 import { MutationType } from './mutation-type';
+
+export interface IFetchVaultItems {
+  page?: number;
+  repo?: VaultRepo;
+  schema?: VaultSchema;
+}
+
+export interface IPaging {
+  current?: number;
+  total?: number;
+}
 
 export interface IStore {
   repo: {
@@ -22,6 +33,7 @@ export interface IStore {
     allState: FetchState,
     current?: VaultItem,
     currentState: FetchState,
+    paging: IPaging,
   },
 }
 
@@ -72,6 +84,10 @@ export const getStore = () => {
         allState: FetchState.NONE,
         current: undefined,
         currentState: FetchState.NONE,
+        paging: {
+          total: undefined,
+          current: undefined,
+        },
       },
     }),
     mutations: {
@@ -84,7 +100,7 @@ export const getStore = () => {
       [MutationType.SET_SCHEMA_DRIS](state, payload: VaultSchema[]) {
         state.schemaDRI.all = payload;
       },
-      [MutationType.SET_VAULT_ITEMS](state, payload: VaultItem[]) {
+      [MutationType.SET_VAULT_ITEMS](state, payload: VaultMeta[]) {
         state.vaultItem.all = payload;
       },
       [MutationType.SET_VAULT_ITEM](state, payload: VaultItem) {
@@ -95,12 +111,17 @@ export const getStore = () => {
 
         if (item)
           item.title = payload.title;
-      }
+      },
+      [MutationType.SET_VAULT_ITEMS_PAGING](state, payload?: IPaging) {
+        state.vaultItem.paging.current = payload?.current;
+        state.vaultItem.paging.total = payload?.total;
+      },
     },
     actions: {
       [ActionType.RESET_VAULT_ITEMS]({ commit }) {
         commit(MutationType.SET_VAULT_ITEMS, undefined);
         commit(MutationType.SET_VAULT_ITEM, undefined);
+        commit(MutationType.SET_VAULT_ITEMS_PAGING, undefined);
       },
       async [ActionType.UPDATE_VAULT_ITEM]({ state, commit, dispatch }, payload: VaultPostItem) {
         if (payload.id)
@@ -139,24 +160,28 @@ export const getStore = () => {
           (store, state) => store.repo.state = state
         );
       },
-      async [ActionType.FETCH_VAULT_ITEMS_BY_REPO]({ commit }, payload: VaultRepo) {
-        doFetch<VaultMeta[]>(
+      async [ActionType.FETCH_VAULT_ITEMS]({ commit, state }, { page, repo, schema }: IFetchVaultItems) {
+        doFetch<MultiResponse<VaultMeta>>(
           commit,
-          async () => (await getInstance().fromRepo(payload.name)).getMetaItems(),
-          (commit, data) => commit(MutationType.SET_VAULT_ITEMS, data),
+          async () => {
+            if (repo)
+              return (await getInstance().fromRepo(repo.name)).getMetaItems(page ? {
+                page,
+              } : undefined)
+            else if (schema)
+              return getInstance().getMetaItems({
+                schemaDri: schema.dri,
+                page,
+              });
+            else
+              throw new Error('Both schema and repo are undefined');
+          },
+          (commit, data) => {
+            commit(MutationType.SET_VAULT_ITEMS, data.content);
+            commit(MutationType.SET_VAULT_ITEMS_PAGING, data.paging);
+          },
           (store, state) => store.vaultItem.allState = state,
-        )
-      },
-      // the hell?
-      // here i couldn't use destructuring, as typescript has always complained about having implicit "any" type
-      // but for all other functions it works...that's strange
-      async [ActionType.FETCH_VAULT_ITEMS_BY_SCHEMA](store, payload: VaultSchema) {
-        doFetch<VaultMeta[]>(
-          store.commit,
-          () => getInstance().getMetaItems({ schemaDri: payload.dri }),
-          (commit, data) => commit(MutationType.SET_VAULT_ITEMS, data),
-          (store, state) => store.vaultItem.allState = state,
-        )
+        );
       },
       async [ActionType.FETCH_VAULT_ITEM]({ commit }, payload: VaultMeta) {
         doFetch<VaultItem>(
@@ -175,7 +200,7 @@ export const getStore = () => {
             }
           });
         }
-      }
+      },
     }
   });
 }

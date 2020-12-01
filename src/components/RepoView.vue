@@ -7,13 +7,14 @@
           type="refresh"
         ></refresh-button>
       </inline-group>
-      <repo-list
-        class="list"
-        :items="repos"
-        :isLoading="isRepoListLoading"
-        :selected="selectedRepo"
-        @select="selectRepo"
-      ></repo-list>
+      <list :isLoading="isRepoListLoading">
+        <b-list-group-item
+          v-for="item of repos"
+          :key="item.id"
+          :active="selectedRepo && item.id === selectedRepo.id"
+          @click="() => selectRepo(item)"
+        >{{item.name}}</b-list-group-item>
+      </list>
     </section>
     <section class="col-md-8">
       <inline-group>
@@ -22,21 +23,29 @@
           type="refresh"
         ></refresh-button>
       </inline-group>
-      <data-list
-        class="list"
-        :items="vaultItems"
+      <list
         :isLoading="isVaultItemListLoading"
-        :selected="selectedVaultItem"
-        @select="selectVaultItem"
-      ></data-list>
+        :totalPages="totalVaultPages"
+        :currentPage="currentVaultPage"
+        @refresh="fetchVaultItems"
+      >
+        <b-list-group-item
+          v-for="item of vaultItems"
+          :key="item.id"
+          :active="selectedVaultItem && item.id === selectedVaultItem.id"
+          @click="() => selectVaultItem(item)"
+        >
+          {{item.id}}
+        </b-list-group-item>
+      </list>
     </section>
   </div>
 </template>
 
 <script lang="ts">
 import Vue from 'vue';
-import { IStore } from '../store';
-import { createList } from '../components/List.vue';
+import { IFetchVaultItems, IStore } from '../store';
+import List, { RefreshObj } from '../components/List.vue';
 import RefreshButton from '../components/Button.vue';
 import InlineGroup from '../components/InlineGroup.vue';
 import { Vaultifier, VaultItem, VaultMinMeta, VaultRepo, VaultSchema } from 'vaultifier/dist/module';
@@ -57,14 +66,7 @@ export default Vue.extend({
   components: {
     RefreshButton,
     InlineGroup,
-    RepoList: createList<VaultRepo>({
-      getTitle: (item) => item.name,
-      getId: (item) => item.id.toString(),
-    }),
-    DataList: createList<VaultItem>({
-      getTitle: (item) => item.id.toString(),
-      getId: (item) => item.id.toString(),
-    }),
+    List,
   },
   methods: {
     async initialize() {
@@ -82,8 +84,13 @@ export default Vue.extend({
       this.selectedRepo = undefined;
       this.$store.dispatch(ActionType.FETCH_REPOS);
     },
-    async fetchVaultItems() {
-      this.$store.dispatch(ActionType.FETCH_VAULT_ITEMS_BY_REPO, this.selectedRepo);
+    async fetchVaultItems(refreshObj?: RefreshObj) {
+      const fetchObj: IFetchVaultItems = {
+        repo: this.selectedRepo,
+        page: refreshObj?.page,
+      };
+
+      this.$store.dispatch(ActionType.FETCH_VAULT_ITEMS, fetchObj);
     }
   },
   computed: {
@@ -105,13 +112,12 @@ export default Vue.extend({
     selectedVaultItem(): VaultItem | undefined {
       return (this.$store.state as IStore).vaultItem.current;
     },
+    currentVaultPage(): number | undefined {
+      return (this.$store.state as IStore).vaultItem.paging.current;
+    },
+    totalVaultPages(): number | undefined {
+      return (this.$store.state as IStore).vaultItem.paging.total;
+    },
   }
 })
 </script>
-
-<style scoped>
-.list {
-  max-height: 250px;
-  overflow-y: auto;
-}
-</style>

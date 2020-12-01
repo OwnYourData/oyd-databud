@@ -7,13 +7,16 @@
           @click="fetchSchemas"
         ></custom-button>
       </inline-group>
-      <schema-list
-        class="list"
-        :items="schemaDRIs"
-        :isLoading="isSchemaListLoading"
-        :selected="selectedSchema"
-        @select="selectSchema"
-      ></schema-list>
+      <list :isLoading="isSchemaListLoading">
+        <b-list-group-item
+          v-for="item of schemaDRIs"
+          :key="item.dri"
+          :active="selectedSchema && item.dri === selectedSchema.dri"
+          @click="() => selectSchema(item)"
+        >
+          {{item.title || item.id}}
+        </b-list-group-item>
+      </list>
     </section>
     <section class="col-md-8">
       <inline-group>
@@ -28,13 +31,21 @@
           :disabled="isDeleteButtonDisabled"
         >Delete</custom-button>
       </inline-group>
-      <data-list
-        class="list"
-        :items="vaultItems"
+      <list
         :isLoading="isVaultItemListLoading"
-        :selected="selectedVaultItem"
-        @select="selectVaultItem"
-      ></data-list>
+        :totalPages="totalVaultPages"
+        :currentPage="currentVaultPage"
+        @refresh="fetchVaultItems"
+      >
+        <b-list-group-item
+          v-for="item of vaultItems"
+          :key="item.id"
+          :active="selectedVaultItem && item.id === selectedVaultItem.id"
+          @click="() => selectVaultItem(item)"
+        >
+          {{item.id}}
+        </b-list-group-item>
+      </list>
     </section>
     <oca-edit-view
       v-if="showEditView"
@@ -49,8 +60,8 @@
 
 <script lang="ts">
 import Vue from 'vue';
-import { IStore } from '../store';
-import { createList } from '../components/List.vue';
+import { IFetchVaultItems, IStore } from '../store';
+import List, { RefreshObj } from '../components/List.vue';
 import CustomButton from '../components/Button.vue';
 import OcaEditView from '../components/OCAEditView.vue';
 import InlineGroup from '../components/InlineGroup.vue';
@@ -79,14 +90,7 @@ export default Vue.extend({
     CustomButton,
     OcaEditView,
     InlineGroup,
-    SchemaList: createList<VaultSchema>({
-      getTitle: (item) => item.title || item.dri,
-      getId: (item) => item.dri,
-    }),
-    DataList: createList<VaultItem>({
-      getTitle: (item) => item.id.toString(),
-      getId: (item) => item.id.toString(),
-    }),
+    List,
   },
   methods: {
     async initialize() {
@@ -104,8 +108,13 @@ export default Vue.extend({
       this.selectedSchema = undefined;
       this.$store.dispatch(ActionType.FETCH_SCHEMA_DRIS);
     },
-    async fetchVaultItems() {
-      this.$store.dispatch(ActionType.FETCH_VAULT_ITEMS_BY_SCHEMA, this.selectedSchema);
+    async fetchVaultItems(refreshObj?: RefreshObj) {
+      let fetchObj: IFetchVaultItems = {
+        schema: this.selectedSchema,
+        page: refreshObj?.page,
+      };
+
+      this.$store.dispatch(ActionType.FETCH_VAULT_ITEMS, fetchObj);
     },
     async deleteSelectedVaultItem() {
       await this.$store.dispatch(ActionType.DELETE_VAULT_ITEM, this.selectedVaultItem);
@@ -157,17 +166,18 @@ export default Vue.extend({
     },
     editViewSchemaDri(): string | undefined {
       return this.editViewSchema?.dri;
-    }
+    },
+    currentVaultPage(): number | undefined {
+      return (this.$store.state as IStore).vaultItem.paging.current;
+    },
+    totalVaultPages(): number | undefined {
+      return (this.$store.state as IStore).vaultItem.paging.total;
+    },
   }
 })
 </script>
 
 <style scoped>
-.list {
-  max-height: 250px;
-  overflow-y: auto;
-}
-
 .oca-edit-view {
   margin-top: 2em;
 }

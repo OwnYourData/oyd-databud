@@ -1,67 +1,57 @@
+<template>
+  <div>
+    <div class="list-container">
+      <spinner v-if="isLoading" />
+      <b-list-group v-else>
+        <slot />
+      </b-list-group>
+    </div>
+    <b-pagination
+      :disabled="isLoading"
+      v-if="totalPages && currentPage"
+      :total-rows="totalPages"
+      v-model="currentPage"
+      @page-click="changePage"
+      align="fill"
+    />
+  </div>
+</template>
+
 <script lang="ts">
-import Vue, { PropType, VNode } from 'vue';
+import { BvEvent } from 'bootstrap-vue';
+import Vue, { PropType } from 'vue';
 import Spinner from './Spinner.vue';
-import { dummyComponent } from '../utils';
 
-export interface ListAdapter<T> {
-  getTitle: (item: T) => string,
-  getId: (item: T) => string,
+export interface RefreshObj {
+  page: number,
 }
 
-export function createList<T>(adapter: ListAdapter<T>) {
-  return Vue.extend({
-    props: {
-      isLoading: {
-        type: Boolean as PropType<boolean>,
-        default: false,
-      },
-      items: {
-        type: Array as PropType<T[]>,
-      },
-      selected: {
-        type: Object as PropType<T>,
-      }
+export default Vue.extend({
+  props: {
+    isLoading: {
+      type: Boolean as PropType<boolean>,
+      default: false,
     },
-    render(h) {
-      let listItems: VNode[];
-      const listItemClass = 'list-group-item list-group-item-action';
-
-      if (this.isLoading) {
-        listItems = [
-          h('div', {
-            class: listItemClass,
-          }, [h(Spinner)]),
-        ];
-      }
-      else if (!this.items || this.items.length === 0)
-        listItems = [
-          h('div', {
-            class: listItemClass,
-          }, 'No items available')
-        ];
-      else
-        listItems = (this.items as T[]).map(x => {
-          const isSelected = !!this.selected && adapter.getId(x) === adapter.getId(this.selected);
-
-          return h('button', {
-            class: `${listItemClass}${isSelected ? ' active' : ''}`,
-            key: adapter.getId(x),
-            on: {
-              click: () => this.$emit('select', x),
-            }
-          },
-            adapter.getTitle(x),
-          );
-        });
-
-      return h('div', undefined, [
-        h('ul', {
-          staticClass: 'list-group'
-        }, listItems)]);
+    totalPages: Number as PropType<number | undefined>,
+    currentPage: Number as PropType<number | undefined>,
+  },
+  components: {
+    Spinner,
+  },
+  methods: {
+    changePage(evt: BvEvent, page: number) {
+      this.$emit('refresh', {
+        page,
+      });
     }
-  });
-}
+  }
+});
 
-// This default is necessary to satisfy vue. Vue always expects a default export
-export default dummyComponent;
 </script>
+
+<style scoped>
+.list-container {
+  height: 250px;
+  overflow-y: auto;
+}
+</style>
