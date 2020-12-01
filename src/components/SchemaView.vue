@@ -11,7 +11,7 @@
           :active="selectedSchema && item.dri === selectedSchema.dri"
           @click="() => selectSchema(item)"
         >
-          {{item.title || item.id}}
+          {{item.title || item.dri}}
         </b-list-group-item>
       </list>
     </section>
