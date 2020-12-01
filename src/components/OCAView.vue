@@ -28,7 +28,7 @@ import Vue, { PropType } from 'vue'
 import Spinner from './Spinner.vue';
 import { SchemaService } from '../services/schema-service';
 // @ts-ignore
-import { FormBuilderGui } from '@gebsl/oca.js-vue';
+import { FormBuilderGui } from 'oca.js-vue';
 import { getLanguages, renderForm } from '../utils';
 
 interface Data {

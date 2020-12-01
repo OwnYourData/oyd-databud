@@ -11,9 +11,9 @@
     "postinstall": "sh ./scripts/postinstall.sh"
   },
   "dependencies": {
-    "@gebsl/oca.js-vue": "0.0.37",
     "bootstrap-vue": "^2.19.0",
     "core-js": "^3.6.5",
+    "oca.js-vue": "0.0.38",
     "vaultifier": "^0.3.0",
     "vue": "^2.6.12",
     "vue-bootstrap-typeahead": "^0.2.6",
