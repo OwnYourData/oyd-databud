@@ -131,7 +131,7 @@ export default Vue.extend({
 
       const vaultifier = await getVaultifier();
 
-      const configurationItems = await vaultifier.getValues({
+      const { content: configurationItems } = await vaultifier.getValues({
         // That's the dri of "ConfigurationItem", basically it's a key value pair
         schemaDri: '4ktjMzvwbhAeGM8Dwu67VcCnuJc52K3fVdq7V1qCPWLw',
       });
