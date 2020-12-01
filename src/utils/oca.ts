@@ -1,6 +1,6 @@
 import { VaultItem } from 'vaultifier'
 // @ts-ignore
-import * as oca from '@gebsl/oca.js-vue';
+import * as oca from 'oca.js-vue';
 
 const iterateForm = (form: any, callback: (control: any) => void) => {
   for (const section of form.sections) {
