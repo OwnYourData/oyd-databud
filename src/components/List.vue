@@ -1,5 +1,13 @@
 <template>
   <div>
+    <inline-group>
+      <custom-button
+        :disabled="isLoading"
+        type="refresh"
+        @click="() => refresh()"
+      ></custom-button>
+      <slot name="header-end" />
+    </inline-group>
     <div class="list-container">
       <spinner v-if="isLoading" />
       <b-list-group v-else>
@@ -8,9 +16,9 @@
     </div>
     <b-pagination
       :disabled="isLoading"
-      v-if="totalPages && currentPage"
+      v-if="totalPages && page"
       :total-rows="totalPages"
-      v-model="currentPage"
+      v-model="page"
       @page-click="changePage"
       align="fill"
     />
@@ -21,9 +29,15 @@
 import { BvEvent } from 'bootstrap-vue';
 import Vue, { PropType } from 'vue';
 import Spinner from './Spinner.vue';
+import CustomButton from '../components/Button.vue';
+import InlineGroup from '../components/InlineGroup.vue';
 
 export interface RefreshObj {
-  page: number,
+  page?: number,
+}
+
+interface Data {
+  page?: number,
 }
 
 export default Vue.extend({
@@ -35,11 +49,27 @@ export default Vue.extend({
     totalPages: Number as PropType<number | undefined>,
     currentPage: Number as PropType<number | undefined>,
   },
+  data: (): Data => ({
+    page: undefined,
+  }),
   components: {
     Spinner,
+    CustomButton,
+    InlineGroup,
+  },
+  created() {
+    this.page = this.currentPage;
+  },
+  watch: {
+    currentPage() {
+      this.page = this.currentPage;
+    }
   },
   methods: {
     changePage(evt: BvEvent, page: number) {
+      this.refresh(page);
+    },
+    refresh(page?: number) {
       this.$emit('refresh', {
         page,
       });

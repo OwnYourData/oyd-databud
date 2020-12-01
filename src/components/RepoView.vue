@@ -1,13 +1,10 @@
 <template>
   <div class="row">
     <section class="col-md-4">
-      <inline-group>
-        <refresh-button
-          @click="fetchRepos"
-          type="refresh"
-        ></refresh-button>
-      </inline-group>
-      <list :isLoading="isRepoListLoading">
+      <list
+        :isLoading="isRepoListLoading"
+        @refresh="fetchRepos"
+      >
         <b-list-group-item
           v-for="item of repos"
           :key="item.id"
@@ -17,12 +14,6 @@
       </list>
     </section>
     <section class="col-md-8">
-      <inline-group>
-        <refresh-button
-          @click="fetchVaultItems"
-          type="refresh"
-        ></refresh-button>
-      </inline-group>
       <list
         :isLoading="isVaultItemListLoading"
         :totalPages="totalVaultPages"
@@ -46,8 +37,6 @@
 import Vue from 'vue';
 import { IFetchVaultItems, IStore } from '../store';
 import List, { RefreshObj } from '../components/List.vue';
-import RefreshButton from '../components/Button.vue';
-import InlineGroup from '../components/InlineGroup.vue';
 import { Vaultifier, VaultItem, VaultMinMeta, VaultRepo, VaultSchema } from 'vaultifier/dist/module';
 import { ActionType } from '@/store/action-type';
 import { FetchState } from '@/store/fetch-state';
@@ -64,8 +53,6 @@ export default Vue.extend({
     selectedRepo: undefined,
   }),
   components: {
-    RefreshButton,
-    InlineGroup,
     List,
   },
   methods: {

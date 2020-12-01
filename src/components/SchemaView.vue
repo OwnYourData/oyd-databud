@@ -1,13 +1,10 @@
 <template>
   <div class="row">
     <section class="col-md-4">
-      <inline-group>
-        <custom-button
-          type="refresh"
-          @click="fetchSchemas"
-        ></custom-button>
-      </inline-group>
-      <list :isLoading="isSchemaListLoading">
+      <list
+        :isLoading="isSchemaListLoading"
+        @refresh="fetchSchemas"
+      >
         <b-list-group-item
           v-for="item of schemaDRIs"
           :key="item.dri"
@@ -19,24 +16,20 @@
       </list>
     </section>
     <section class="col-md-8">
-      <inline-group>
-        <custom-button
-          @click="fetchVaultItems"
-          type="refresh"
-        ></custom-button>
-        <custom-button @click="addItem">New</custom-button>
-        <custom-button
-          type="danger"
-          @click="deleteSelectedVaultItem"
-          :disabled="isDeleteButtonDisabled"
-        >Delete</custom-button>
-      </inline-group>
       <list
         :isLoading="isVaultItemListLoading"
         :totalPages="totalVaultPages"
         :currentPage="currentVaultPage"
         @refresh="fetchVaultItems"
       >
+        <template v-slot:header-end>
+          <custom-button @click="addItem">New</custom-button>
+          <custom-button
+            type="danger"
+            @click="deleteSelectedVaultItem"
+            :disabled="isDeleteButtonDisabled"
+          >Delete</custom-button>
+        </template>
         <b-list-group-item
           v-for="item of vaultItems"
           :key="item.id"
@@ -64,7 +57,6 @@ import { IFetchVaultItems, IStore } from '../store';
 import List, { RefreshObj } from '../components/List.vue';
 import CustomButton from '../components/Button.vue';
 import OcaEditView from '../components/OCAEditView.vue';
-import InlineGroup from '../components/InlineGroup.vue';
 import { Vaultifier, VaultItem, VaultMinMeta, VaultPostItem, VaultSchema } from 'vaultifier/dist/module';
 import { ActionType } from '@/store/action-type';
 import { FetchState } from '@/store/fetch-state';
@@ -89,7 +81,6 @@ export default Vue.extend({
   components: {
     CustomButton,
     OcaEditView,
-    InlineGroup,
     List,
   },
   methods: {
