@@ -52,6 +52,9 @@ export class TDAService {
       await fetch(`${this._tdaUrl}/pds/settings`, {
         method: 'POST',
         body: JSON.stringify(obj),
+        headers: {
+          'Content-Type': 'application/json',
+        },
       });
     }
     catch { /* */ }
