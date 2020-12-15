@@ -1,7 +1,7 @@
 import { getInstance } from '@/services';
 import { SchemaService } from '@/services/schema-service';
 import { getTitle } from '@/utils';
-import { MultiResponse, VaultItem, VaultMeta, VaultPostItem, VaultRepo, VaultSchema } from 'vaultifier';
+import { MultiResponse, Paging, VaultItem, VaultMeta, VaultPostItem, VaultRepo, VaultSchema } from 'vaultifier';
 import Vue from 'vue';
 import Vuex, { Commit } from 'vuex'
 import { ActionType } from './action-type';
@@ -13,12 +13,6 @@ export interface IFetchVaultItems {
   repo?: VaultRepo;
   schema?: VaultSchema;
 }
-
-export interface IPaging {
-  current?: number;
-  total?: number;
-}
-
 export interface IStore {
   repo: {
     all?: VaultRepo[],
@@ -33,10 +27,9 @@ export interface IStore {
     allState: FetchState,
     current?: VaultItem,
     currentState: FetchState,
-    paging: IPaging,
+    paging?: Paging,
   },
 }
-
 interface IFetchState {
   state: FetchState,
   setFetchState: (store: IStore, state: FetchState) => void,
@@ -84,10 +77,7 @@ export const getStore = () => {
         allState: FetchState.NONE,
         current: undefined,
         currentState: FetchState.NONE,
-        paging: {
-          total: undefined,
-          current: undefined,
-        },
+        paging: undefined,
       },
     }),
     mutations: {
@@ -112,9 +102,8 @@ export const getStore = () => {
         if (item)
           item.title = payload.title;
       },
-      [MutationType.SET_VAULT_ITEMS_PAGING](state, payload?: IPaging) {
-        state.vaultItem.paging.current = payload?.current;
-        state.vaultItem.paging.total = payload?.total;
+      [MutationType.SET_VAULT_ITEMS_PAGING](state, payload?: Paging) {
+        state.vaultItem.paging = payload;
       },
     },
     actions: {
@@ -166,12 +155,16 @@ export const getStore = () => {
           async () => {
             if (repo)
               return (await getInstance().fromRepo(repo.name)).getMetaItems(page ? {
-                page,
+                page: {
+                  page,
+                },
               } : undefined)
             else if (schema)
               return getInstance().getMetaItems({
                 schemaDri: schema.dri,
-                page,
+                page: {
+                  page,
+                },
               });
             else
               throw new Error('Both schema and repo are undefined');

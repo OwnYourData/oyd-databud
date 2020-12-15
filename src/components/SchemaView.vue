@@ -18,8 +18,9 @@
     <section class="col-md-8">
       <list
         :isLoading="isVaultItemListLoading"
-        :totalPages="totalVaultPages"
+        :totalItems="totalVaultItems"
         :currentPage="currentVaultPage"
+        :pageItems="vaultPageItems"
         @refresh="fetchVaultItems"
       >
         <template v-slot:header-end>
@@ -159,10 +160,13 @@ export default Vue.extend({
       return this.editViewSchema?.dri;
     },
     currentVaultPage(): number | undefined {
-      return (this.$store.state as IStore).vaultItem.paging.current;
+      return (this.$store.state as IStore).vaultItem.paging?.current;
     },
-    totalVaultPages(): number | undefined {
-      return (this.$store.state as IStore).vaultItem.paging.total;
+    totalVaultItems(): number | undefined {
+      return (this.$store.state as IStore).vaultItem.paging?.totalItems;
+    },
+    vaultPageItems(): number | undefined {
+      return (this.$store.state as IStore).vaultItem.paging?.pageItems;
     },
   }
 })
