@@ -18,9 +18,10 @@
       </b-list-group>
     </div>
     <b-pagination
+      v-if="totalItems && page && pageItems"
       :disabled="isLoading"
-      v-if="totalPages && page"
-      :total-rows="totalPages"
+      :total-rows="totalItems"
+      :per-page="pageItems"
       v-model="page"
       @page-click="changePage"
       align="fill"
@@ -49,8 +50,9 @@ export default Vue.extend({
       type: Boolean as PropType<boolean>,
       default: false,
     },
-    totalPages: Number as PropType<number | undefined>,
+    totalItems: Number as PropType<number | undefined>,
     currentPage: Number as PropType<number | undefined>,
+    pageItems: Number as PropType<number | undefined>,
   },
   data: (): Data => ({
     page: undefined,
