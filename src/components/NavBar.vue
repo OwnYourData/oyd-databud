@@ -88,7 +88,12 @@ export default Vue.extend({
             throw new Error(`Invalid method for action ${key}`);
         }
         else {
-          const req = await fetch(url, { method });
+          const req = await fetch(url, {
+            method,
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          });
           await req.text();
         }
 
