@@ -13,7 +13,7 @@
   "dependencies": {
     "bootstrap-vue": "^2.19.0",
     "core-js": "^3.6.5",
-    "oca.js-vue": "0.0.38",
+    "oca.js-vue": "0.0.40",
     "vaultifier": "^0.4.1",
     "vue": "^2.6.12",
     "vue-bootstrap-typeahead": "^0.2.6",
