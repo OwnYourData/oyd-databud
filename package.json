@@ -13,6 +13,7 @@
   "dependencies": {
     "bootstrap-vue": "^2.19.0",
     "core-js": "^3.6.5",
+    "hashlink": "^0.12.1",
     "oca.js-vue": "0.0.40",
     "vaultifier": "^1.0.0",
     "vue": "^2.6.12",
