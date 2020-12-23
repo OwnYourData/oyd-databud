@@ -7,6 +7,9 @@
         card
         @activate-tab="handleActivateTab"
       >
+        <b-tab title="Tables">
+          <table-view />
+        </b-tab>
         <b-tab title="Schemas">
           <schema-view @showEditView="handleShowEditView"></schema-view>
         </b-tab>
@@ -40,6 +43,7 @@ import DataVisualizer from '../components/DataVisualizer.vue';
 import Spinner from '../components/Spinner.vue';
 import SchemaView from '../components/SchemaView.vue';
 import RepoView from '../components/RepoView.vue';
+import TableView from '../components/TableView.vue';
 import { VaultItem } from 'vaultifier/dist/module';
 import { renderForm } from '../utils';
 import { FetchState } from '@/store/fetch-state';
@@ -56,7 +60,8 @@ export default Vue.extend({
     DataVisualizer,
     Spinner,
     SchemaView,
-    RepoView
+    RepoView,
+    TableView,
   },
   data: (): Data => ({
     hasRepoSupport: false,
