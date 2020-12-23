@@ -57,6 +57,7 @@ import CustomButton from './Button.vue';
 import { getObjectFromForm } from '@/utils';
 import { SchemaService, SuggestItem } from '@/services/schema-service';
 import Spinner from './Spinner.vue';
+import { generateHashlink } from '@/utils/crypto';
 
 interface Data {
   editableText?: string,
@@ -107,11 +108,12 @@ export default Vue.extend({
       if (!this.selectedSchemaDri)
         return;
 
+      const objectToSave = getObjectFromForm((this.$refs.ocaView as any).form);
+
       const postItem: VaultPostItem = {
-        content: getObjectFromForm((this.$refs.ocaView as any).form),
-        // TODO:
+        content: objectToSave,
         id: this.item?.id,
-        dri: this.item?.dri ?? Date.now() + '___shouldbesetbyclient',
+        dri: await generateHashlink(objectToSave),
         schemaDri: this.selectedSchemaDri,
         mimeType: MimeType.JSON,
       };

@@ -1,7 +1,7 @@
 import { getInstance } from '@/services';
 import { SchemaService } from '@/services/schema-service';
 import { getTitle } from '@/utils';
-import { MultiResponse, Paging, VaultItem, VaultMeta, VaultPostItem, VaultRepo, VaultSchema } from 'vaultifier';
+import { MultiResponse, Paging, VaultItem, VaultMeta, VaultPostItem, VaultRepo, VaultSchema, VaultTable, } from 'vaultifier';
 import Vue from 'vue';
 import Vuex, { Commit } from 'vuex'
 import { ActionType } from './action-type';
@@ -10,6 +10,7 @@ import { MutationType } from './mutation-type';
 
 export interface IFetchVaultItems {
   page?: number;
+  table?: VaultTable;
   repo?: VaultRepo;
   schema?: VaultSchema;
 }
@@ -18,6 +19,10 @@ export interface IStore {
     all?: VaultRepo[],
     state: FetchState,
   },
+  table: {
+    all: VaultTable[],
+    state: FetchState,
+  }
   schemaDRI: {
     all: VaultSchema[],
     state: FetchState,
@@ -68,6 +73,10 @@ export const getStore = () => {
         all: [],
         state: FetchState.NONE,
       },
+      table: {
+        all: [],
+        state: FetchState.NONE,
+      },
       schemaDRI: {
         all: [],
         state: FetchState.NONE,
@@ -86,6 +95,9 @@ export const getStore = () => {
       },
       [MutationType.SET_REPOS](state, payload: VaultRepo[]) {
         state.repo.all = payload;
+      },
+      [MutationType.SET_TABLES](state, payload: VaultTable[]) {
+        state.table.all = payload;
       },
       [MutationType.SET_SCHEMA_DRIS](state, payload: VaultSchema[]) {
         state.schemaDRI.all = payload;
@@ -149,7 +161,18 @@ export const getStore = () => {
           (store, state) => store.repo.state = state
         );
       },
-      async [ActionType.FETCH_VAULT_ITEMS]({ commit, state }, { page, repo, schema }: IFetchVaultItems) {
+      async [ActionType.FETCH_TABLES]({ commit, dispatch }) {
+        doFetch<VaultTable[]>(
+          commit,
+          () => getInstance().getTables(),
+          (commit, data) => {
+            dispatch(ActionType.RESET_VAULT_ITEMS);
+            commit(MutationType.SET_TABLES, data);
+          },
+          (store, state) => store.table.state = state
+        );
+      },
+      async [ActionType.FETCH_VAULT_ITEMS]({ commit, state }, { page, table, repo, schema }: IFetchVaultItems) {
         doFetch<MultiResponse<VaultMeta>>(
           commit,
           async () => {
@@ -159,15 +182,16 @@ export const getStore = () => {
                   page,
                 },
               } : undefined)
-            else if (schema)
+            else if (schema || table)
               return getInstance().getMetaItems({
-                schemaDri: schema.dri,
+                schemaDri: schema?.dri,
+                tableId: table?.id,
                 page: {
                   page,
                 },
               });
             else
-              throw new Error('Both schema and repo are undefined');
+              throw new Error('Schema, repo and table are undefined');
           },
           (commit, data) => {
             commit(MutationType.SET_VAULT_ITEMS, data.content);

@@ -1,7 +1,11 @@
 <template>
   <div>
     <b-container>
-      <nav-bar :encryptionSupport="encryptionSupport">
+      <nav-bar
+        :encryptionSupport="encryptionSupport"
+        :title="title"
+        :description="description"
+      >
         <b-nav-item
           v-if="hasTDA"
           href="#"
@@ -21,7 +25,7 @@
     <b-container v-if="isInitializing">
       <div class="jumbotron">
         <span class="lead">
-          OwnYourData DataBud <span class="text-muted">is loading <spinner></spinner></span>
+          {{title}} <span class="text-muted">is loading <spinner></spinner></span>
         </span>
 
       </div>
@@ -51,7 +55,7 @@ import Spinner from './components/Spinner.vue'
 import NavBar from './components/NavBar.vue'
 import Login, { Data as LoginData } from './components/Login.vue'
 import { ConfigService } from './services/config-service';
-import { Vaultifier, VaultEncryptionSupport, VaultSupport } from 'vaultifier';
+import { Vaultifier, VaultEncryptionSupport, VaultSupport, VaultInfo, } from 'vaultifier';
 import { RoutePath } from './router';
 
 interface IData {
@@ -60,6 +64,7 @@ interface IData {
   message?: string,
   encryptionSupport?: VaultEncryptionSupport,
   vaultSupport?: VaultSupport,
+  vaultInfo?: VaultInfo,
   tdaFrontendUrl?: string,
   tdaBackendUrl?: string,
   isTDALoading: boolean,
@@ -80,6 +85,7 @@ export default Vue.extend({
     message: undefined,
     encryptionSupport: undefined,
     vaultSupport: undefined,
+    vaultInfo: undefined,
     tdaFrontendUrl: undefined,
     tdaBackendUrl: undefined,
     isTDALoading: false,
@@ -113,6 +119,9 @@ export default Vue.extend({
         }
 
         this.encryptionSupport = await vaultifier.setEnd2EndEncryption(true);
+
+        if (this.isLoggedIn)
+          this.vaultInfo = await vaultifier.getVaultInfo();
       }
       catch {
         if (vaultifier.urls.baseUrl)
@@ -191,6 +200,17 @@ export default Vue.extend({
     hasTDA(): boolean {
       return !!(this.tdaFrontendUrl && this.tdaBackendUrl);
     },
+    title(): string {
+      return this.vaultInfo?.name || 'OYD-DataBud';
+    },
+    description(): string | undefined {
+      return this.vaultInfo?.description;
+    }
+  },
+  watch: {
+    title() {
+      document.title = this.title;
+    }
   }
 });
 </script>

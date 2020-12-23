@@ -4,7 +4,7 @@
     type="dark"
     variant="dark"
   >
-    <b-navbar-brand>DataBud</b-navbar-brand>
+    <b-navbar-brand v-b-tooltip.hover.bottomright="description">{{title}}</b-navbar-brand>
     <b-nav-text>
       v{{version}}
       <b-icon
@@ -64,6 +64,8 @@ export default Vue.extend({
   props: {
     encryptionSupport: Object as PropType<VaultEncryptionSupport>,
     settingsActions: Array as PropType<string[]>,
+    title: String as PropType<string>,
+    description: String as PropType<string | undefined>,
   },
   data: (): Data => ({
     workingAction: undefined,
