@@ -154,7 +154,8 @@ export default Vue.extend({
 
         if (vaultifier.credentials) {
           const { appKey, appSecret, scope } = vaultifier.credentials;
-          const { oAuth, name } = await vaultifier.getVaultSupport();
+          const { oAuth } = await vaultifier.getVaultSupport();
+          const { name } = await vaultifier.getVaultInfo();
 
           if (appKey && appSecret && oAuth) {
             const tdaService = TDAService.getInstance();
