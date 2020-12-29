@@ -1,6 +1,6 @@
 {
   "name": "oyd-databud",
-  "version": "0.10.16",
+  "version": "0.10.17",
   "license": "MIT",
   "scripts": {
     "serve": "vue-cli-service serve",
