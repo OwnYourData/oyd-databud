@@ -14,7 +14,9 @@
         v-else
         class="list"
       >
-        <slot />
+        <slot>
+          <b-list-group-item>No items available</b-list-group-item>
+        </slot>
       </b-list-group>
     </div>
     <b-pagination

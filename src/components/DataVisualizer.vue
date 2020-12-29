@@ -3,6 +3,7 @@
     <b-tabs
       pills
       card
+      v-model="activeTabIndex"
     >
       <b-tab
         title="Raw Data"
@@ -23,6 +24,16 @@
           @save="saveVaultItem"
         ></oca-edit-view>
       </b-tab>
+      <b-tab>
+        <template #title>
+          Relations <b-badge variant="light">{{totalRelations}}</b-badge>
+        </template>
+        <relations-view
+          :item="item"
+          @update="(down, up) => totalRelations = down.length + up.length"
+          @selectId="selectVaultItem"
+        />
+      </b-tab>
     </b-tabs>
   </b-card>
 </template>
@@ -30,15 +41,18 @@
 <script lang="ts">
 import Vue, { PropType } from 'vue';
 
-import { VaultItem, VaultPostItem } from 'vaultifier';
+import { VaultItem, VaultMinMeta, VaultPostItem } from 'vaultifier';
 import RawData from './RawData.vue';
 
 import OcaEditView from '../components/OCAEditView.vue';
+import RelationsView from '../components/RelationsView.vue';
 import { IStore } from '@/store';
 import { ActionType } from '@/store/action-type';
 
 interface Data {
-  isSaving: boolean,
+  isSaving: boolean;
+  activeTabIndex: number;
+  totalRelations: number;
 }
 
 export default Vue.extend({
@@ -51,10 +65,13 @@ export default Vue.extend({
   },
   data: (): Data => ({
     isSaving: false,
+    activeTabIndex: 0,
+    totalRelations: 0,
   }),
   components: {
     RawData,
     OcaEditView,
+    RelationsView,
   },
   computed: {
     schemaDri(): string | undefined {
@@ -69,7 +86,16 @@ export default Vue.extend({
       this.isSaving = true;
       await this.$store.dispatch(ActionType.UPDATE_VAULT_ITEM, item);
       this.isSaving = false;
+    },
+    selectVaultItem(id: number) {
+      this.$emit('selectVaultItem', {
+        id,
+      } as VaultMinMeta);
+
+      // if new vault item was set through clicking on a relation
+      // we want to show the first tab so the user notices something has changed
+      this.activeTabIndex = 0;
     }
-  }
+  },
 })
 </script>

@@ -5,6 +5,7 @@
       <b-tabs
         pills
         card
+        lazy
         @activate-tab="handleActivateTab"
       >
         <b-tab title="Tables">
@@ -32,6 +33,7 @@
       class="data-visualizer"
       v-if="hasSelectedVaultItem"
       :item="selectedVaultItem"
+      @selectVaultItem="selectVaultItem"
     ></data-visualizer>
   </div>
 </template>
@@ -44,7 +46,7 @@ import Spinner from '../components/Spinner.vue';
 import SchemaView from '../components/SchemaView.vue';
 import RepoView from '../components/RepoView.vue';
 import TableView from '../components/TableView.vue';
-import { VaultItem } from 'vaultifier/dist/module';
+import { VaultItem, VaultMinMeta } from 'vaultifier/dist/module';
 import { renderForm } from '../utils';
 import { FetchState } from '@/store/fetch-state';
 
@@ -87,6 +89,9 @@ export default Vue.extend({
     },
     handleActivateTab() {
       this.$store.dispatch(ActionType.RESET_VAULT_ITEMS);
+    },
+    selectVaultItem(item: VaultMinMeta) {
+      this.$store.dispatch(ActionType.FETCH_VAULT_ITEM, item);
     }
   }
 })

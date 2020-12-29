@@ -1,7 +1,7 @@
 import { getInstance } from '@/services';
 import { SchemaService } from '@/services/schema-service';
 import { getTitle } from '@/utils';
-import { MultiResponse, Paging, VaultItem, VaultMeta, VaultPostItem, VaultRepo, VaultSchema, VaultTable, } from 'vaultifier';
+import { MultiResponse, Paging, VaultItem, VaultMeta, VaultMinMeta, VaultPostItem, VaultRepo, VaultSchema, VaultTable, } from 'vaultifier';
 import Vue from 'vue';
 import Vuex, { Commit } from 'vuex'
 import { ActionType } from './action-type';
@@ -200,7 +200,7 @@ export const getStore = () => {
           (store, state) => store.vaultItem.allState = state,
         );
       },
-      async [ActionType.FETCH_VAULT_ITEM]({ commit }, payload: VaultMeta) {
+      async [ActionType.FETCH_VAULT_ITEM]({ commit }, payload: VaultMinMeta) {
         doFetch<VaultItem>(
           commit,
           () => getInstance().getItem({ id: payload.id }),
