@@ -227,7 +227,7 @@ export default Vue.extend({
   cursor: pointer;
 }
 
-.list-group-item:not(.list-group-item--nolink):hover {
+.list-group-item:not(.active):not(.list-group-item--nolink):hover {
   background-color: #f0f7ff
 }
 </style>
