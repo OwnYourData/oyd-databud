@@ -24,10 +24,10 @@
           @save="saveVaultItem"
         ></oca-edit-view>
       </b-tab>
-      <b-tab>
-        <template #title>
-          Relations <b-badge variant="light">{{totalRelations}}</b-badge>
-        </template>
+      <b-tab
+        title="Relations"
+        :disabled="totalRelations === 0"
+      >
         <relations-view
           :item="item"
           @update="(down, up) => totalRelations = down.length + up.length"
