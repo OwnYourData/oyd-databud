@@ -15,7 +15,7 @@
         class="list"
       >
         <slot>
-          <b-list-group-item>No items available</b-list-group-item>
+          <b-list-group-item class="list-group-item--nolink">No items available</b-list-group-item>
         </slot>
       </b-list-group>
     </div>

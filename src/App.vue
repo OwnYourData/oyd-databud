@@ -222,4 +222,12 @@ export default Vue.extend({
   text-overflow: ellipsis;
   word-wrap: initial;
 }
+
+.list-group-item:not(.list-group-item--nolink) {
+  cursor: pointer;
+}
+
+.list-group-item:not(.list-group-item--nolink):hover {
+  background-color: #f0f7ff
+}
 </style>
