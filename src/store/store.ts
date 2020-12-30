@@ -125,10 +125,13 @@ export const getStore = () => {
         commit(MutationType.SET_VAULT_ITEMS_PAGING, undefined);
       },
       async [ActionType.UPDATE_VAULT_ITEM]({ state, commit, dispatch }, payload: VaultPostItem) {
-        if (payload.id)
+        if (payload.id) {
           await getInstance().updateItem(payload);
+          dispatch(ActionType.FETCH_VAULT_ITEM, { id: payload.id } as VaultMinMeta);
+        }
         else
           await getInstance().postItem(payload);
+
       },
       async [ActionType.DELETE_VAULT_ITEM]({ state, commit, dispatch }, payload: VaultMeta) {
         await getInstance().deleteItem({
