@@ -176,6 +176,9 @@ export const getStore = () => {
         );
       },
       async [ActionType.FETCH_VAULT_ITEMS]({ commit, state }, { page, table, repo, schema }: IFetchVaultItems) {
+        // reset currently selected vault item if list of vault items is refreshed
+        commit(MutationType.SET_VAULT_ITEM, undefined);
+
         doFetch<MultiResponse<VaultMeta>>(
           commit,
           async () => {
