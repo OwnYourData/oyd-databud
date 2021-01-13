@@ -2,12 +2,15 @@
   <div class="row">
     <div class="col-md-6">
       <h3 class="heading">Meta</h3>
-      <pre class="card">{{jsonifiedMeta}}</pre>
+      <raw-json :data="meta" />
     </div>
     <div class="col-md-6">
       <h3 class="heading">Content</h3>
-      <span class="text-muted" v-if="isEncrypted"> (encrypted)</span>
-      <pre class="card">{{ jsonifiedData }}</pre>
+      <span
+        class="text-muted"
+        v-if="isEncrypted"
+      > (encrypted)</span>
+      <raw-json :data="item.content" />
     </div>
   </div>
 </template>
@@ -16,27 +19,24 @@
 // @ts-ignore
 import { VaultItem } from 'vaultifier';
 import Vue, { PropType } from 'vue'
+import RawJson from './RawJson.vue';
 
 export default Vue.extend({
+  components: {
+    RawJson,
+  },
   props: {
     item: {
       type: Object as PropType<VaultItem>,
     }
   },
-  methods: {
-    jsonify(obj: any) {
-      return JSON.stringify(obj, null, 2).trim();
-    }
-  },
   computed: {
-    jsonifiedMeta(): string {
+    meta(): any {
       const copy = { ...this.item };
       delete copy.content;
+      delete copy.raw;
 
-      return this.jsonify(copy);
-    },
-    jsonifiedData(): string {
-      return this.jsonify(this.item.content);
+      return copy;
     },
     isEncrypted(): boolean {
       return this.item.isEncrypted;
@@ -46,19 +46,6 @@ export default Vue.extend({
 </script>
 
 <style scoped>
-.card {
-  padding: 1em;
-
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: block;
-}
-
-.card:hover {
-  overflow: auto;
-  text-overflow: clip;
-}
-
 .heading {
   display: inline-block;
 }
