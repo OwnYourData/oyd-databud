@@ -43,6 +43,7 @@ import Login, { Data as LoginData } from './components/Login.vue'
 import { ConfigService } from './services/config-service';
 import { Vaultifier, VaultEncryptionSupport, VaultSupport, VaultInfo, } from 'vaultifier';
 import { RoutePath } from './router';
+import { RouteParams } from "./router/routes";
 
 interface IData {
   isInitializing: boolean,
@@ -77,10 +78,14 @@ export default Vue.extend({
       this.tryInitializeVaultifier();
 
       const { searchParams } = new URL(window.location.href);
-      const schema = searchParams.get('schemaDri');
 
+      const schema = searchParams.get(RouteParams.SCHEMA_DRI);
       if (schema && this.$router.currentRoute.path !== RoutePath.SCHEMA_VIEW)
         this.$router.push(RoutePath.SCHEMA_VIEW);
+
+      const itemId = searchParams.get(RouteParams.ITEM_ID);
+      if (itemId && this.$router.currentRoute.path !== RoutePath.ITEM_VIEW)
+        this.$router.push(RoutePath.ITEM_VIEW);
     },
     async tryInitializeVaultifier() {
       const vaultifier = getVaultifier();
@@ -92,7 +97,7 @@ export default Vue.extend({
         if (!this.vaultSupport?.authentication) {
           this.isLoggedIn = true;
         }
-        else if (vaultifier.hasCredentials()) {
+        else {
           await vaultifier.initialize();
 
           this.isLoggedIn = await vaultifier.isValid();

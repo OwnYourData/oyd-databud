@@ -4,7 +4,11 @@
     type="dark"
     variant="dark"
   >
-    <b-navbar-brand v-b-tooltip.hover.bottomright="description">{{title}}</b-navbar-brand>
+    <b-navbar-brand
+      v-b-tooltip.hover.bottomright="description"
+      @click="goHome"
+      href="#"
+    >{{title}}</b-navbar-brand>
     <b-nav-text>
       v{{version}}
       <b-icon
@@ -41,6 +45,7 @@
 </template>
 
 <script lang="ts">
+import { RoutePath } from '@/router';
 import { getInstance } from '@/services';
 import { VaultEncryptionSupport } from 'vaultifier';
 import Vue, { PropType } from 'vue'
@@ -104,6 +109,9 @@ export default Vue.extend({
       }
 
       this.workingAction = undefined;
+    },
+    goHome() {
+      this.$router.push(RoutePath.MAIN_VIEW);
     }
   },
   computed: {
@@ -142,7 +150,7 @@ export default Vue.extend({
     },
     workingActionTitle() {
       return this.workingAction?.title;
-    }
+    },
   }
 })
 </script>

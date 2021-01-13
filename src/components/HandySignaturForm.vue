@@ -24,6 +24,7 @@
 import { getInstance } from '../services/communicator-service';
 import { VaultItem } from 'vaultifier';
 import Vue, { PropType } from 'vue'
+import { RouteParams } from '@/router/routes';
 
 interface Data {
   eidasToken?: string,
@@ -58,7 +59,7 @@ export default Vue.extend({
       if (this.eidasToken) {
         const { id } = this.item;
         const url = new URL(window.location.origin);
-        url.searchParams.append('item_id', id.toString());
+        url.searchParams.append(RouteParams.ITEM_ID, id.toString());
 
         return getInstance().urls.getEidasExternalUrl(id, this.eidasToken, window.encodeURIComponent(url.toString()));
       }
