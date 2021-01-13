@@ -55,8 +55,13 @@ export default Vue.extend({
       return !!(this.responseUrl && this.xmlBody);
     },
     responseUrl(): string | undefined {
-      if (this.eidasToken)
-        return getInstance().urls.getEidasExternalUrl(this.item.id, this.eidasToken);
+      if (this.eidasToken) {
+        const { id } = this.item;
+        const url = new URL(window.location.origin);
+        url.searchParams.append('item_id', id.toString());
+
+        return getInstance().urls.getEidasExternalUrl(id, this.eidasToken, window.encodeURIComponent(url.toString()));
+      }
 
       return undefined;
     },
