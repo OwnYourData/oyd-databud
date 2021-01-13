@@ -118,7 +118,8 @@ export default Vue.extend({
           this.isLoggedIn = await vaultifier.isValid();
         }
 
-        this.encryptionSupport = await vaultifier.setEnd2EndEncryption(true);
+        // E2E encryption is disabled for DIP
+        // this.encryptionSupport = await vaultifier.setEnd2EndEncryption(true);
 
         if (this.isLoggedIn)
           this.vaultInfo = await vaultifier.getVaultInfo();
