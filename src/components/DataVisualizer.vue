@@ -34,9 +34,57 @@
           @selectId="selectVaultItem"
         />
       </b-tab>
+      <b-tab title="Sign">
+        <div class="flex-container">
+          <b-img
+            class="signature-logo"
+            :src="handySignaturLogo"
+          />
+          <span>
+            Sign this data item with A-TRUST Handy-Signatur.<br>
+            The following data that will be signed:
+          </span>
+          <b-button
+            @click="signItem"
+            class="sign-button"
+            variant="primary"
+          >Sign
+            <b-spinner v-if="isSigning" />
+          </b-button>
+        </div>
+        <handy-signatur-form
+          ref="handySignaturForm"
+          :item="item"
+        />
+        <b-alert
+          v-model="hasSignError"
+          variant="danger"
+        >
+          There was an error while trying to sign the data item.
+        </b-alert>
+        <raw-json :data="item.raw" />
+
+      </b-tab>
     </b-tabs>
   </b-card>
 </template>
+
+<style scoped>
+.flex-container {
+  display: flex;
+  align-items: center;
+  margin-bottom: 2em;
+}
+
+.signature-logo {
+  margin-right: 2em;
+  max-width: 4em;
+}
+
+.sign-button {
+  margin-left: auto;
+}
+</style>
 
 <script lang="ts">
 import Vue, { PropType } from 'vue';
@@ -46,13 +94,18 @@ import RawData from './RawData.vue';
 
 import OcaEditView from '../components/OCAEditView.vue';
 import RelationsView from '../components/RelationsView.vue';
+import HandySignaturForm from '../components/HandySignaturForm.vue';
+
 import { IStore } from '@/store';
 import { ActionType } from '@/store/action-type';
+import RawJson from './RawJson.vue';
 
 interface Data {
   isSaving: boolean;
   activeTabIndex: number;
   totalRelations: number;
+  hasSignError: boolean;
+  isSigning: boolean;
 }
 
 export default Vue.extend({
@@ -67,11 +120,15 @@ export default Vue.extend({
     isSaving: false,
     activeTabIndex: 0,
     totalRelations: 0,
+    hasSignError: false,
+    isSigning: false,
   }),
   components: {
     RawData,
     OcaEditView,
     RelationsView,
+    HandySignaturForm,
+    RawJson,
   },
   computed: {
     schemaDri(): string | undefined {
@@ -79,6 +136,9 @@ export default Vue.extend({
     },
     hasSchema(): boolean {
       return !!this.schemaDri;
+    },
+    handySignaturLogo(): string {
+      return require('../assets/handysign_logo.jpg');
     }
   },
   methods: {
@@ -95,6 +155,17 @@ export default Vue.extend({
       // if new vault item was set through clicking on a relation
       // we want to show the first tab so the user notices something has changed
       this.activeTabIndex = 0;
+    },
+    async signItem() {
+      this.hasSignError = false;
+      this.isSigning = true;
+
+      await (this.$refs.handySignaturForm as any).sign();
+
+      // if .sign() fulfills the promise, something went wrong
+      // signing always leaves the current browser page that's why the promise will not be resolved, if everything goes according to plan :-)
+      this.hasSignError = true;
+      this.isSigning = false;
     }
   },
 })
