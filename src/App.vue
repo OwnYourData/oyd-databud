@@ -118,9 +118,11 @@ export default Vue.extend({
           this.isLoggedIn = true;
         }
         else {
-          await vaultifier.initialize();
+          try {
+            await vaultifier.initialize();
+            this.isLoggedIn = true
+          } catch { /* vaultifier throws an error if no credentials can be determined */ }
 
-          this.isLoggedIn = await vaultifier.isValid();
         }
 
         // E2E encryption is disabled for DIP
@@ -234,6 +236,6 @@ export default Vue.extend({
 }
 
 .list-group-item:not(.active):not(.list-group-item--nolink):hover {
-  background-color: #f0f7ff
+  background-color: #f0f7ff;
 }
 </style>
