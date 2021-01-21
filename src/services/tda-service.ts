@@ -49,12 +49,19 @@ export class TDAService {
       obj.settings.own_your_data.scope = scope;
 
     try {
+      const headers = {
+        'Content-Type': 'application/json',
+      };
+
       await fetch(`${this._tdaUrl}/pds/settings`, {
         method: 'POST',
         body: JSON.stringify(obj),
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
+      });
+
+      await fetch(`${this._tdaUrl}/pds/activate?type=own_your_data&optional_name=${name}`, {
+        method: 'POST',
+        headers,
       });
     }
     catch { /* */ }
