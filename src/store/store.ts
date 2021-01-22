@@ -183,7 +183,7 @@ export const getStore = () => {
           commit,
           async () => {
             if (repo)
-              return (await getInstance().fromRepo(repo.name)).getMetaItems(page ? {
+              return (await getInstance().fromRepo(repo.identifier)).getMetaItems(page ? {
                 page: {
                   page,
                 },
