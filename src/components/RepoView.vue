@@ -21,6 +21,14 @@
         :pageItems="vaultPageItems"
         @refresh="fetchVaultItems"
       >
+        <template v-slot:header-end>
+          <custom-button
+            type="danger"
+            @click="deleteSelectedVaultItem"
+            :disabled="isDeleteButtonDisabled"
+          >Delete</custom-button>
+        </template>
+
         <b-list-group-item
           v-for="item of vaultItems"
           :key="item.id"
@@ -38,7 +46,8 @@
 import Vue from 'vue';
 import { IFetchVaultItems, IStore } from '../store';
 import List, { RefreshObj } from '../components/List.vue';
-import { Vaultifier, VaultItem, VaultMinMeta, VaultRepo, VaultSchema } from 'vaultifier/dist/module';
+import CustomButton from '../components/Button.vue';
+import { VaultItem, VaultMinMeta, VaultRepo } from 'vaultifier/dist/module';
 import { ActionType } from '@/store/action-type';
 import { FetchState } from '@/store/fetch-state';
 
@@ -55,6 +64,7 @@ export default Vue.extend({
   }),
   components: {
     List,
+    CustomButton,
   },
   methods: {
     async initialize() {
@@ -79,7 +89,11 @@ export default Vue.extend({
       };
 
       this.$store.dispatch(ActionType.FETCH_VAULT_ITEMS, fetchObj);
-    }
+    },
+    async deleteSelectedVaultItem() {
+      await this.$store.dispatch(ActionType.DELETE_VAULT_ITEM, this.selectedVaultItem);
+      this.fetchRepos();
+    },
   },
   computed: {
     store(): IStore {
@@ -96,6 +110,12 @@ export default Vue.extend({
     },
     isVaultItemListLoading(): boolean {
       return (this.$store.state as IStore).vaultItem.allState === FetchState.FETCHING;
+    },
+    hasSelectedVaultItem(): boolean {
+      return !!this.selectedVaultItem;
+    },
+    isDeleteButtonDisabled(): boolean {
+      return !this.hasSelectedVaultItem;
     },
     selectedVaultItem(): VaultItem | undefined {
       return (this.$store.state as IStore).vaultItem.current;
