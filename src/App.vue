@@ -44,6 +44,7 @@ import { ConfigService } from './services/config-service';
 import { Vaultifier, VaultEncryptionSupport, VaultSupport, VaultInfo, } from 'vaultifier';
 import { RoutePath } from './router';
 import { RouteParams } from "./router/routes";
+import { SchemaService } from "./services/schema-service";
 
 interface IData {
   isInitializing: boolean,
@@ -107,8 +108,10 @@ export default Vue.extend({
 
         this.encryptionSupport = await vaultifier.setEnd2EndEncryption(true);
 
-        if (this.isLoggedIn)
+        if (this.isLoggedIn) {
           this.vaultInfo = await vaultifier.getVaultInfo();
+          await this.initializeOca();
+        }
       }
       catch {
         if (vaultifier.urls.baseUrl)
@@ -122,6 +125,15 @@ export default Vue.extend({
     logIn(credentials: LoginData) {
       getVaultifier().setCredentials(credentials);
       this.tryInitializeVaultifier();
+    },
+    async initializeOca() {
+      const { content: configurationItems } = await getVaultifier().getValues({
+        // That's the dri of "ConfigurationItem", basically it's a key value pair
+        schemaDri: '4ktjMzvwbhAeGM8Dwu67VcCnuJc52K3fVdq7V1qCPWLw',
+      });
+
+      const ocaBaseUrl = configurationItems.find((x: any) => x.key === 'oca.backend.url');
+      SchemaService.setBaseUrl(ocaBaseUrl?.value)
     }
   },
   computed: {
