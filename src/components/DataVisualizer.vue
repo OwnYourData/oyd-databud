@@ -9,7 +9,11 @@
         title="Raw Data"
         v-if="showRawView"
       >
-        <raw-data :item="item"></raw-data>
+        <raw-data
+          :item="item"
+          :isSaving="isSaving"
+          @save="saveVaultItem"
+        ></raw-data>
       </b-tab>
       <b-tab
         title="OCA-Form"

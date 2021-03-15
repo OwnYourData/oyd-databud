@@ -10,20 +10,21 @@ export interface SuggestItem {
   title: string,
 }
 
-const baseUrl = 'https://repository.oca.argo.colossi.network';
-
-const getItemUrl = (schemaDri: string) => `${baseUrl}/api/v3/schemas/${schemaDri}`;
-
-const getSuggestUrl = (query: string) => `${baseUrl}/api/v3/schemas?suggest=${query}`;
-const getOverlaysForSchemaBase = (schemaBaseDri: string) => `${baseUrl}/api/v3/schemas?q=${schemaBaseDri}`;
+const ocaDefaultUrl = 'https://repository.oca.argo.colossi.network';
 
 export class SchemaService {
+  getItemUrl = (schemaDri: string) => `${this.baseUrl}/api/v3/schemas/${schemaDri}`;
+  
+  getSuggestUrl = (query: string) => `${this.baseUrl}/api/v3/schemas?suggest=${query}`;
+  getOverlaysForSchemaBase = (schemaBaseDri: string) => `${this.baseUrl}/api/v3/schemas?q=${schemaBaseDri}`;
+  
   private static INSTANCE = new SchemaService();
-
+  
   private overlaysCache: CacheItem[] = [];
+  private baseUrl = ocaDefaultUrl;
 
   private getSuggestions = async (query: string): Promise<SuggestItem[]> => {
-    const res = await fetch(getSuggestUrl(query));
+    const res = await fetch(this.getSuggestUrl(query));
     const data = await res.json();
 
     return data.map((x: any): SuggestItem => ({
@@ -33,7 +34,7 @@ export class SchemaService {
   }
 
   private getOverlaySchemaDRIsFromSchemaBase = async (schemaBaseDri: string): Promise<string[]> => {
-    const res = await fetch(getOverlaysForSchemaBase(schemaBaseDri));
+    const res = await fetch(this.getOverlaysForSchemaBase(schemaBaseDri));
     const data = await res.json();
 
     return data.map((x: any) => x.DRI);
@@ -52,8 +53,7 @@ export class SchemaService {
     let item = this.overlaysCache.find(x => x.schemaDri === schemaDri);
 
     if (!item) {
-      // TODO: this url should be configurable
-      const url = getItemUrl(schemaDri);
+      const url = this.getItemUrl(schemaDri);
       const response = await fetch(url);
       const json = await response.json();
 
@@ -81,4 +81,5 @@ export class SchemaService {
   static getTitle = async (schemaDri: string) => SchemaService.getInstance().getTitle(schemaDri);
   static getSuggestions = async (query: string) => SchemaService.getInstance().getSuggestions(query);
   static getOverlaySchemaDRIsFromSchemaBase = async (schemaBaseDri: string) => SchemaService.getInstance().getOverlaySchemaDRIsFromSchemaBase(schemaBaseDri);
+  static setBaseUrl = (baseUrl?: string) => SchemaService.getInstance().baseUrl = baseUrl ?? ocaDefaultUrl;
 }
