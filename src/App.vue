@@ -141,20 +141,34 @@ export default Vue.extend({
           this.message = `I could not find any endpoint to connect to.`
       }
 
-      if (this.isLoggedIn)
-        await this.initializeTDA();
-
       this.isInitializing = false;
     },
-    async initializeTDA() {
+    async openTDA() {
+      if (!this.tdaFrontendUrl || !this.tdaBackendUrl)
+        return;
+
       this.isTDALoading = true;
 
-      const vaultifier = await getVaultifier();
+      const tdaService = TDAService.getInstance();
+      const url = await tdaService.createAdminInvitationUrl(this.tdaFrontendUrl);
+      window.open(url);
 
-      const { content: configurationItems } = await vaultifier.getValues({
+      this.isTDALoading = false;
+    },
+    logIn(credentials: LoginData) {
+      getVaultifier().setCredentials(credentials);
+      this.tryInitializeVaultifier();
+    },
+    async initializeOca() {
+      this.isTDALoading = true;
+
+      const { content: configurationItems } = await getVaultifier().getValues({
         // That's the dri of "ConfigurationItem", basically it's a key value pair
         schemaDri: '4ktjMzvwbhAeGM8Dwu67VcCnuJc52K3fVdq7V1qCPWLw',
       });
+
+      const ocaBaseUrl = configurationItems.find((x: any) => x.key === 'oca.backend.url');
+      SchemaService.setBaseUrl(ocaBaseUrl?.value)
 
       const backend = configurationItems.find((x: any) => x.key === 'tda.backend.uri');
       const frontend = configurationItems.find((x: any) => x.key === 'tda.frontend.uri');
@@ -162,6 +176,8 @@ export default Vue.extend({
       if (backend && frontend) {
         this.tdaFrontendUrl = frontend.value as string;
         this.tdaBackendUrl = backend.value as string;
+
+        const vaultifier = getVaultifier();
 
         if (vaultifier.credentials) {
           const { appKey, appSecret, scope } = vaultifier.credentials;
@@ -185,31 +201,6 @@ export default Vue.extend({
 
       this.isTDALoading = false;
     },
-    async openTDA() {
-      if (!this.tdaFrontendUrl || !this.tdaBackendUrl)
-        return;
-
-      this.isTDALoading = true;
-
-      const tdaService = TDAService.getInstance();
-      const url = await tdaService.createAdminInvitationUrl(this.tdaFrontendUrl);
-      window.open(url);
-
-      this.isTDALoading = false;
-    },
-    logIn(credentials: LoginData) {
-      getVaultifier().setCredentials(credentials);
-      this.tryInitializeVaultifier();
-    },
-    async initializeOca() {
-      const { content: configurationItems } = await getVaultifier().getValues({
-        // That's the dri of "ConfigurationItem", basically it's a key value pair
-        schemaDri: '4ktjMzvwbhAeGM8Dwu67VcCnuJc52K3fVdq7V1qCPWLw',
-      });
-
-      const ocaBaseUrl = configurationItems.find((x: any) => x.key === 'oca.backend.url');
-      SchemaService.setBaseUrl(ocaBaseUrl?.value)
-    }
   },
   computed: {
     hasMessage(): boolean {
