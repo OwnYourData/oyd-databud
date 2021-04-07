@@ -10,8 +10,10 @@ export const create = async (): Promise<Vaultifier> => {
 
   try {
     // first of all trying to create an instance out of url params or default values
-    const v = await VaultifierWeb.create();
-
+    const v = await VaultifierWeb.create({
+      clientId: ConfigService.get('endpoint', 'clientId'),
+    });
+    
     if (v) {
       vaultifier = v;
       isValid = await vaultifier.isValid();
