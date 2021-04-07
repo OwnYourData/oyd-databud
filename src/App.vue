@@ -95,15 +95,14 @@ export default Vue.extend({
       try {
         this.vaultSupport = await vaultifier.getVaultSupport();
 
-        if (!this.vaultSupport?.authentication) {
+        if (vaultifier.isAuthenticated()) {
           this.isLoggedIn = true;
         }
         else {
           try {
             await vaultifier.initialize();
-            this.isLoggedIn = true
+            this.isLoggedIn = await vaultifier.isAuthenticated();
           } catch { /* vaultifier throws an error if no credentials can be determined */ }
-
         }
 
         this.encryptionSupport = await vaultifier.setEnd2EndEncryption(true);
