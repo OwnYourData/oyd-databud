@@ -95,7 +95,7 @@ export default Vue.extend({
       try {
         this.vaultSupport = await vaultifier.getVaultSupport();
 
-        if (vaultifier.isAuthenticated()) {
+        if (await vaultifier.isAuthenticated()) {
           this.isLoggedIn = true;
         }
         else {
