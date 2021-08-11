@@ -50,14 +50,13 @@
 <script lang="ts">
 import Vue, { PropType } from 'vue';
 
-import { MimeType, VaultItem, VaultPostItem } from 'vaultifier';
+import { MimeType, VaultItem, VaultPostItem, crypto } from 'vaultifier';
 import OcaView from './OCAView.vue';
 import InlineGroup from './InlineGroup.vue';
 import CustomButton from './Button.vue';
 import { getObjectFromForm } from '@/utils';
 import { SchemaService, SuggestItem } from '@/services/schema-service';
 import Spinner from './Spinner.vue';
-import { generateHashlink } from '@/utils/crypto';
 
 interface Data {
   editableText?: string,
@@ -110,10 +109,11 @@ export default Vue.extend({
 
       const objectToSave = getObjectFromForm((this.$refs.ocaView as any).form);
 
+      // TODO: We should let the user decide whether DRI should be calculated automatically or not
       const postItem: VaultPostItem = {
         content: objectToSave,
         id: this.item?.id,
-        dri: await generateHashlink(objectToSave),
+        dri: await crypto.generateHashlink(objectToSave),
         schemaDri: this.selectedSchemaDri,
         mimeType: MimeType.JSON,
       };
