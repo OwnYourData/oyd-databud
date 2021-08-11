@@ -12,7 +12,6 @@
   },
   "dependencies": {
     "bootstrap-vue": "^2.19.0",
-    "core-js": "^3.6.5",
     "oca.js-vue": "^0.1.1",
     "vaultifier": "^2.2.1",
     "vue": "^2.6.12",
