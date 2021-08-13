@@ -1,7 +1,7 @@
 import { getInstance } from '@/services';
 import { SchemaService } from '@/services/schema-service';
 import { getTitle } from '@/utils';
-import { MultiResponse, Paging, VaultItem, VaultMeta, VaultMinMeta, VaultPostItem, VaultRepo, VaultSchema, VaultTable, } from 'vaultifier';
+import { MultiResponse, Paging, Vaultifier, VaultItem, VaultItemsQuery, VaultMeta, VaultMinMeta, VaultPostItem, VaultRepo, VaultSchema, VaultTable, } from 'vaultifier';
 import Vue from 'vue';
 import Vuex, { Commit } from 'vuex'
 import { ActionType } from './action-type';
@@ -10,9 +10,11 @@ import { MutationType } from './mutation-type';
 
 export interface IFetchVaultItems {
   page?: number;
+  size?: number;
   table?: VaultTable;
   repo?: VaultRepo;
   schema?: VaultSchema;
+  fetchContent?: boolean;
 }
 export interface IStore {
   repo: {
@@ -175,29 +177,39 @@ export const getStore = () => {
           (store, state) => store.table.state = state
         );
       },
-      async [ActionType.FETCH_VAULT_ITEMS]({ commit, state }, { page, table, repo, schema }: IFetchVaultItems) {
+      async [ActionType.FETCH_VAULT_ITEMS]({ commit, state }, { page, size, table, repo, schema, fetchContent }: IFetchVaultItems) {
         // reset currently selected vault item if list of vault items is refreshed
         commit(MutationType.SET_VAULT_ITEM, undefined);
 
         doFetch<MultiResponse<VaultMeta>>(
           commit,
           async () => {
-            if (repo)
-              return (await getInstance().fromRepo(repo.identifier)).getMetaItems(page ? {
-                page: {
-                  page,
-                },
-              } : undefined)
-            else if (schema || table)
-              return getInstance().getMetaItems({
+            let query: VaultItemsQuery | undefined = {
+              page: {
+                page,
+                size,
+              },
+            };
+            let instance: Vaultifier;
+
+            if (repo) {
+              instance = await getInstance().fromRepo(repo.identifier);
+            }
+            else if (schema || table) {
+              instance = getInstance();
+              query = {
+                ...query,
                 schemaDri: schema?.dri,
                 tableId: table?.id,
-                page: {
-                  page,
-                },
-              });
+              };
+            }
             else
               throw new Error('Schema, repo and table are undefined');
+
+            if (fetchContent)
+              return instance.getItems(query);
+            else
+              return instance.getMetaItems(query);
           },
           (commit, data) => {
             commit(MutationType.SET_VAULT_ITEMS, data.content);

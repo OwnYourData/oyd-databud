@@ -14,30 +14,47 @@
       </list>
     </section>
     <section class="col-md-8">
-      <list
-        :isLoading="isVaultItemListLoading"
-        :totalItems="totalVaultItems"
-        :currentPage="currentVaultPage"
-        :pageItems="vaultPageItems"
-        @refresh="fetchVaultItems"
+      <b-tabs
+        content-class="mt-3"
+        @activate-tab="handleActivateTab"
+        v-model="selectedTabIndex"
+        lazy
       >
-        <template v-slot:header-end>
-          <custom-button
-            type="danger"
-            @click="deleteSelectedVaultItem"
-            :disabled="isDeleteButtonDisabled"
-          >Delete</custom-button>
-        </template>
+        <b-tab title="Data Items">
+          <list
+            :isLoading="isVaultItemListLoading"
+            :totalItems="totalVaultItems"
+            :currentPage="currentVaultPage"
+            :pageItems="vaultPageItems"
+            @refresh="fetchVaultItems"
+          >
+            <template v-slot:header-end>
+              <custom-button
+                type="danger"
+                @click="deleteSelectedVaultItem"
+                :disabled="isDeleteButtonDisabled"
+              >Delete</custom-button>
+            </template>
 
-        <b-list-group-item
-          v-for="item of vaultItems"
-          :key="item.id"
-          :active="selectedVaultItem && item.id === selectedVaultItem.id"
-          @click="() => selectVaultItem(item)"
-        >
-          {{item.id}}
-        </b-list-group-item>
-      </list>
+            <b-list-group-item
+              v-for="item of vaultItems"
+              :key="item.id"
+              :active="selectedVaultItem && item.id === selectedVaultItem.id"
+              @click="() => selectVaultItem(item)"
+            >
+              {{item.id}}
+            </b-list-group-item>
+          </list>
+        </b-tab>
+        <b-tab title="Charts">
+          <b-input-group prepend="Item Count">
+            <b-input v-model="dataItemCount" />
+          </b-input-group>
+
+          <chart-visualizer :items="vaultItems">
+          </chart-visualizer>
+        </b-tab>
+      </b-tabs>
     </section>
   </div>
 </template>
@@ -45,14 +62,17 @@
 <script lang="ts">
 import Vue from 'vue';
 import { IFetchVaultItems, IStore } from '../store';
-import List, { RefreshObj } from '../components/List.vue';
+import List from '../components/List.vue';
 import CustomButton from '../components/Button.vue';
 import { VaultItem, VaultMinMeta, VaultTable } from 'vaultifier/dist/module';
 import { ActionType } from '@/store/action-type';
 import { FetchState } from '@/store/fetch-state';
+import ChartVisualizer from './ChartVisualizer.vue';
 
 interface IData {
   selectedTable?: VaultTable,
+  selectedTabIndex: number,
+  dataItemCount: number,
 }
 
 export default Vue.extend({
@@ -61,10 +81,13 @@ export default Vue.extend({
   },
   data: (): IData => ({
     selectedTable: undefined,
+    selectedTabIndex: 0,
+    dataItemCount: 50,
   }),
   components: {
     List,
     CustomButton,
+    ChartVisualizer,
   },
   methods: {
     async initialize() {
@@ -82,18 +105,30 @@ export default Vue.extend({
       this.selectedTable = undefined;
       this.$store.dispatch(ActionType.FETCH_TABLES);
     },
-    async fetchVaultItems(refreshObj?: RefreshObj) {
-      const fetchObj: IFetchVaultItems = {
+    async fetchVaultItems(refreshObj?: IFetchVaultItems) {
+      const isChart = this.selectedTabIndex === 1;
+
+      refreshObj = {
+        ...refreshObj,
         table: this.selectedTable,
-        page: refreshObj?.page,
+        // we only want to fetch all the content if we display charts
+        fetchContent: isChart,
       };
 
-      this.$store.dispatch(ActionType.FETCH_VAULT_ITEMS, fetchObj);
+      if (isChart) {
+        refreshObj.size = this.dataItemCount;
+      }
+
+      this.$store.dispatch(ActionType.FETCH_VAULT_ITEMS, refreshObj);
     },
     async deleteSelectedVaultItem() {
       await this.$store.dispatch(ActionType.DELETE_VAULT_ITEM, this.selectedVaultItem);
       this.fetchTables();
     },
+    async handleActivateTab() {
+      this.selectedTable = undefined;
+      this.$store.dispatch(ActionType.RESET_VAULT_ITEMS);
+    }
   },
   computed: {
     store(): IStore {
