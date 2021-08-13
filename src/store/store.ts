@@ -36,6 +36,9 @@ export interface IStore {
     currentState: FetchState,
     paging?: Paging,
   },
+  ui: {
+    isFluid: boolean,
+  }
 }
 interface IFetchState {
   state: FetchState,
@@ -90,6 +93,9 @@ export const getStore = () => {
         currentState: FetchState.NONE,
         paging: undefined,
       },
+      ui: {
+        isFluid: false,
+      }
     }),
     mutations: {
       [MutationType.SET_FETCH_STATE](state, payload: IFetchState) {
@@ -118,6 +124,9 @@ export const getStore = () => {
       },
       [MutationType.SET_VAULT_ITEMS_PAGING](state, payload?: Paging) {
         state.vaultItem.paging = payload;
+      },
+      [MutationType.SET_UI_IS_FLUID](state, payload: boolean) {
+        state.ui.isFluid = payload;
       },
     },
     actions: {
@@ -235,6 +244,9 @@ export const getStore = () => {
             }
           });
         }
+      },
+      async [ActionType.TOGGLE_UI_IS_FLUID]({ commit, state }) {
+        commit(MutationType.SET_UI_IS_FLUID, !state.ui.isFluid);
       },
     }
   });

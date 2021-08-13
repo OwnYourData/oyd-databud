@@ -1,6 +1,6 @@
 <template>
   <div>
-    <b-container>
+    <b-container :fluid="isUiFluid">
       <nav-bar
         :encryptionSupport="encryptionSupport"
         :title="title"
@@ -45,6 +45,7 @@ import { Vaultifier, VaultEncryptionSupport, VaultSupport, VaultInfo, } from 'va
 import { RoutePath } from './router';
 import { RouteParams } from "./router/routes";
 import { SchemaService } from "./services/schema-service";
+import { IStore } from "./store";
 
 interface IData {
   isInitializing: boolean,
@@ -147,6 +148,12 @@ export default Vue.extend({
     },
     description(): string | undefined {
       return this.vaultInfo?.description;
+    },
+    state(): IStore {
+      return this.$store.state as IStore;
+    },
+    isUiFluid(): boolean {
+      return this.state.ui.isFluid;
     }
   },
   watch: {

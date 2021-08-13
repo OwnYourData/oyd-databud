@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <b-container :fluid="isUiFluid">
 
     <b-card no-body>
       <b-tabs
@@ -35,7 +35,7 @@
       :item="selectedVaultItem"
       @selectVaultItem="selectVaultItem"
     ></data-visualizer>
-  </div>
+  </b-container>
 </template>
 
 <script lang="ts">
@@ -73,13 +73,19 @@ export default Vue.extend({
   },
   computed: {
     selectedVaultItem(): VaultItem | undefined {
-      return (this.$store.state as IStore).vaultItem.current;
+      return this.state.vaultItem.current;
     },
     hasSelectedVaultItem(): boolean {
       return !!this.selectedVaultItem;
     },
+    state(): IStore {
+      return this.$store.state as IStore;
+    },
     isVaultItemLoading(): boolean {
-      return (this.$store.state as IStore).vaultItem.currentState == FetchState.FETCHING;
+      return this.state.vaultItem.currentState == FetchState.FETCHING;
+    },
+    isUiFluid(): boolean {
+      return this.state.ui.isFluid;
     }
   },
   methods: {

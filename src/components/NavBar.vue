@@ -19,6 +19,12 @@
     </b-nav-text>
 
     <b-navbar-nav class="ml-auto">
+      <b-nav-item>
+        <b-icon
+          :icon="isUiFluid ? 'arrows-angle-contract': 'arrows-angle-expand'"
+          @click="toggleUiFluid"
+        />
+      </b-nav-item>
       <b-nav-item-dropdown
         right
         v-if="actions && actions.length > 0"
@@ -47,6 +53,8 @@
 <script lang="ts">
 import { RoutePath } from '@/router';
 import { getInstance } from '@/services';
+import { IStore } from '@/store';
+import { ActionType } from '@/store/action-type';
 import { VaultEncryptionSupport } from 'vaultifier';
 import Vue, { PropType } from 'vue'
 
@@ -112,6 +120,9 @@ export default Vue.extend({
     },
     goHome() {
       this.$router.push(RoutePath.MAIN_VIEW);
+    },
+    toggleUiFluid() {
+      this.$store.dispatch(ActionType.TOGGLE_UI_IS_FLUID);
     }
   },
   computed: {
@@ -151,6 +162,12 @@ export default Vue.extend({
     workingActionTitle() {
       return this.workingAction?.title;
     },
+    state(): IStore {
+      return this.$store.state as IStore;
+    },
+    isUiFluid(): boolean {
+      return this.state.ui.isFluid;
+    }
   }
 })
 </script>

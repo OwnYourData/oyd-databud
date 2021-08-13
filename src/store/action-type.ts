@@ -7,5 +7,6 @@ export enum ActionType {
   FETCH_VAULT_ITEMS = 'fetchVaultItems',
   FETCH_VAULT_ITEM = 'fetchVaultItem',
   RESET_VAULT_ITEMS = 'resetVaultItems',
+  TOGGLE_UI_IS_FLUID = 'toggleUiIsFluid',
   UPDATE_VAULT_ITEM = 'updateVaultItem',
 }
