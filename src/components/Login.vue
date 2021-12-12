@@ -34,20 +34,46 @@
         variant="primary"
       >Login</b-button>
     </b-form>
+
+    <div class="mt-3">
+      <b-button
+        :key="idp.authority"
+        v-for="idp of identityProviders"
+        variant="outline-dark"
+        @click="() => $emit('useIdentityProvider', idp)"
+      >
+        <img
+          class="button-icon"
+          :src="idp.imageUrl"
+        />
+        {{getIdentityProviderTitle(idp)}}
+      </b-button>
+    </div>
   </div>
 </template>
 
+<style scoped>
+.button-icon {
+  max-height: 1.5em;
+  max-width: 1.5em;
+}
+</style>
+
 <script lang="ts">
+import Vue, { PropType } from 'vue';
+import { OAuthIdentityProvider } from 'vaultifier';
+import { getTranslation } from '../utils';
+
 export interface Data {
   appKey: string,
   appSecret: string,
   scope?: string,
 }
 
-import Vue, { PropType } from 'vue'
 export default Vue.extend({
   props: {
-    scopes: Array as PropType<string[] | undefined>
+    scopes: Array as PropType<string[] | undefined>,
+    identityProviders: Array as PropType<OAuthIdentityProvider[] | undefined>,
   },
   data: (): Data => ({
     appKey: '',
@@ -67,6 +93,9 @@ export default Vue.extend({
         appSecret: this.appSecret,
         scope: this.scope,
       } as Data);
+    },
+    getIdentityProviderTitle(identityProvider: OAuthIdentityProvider) {
+      return getTranslation(identityProvider.title);
     }
   },
   computed: {

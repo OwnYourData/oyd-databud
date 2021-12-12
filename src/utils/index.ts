@@ -1,5 +1,6 @@
 export * from './oca';
 export * from './vue';
+export * from './i18n';
 
 export function tryGet(obj: any, ...path: string[]) {
   path = path || [];

@@ -13,39 +13,44 @@
         <span class="lead">
           {{title}} <span class="text-muted">is loading <spinner></spinner></span>
         </span>
-
       </div>
     </b-container>
     <b-container v-else-if="hasMessage">
       <div class="jumbotron">
         <h1 class="display-5">Buddy Message</h1>
-        <p class="lead">
-          {{message}}
-        </p>
+        <p class="lead">{{message}}</p>
       </div>
     </b-container>
     <b-container v-else-if="isLoginFormShowed">
       <login
         :scopes="vaultSupport.scopes"
+        :identityProviders="identityProviders"
         @login="logIn"
+        @useIdentityProvider="tryInitializeVaultifier"
       ></login>
     </b-container>
     <router-view v-else></router-view>
   </div>
 </template>
 
+<style scoped>
+.lead {
+  white-space: pre-wrap;
+}
+</style>
+
 <script lang="ts">
 import Vue from "vue";
-import { create as createVaultifier, getInstance as getVaultifier } from './services';
+import { getInstance as getVaultifier, setInstance as setVaultifier } from './services';
 import Spinner from './components/Spinner.vue'
 import NavBar from './components/NavBar.vue'
 import Login, { Data as LoginData } from './components/Login.vue'
-import { ConfigService } from './services/config-service';
-import { Vaultifier, VaultEncryptionSupport, VaultSupport, VaultInfo, } from 'vaultifier';
+import { Vaultifier, VaultEncryptionSupport, VaultSupport, VaultInfo, VaultifierWeb, OAuthIdentityProvider, } from 'vaultifier';
 import { RoutePath } from './router';
 import { RouteParams } from "./router/routes";
 import { SchemaService } from "./services/schema-service";
 import { IStore } from "./store";
+import { ConfigService } from "./services/config-service";
 
 interface IData {
   isInitializing: boolean,
@@ -54,6 +59,7 @@ interface IData {
   encryptionSupport?: VaultEncryptionSupport,
   vaultSupport?: VaultSupport,
   vaultInfo?: VaultInfo,
+  vaultUrl?: string,
 }
 
 export default Vue.extend({
@@ -72,11 +78,10 @@ export default Vue.extend({
     encryptionSupport: undefined,
     vaultSupport: undefined,
     vaultInfo: undefined,
+    vaultUrl: undefined,
   }),
   methods: {
     async initialize() {
-      const vaultifier = await createVaultifier();
-
       this.tryInitializeVaultifier();
 
       const { searchParams } = new URL(window.location.href);
@@ -89,9 +94,36 @@ export default Vue.extend({
       if (itemId && this.$router.currentRoute.path !== RoutePath.ITEM_VIEW)
         this.$router.push(RoutePath.ITEM_VIEW);
     },
-    async tryInitializeVaultifier() {
-      const vaultifier = getVaultifier();
+    async tryInitializeVaultifier(idp?: OAuthIdentityProvider) {
       this.isInitializing = true;
+
+      let vaultifier: Vaultifier | undefined = undefined;
+
+      const vw = await VaultifierWeb.create({
+        baseUrl: ConfigService.get('endpoint', 'url'),
+        clientId: ConfigService.get('endpoint', 'clientId'),
+      });
+
+      if (vw.vaultifier)
+        this.vaultUrl = vw.vaultifier.urls.baseUrl;
+
+      try {
+        await vw.initialize({
+          oAuthType: idp,
+        });
+      } catch { /* */ }
+
+      if (vw.vaultifier) {
+        vaultifier = vw.vaultifier;
+        setVaultifier(vaultifier);
+      }
+
+      if (!vaultifier) {
+        this.message = `Sorry. I was not able to create a vaultifier instance.
+Try looking into the browser console to gain more insights on the problem.`;
+        this.isInitializing = false;
+        return;
+      }
 
       try {
         this.vaultSupport = await vaultifier.getVaultSupport();
@@ -154,6 +186,9 @@ export default Vue.extend({
     },
     isUiFluid(): boolean {
       return this.state.ui.isFluid;
+    },
+    identityProviders(): OAuthIdentityProvider[] {
+      return (this.vaultSupport?.oAuth ?? []).filter(x => (x as OAuthIdentityProvider).authority !== undefined) as OAuthIdentityProvider[];
     }
   },
   watch: {
