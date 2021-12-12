@@ -17,6 +17,9 @@
         :icon="encryptionIcon"
       ></b-icon>
     </b-nav-text>
+    <b-nav-text v-if="url">
+      <a :href="url">{{url}}</a>
+    </b-nav-text>
 
     <b-navbar-nav class="ml-auto">
       <b-nav-item>
@@ -78,6 +81,7 @@ export default Vue.extend({
     settingsActions: Array as PropType<string[]>,
     title: String as PropType<string>,
     description: String as PropType<string | undefined>,
+    url: String as PropType<string | undefined>,
   },
   data: (): Data => ({
     workingAction: undefined,

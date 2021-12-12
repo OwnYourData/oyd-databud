@@ -5,6 +5,7 @@
         :encryptionSupport="encryptionSupport"
         :title="title"
         :description="description"
+        :url="vaultUrl"
       >
       </nav-bar>
     </b-container>
