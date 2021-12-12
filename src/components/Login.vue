@@ -44,6 +44,7 @@
       >
         <img
           class="button-icon"
+          v-if="idp.imageUrl"
           :src="idp.imageUrl"
         />
         {{getIdentityProviderTitle(idp)}}
@@ -61,7 +62,7 @@
 
 <script lang="ts">
 import Vue, { PropType } from 'vue';
-import { OAuthIdentityProvider } from 'vaultifier';
+import { OAuthIdentityProvider, OAuthSupport } from 'vaultifier';
 import { getTranslation } from '../utils';
 
 export interface Data {
@@ -73,7 +74,7 @@ export interface Data {
 export default Vue.extend({
   props: {
     scopes: Array as PropType<string[] | undefined>,
-    identityProviders: Array as PropType<OAuthIdentityProvider[] | undefined>,
+    identityProviders: Array as PropType<(OAuthSupport | OAuthIdentityProvider)[] | undefined>,
   },
   data: (): Data => ({
     appKey: '',
@@ -95,7 +96,8 @@ export default Vue.extend({
       } as Data);
     },
     getIdentityProviderTitle(identityProvider: OAuthIdentityProvider) {
-      return getTranslation(identityProvider.title);
+      // 'OAuth' is the default string for OYD-internal authorization code
+      return getTranslation(identityProvider.title ?? 'OAuth');
     }
   },
   computed: {

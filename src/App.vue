@@ -46,7 +46,7 @@ import { getInstance as getVaultifier, setInstance as setVaultifier } from './se
 import Spinner from './components/Spinner.vue'
 import NavBar from './components/NavBar.vue'
 import Login, { Data as LoginData } from './components/Login.vue'
-import { Vaultifier, VaultEncryptionSupport, VaultSupport, VaultInfo, VaultifierWeb, OAuthIdentityProvider, } from 'vaultifier';
+import { Vaultifier, VaultEncryptionSupport, VaultSupport, VaultInfo, VaultifierWeb, OAuthIdentityProvider, OAuthSupport, } from 'vaultifier';
 import { RoutePath } from './router';
 import { RouteParams } from "./router/routes";
 import { SchemaService } from "./services/schema-service";
@@ -188,8 +188,8 @@ Try looking into the browser console to gain more insights on the problem.`;
     isUiFluid(): boolean {
       return this.state.ui.isFluid;
     },
-    identityProviders(): OAuthIdentityProvider[] {
-      return (this.vaultSupport?.oAuth ?? []).filter(x => (x as OAuthIdentityProvider).authority !== undefined) as OAuthIdentityProvider[];
+    identityProviders(): (OAuthSupport | OAuthIdentityProvider)[] | undefined {
+      return this.vaultSupport?.oAuth;
     }
   },
   watch: {
