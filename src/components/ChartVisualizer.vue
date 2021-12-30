@@ -24,6 +24,10 @@
         </b-input-group-append>
       </b-input-group>
 
+      <b-button @click="computeChartData">
+        Update Chart
+      </b-button>
+
       <div class="mt-3">
         <slot />
       </div>
@@ -64,6 +68,7 @@ interface Data {
   rows: Row[],
   labels: string[],
   scaleXExpression: string,
+  chartData: ChartData | undefined,
 }
 
 export default Vue.extend({
@@ -77,9 +82,23 @@ export default Vue.extend({
     rows: [{ expression: '' }],
     labels: [],
     scaleXExpression: '',
+    chartData: undefined,
   }),
   computed: {
-    chartData(): ChartData | undefined {
+    canRemoveRow() {
+      return this.rows.length > 1;
+    },
+  },
+  methods: {
+    addRow(idx: number) {
+      this.rows.splice(idx + 1, 0, {
+        expression: '',
+      })
+    },
+    removeRow(idx: number) {
+      this.rows.splice(idx, 1);
+    },
+    computeChartData(): ChartData | undefined {
       if (!this.items || this.items.length === 0)
         return;
 
@@ -117,23 +136,8 @@ export default Vue.extend({
         data.series.push({ values: series });
       }
 
-      if (data.series.length === 0)
+      this.chartData = data.series.length === 0 ? undefined : data;
         return;
-
-      return data;
-    },
-    canRemoveRow() {
-      return this.rows.length > 1;
-    },
-  },
-  methods: {
-    addRow(idx: number) {
-      this.rows.splice(idx + 1, 0, {
-        expression: '',
-      })
-    },
-    removeRow(idx: number) {
-      this.rows.splice(idx, 1);
     },
   },
 });
