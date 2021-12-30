@@ -54,6 +54,11 @@ export class Evaluator {
         timeStyle: 'medium',
       }).format(val);
 
+    // try parsing values as float
+    const floatVal = parseFloat(val);
+    if (!isNaN(floatVal))
+      return floatVal;
+
     return val;
   };
 }
