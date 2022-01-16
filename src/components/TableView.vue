@@ -47,8 +47,11 @@
           </list>
         </b-tab>
         <b-tab title="Charts">
-          <b-input-group prepend="Item Count">
+          <b-input-group prepend="Page Size">
             <b-input v-model="dataItemCount" />
+          </b-input-group>
+          <b-input-group prepend="Page Number">
+            <b-input v-model="dataItemPage" />
           </b-input-group>
 
           <chart-visualizer :items="vaultItems">
@@ -73,6 +76,7 @@ interface IData {
   selectedTable?: VaultTable,
   selectedTabIndex: number,
   dataItemCount: number,
+  dataItemPage?: number,
 }
 
 export default Vue.extend({
@@ -83,6 +87,7 @@ export default Vue.extend({
     selectedTable: undefined,
     selectedTabIndex: 0,
     dataItemCount: 50,
+    dataItemPage: undefined,
   }),
   components: {
     List,
@@ -117,6 +122,7 @@ export default Vue.extend({
 
       if (isChart) {
         refreshObj.size = this.dataItemCount;
+        refreshObj.page = this.dataItemPage;
       }
 
       this.$store.dispatch(ActionType.FETCH_VAULT_ITEMS, refreshObj);
