@@ -47,7 +47,6 @@ import SchemaView from '../components/SchemaView.vue';
 import RepoView from '../components/RepoView.vue';
 import TableView from '../components/TableView.vue';
 import { VaultItem, VaultMinMeta } from 'vaultifier/dist/module';
-import { renderForm } from '../utils';
 import { FetchState } from '@/store/fetch-state';
 
 import { getInstance } from '@/services';

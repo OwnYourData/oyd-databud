@@ -16,7 +16,7 @@
         ></raw-data>
       </b-tab>
       <b-tab
-        title="OCA-Form"
+        title="Form"
         v-if="hasSchema"
       >
         <oca-edit-view
@@ -96,11 +96,10 @@ import Vue, { PropType } from 'vue';
 import { VaultItem, VaultMinMeta, VaultPostItem } from 'vaultifier';
 import RawData from './RawData.vue';
 
-import OcaEditView from '../components/OCAEditView.vue';
-import RelationsView from '../components/RelationsView.vue';
-import HandySignaturForm from '../components/HandySignaturForm.vue';
+import OcaEditView from './FormEditView.vue';
+import RelationsView from './RelationsView.vue';
+import HandySignaturForm from './HandySignaturForm.vue';
 
-import { IStore } from '@/store';
 import { ActionType } from '@/store/action-type';
 import RawJson from './RawJson.vue';
 
@@ -148,7 +147,13 @@ export default Vue.extend({
   methods: {
     async saveVaultItem(item: VaultPostItem) {
       this.isSaving = true;
-      await this.$store.dispatch(ActionType.UPDATE_VAULT_ITEM, item);
+
+      try {
+        await this.$store.dispatch(ActionType.UPDATE_VAULT_ITEM, item);
+      } catch {
+        /* TODO: Error handling */
+      }
+
       this.isSaving = false;
     },
     selectVaultItem(id: number) {

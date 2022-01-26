@@ -7,13 +7,16 @@
     "build": "vue-cli-service build",
     "dockerize": "docker build -t gebsl/oyd-databud .",
     "deploy": "sh ./scripts/deploy.sh",
-    "lint": "vue-cli-service lint",
-    "postinstall": "sh ./scripts/postinstall.sh"
+    "lint": "vue-cli-service lint"
   },
   "dependencies": {
+    "@jsonforms/core": "^2.5.2",
+    "@jsonforms/vue2": "^2.5.2",
+    "@jsonforms/vue2-vanilla": "^2.5.2",
+    "@vue/composition-api": "^1.4.4",
     "bootstrap-vue": "^2.19.0",
     "expression-eval": "^5.0.0",
-    "oca.js-vue": "^0.1.1",
+    "soya-js": "^0.2.1",
     "vaultifier": "^2.7.0",
     "vue": "^2.6.12",
     "vue-bootstrap-typeahead": "^0.2.6",
@@ -33,7 +36,7 @@
     "babel-eslint": "^10.1.0",
     "eslint": "^6.7.2",
     "eslint-plugin-vue": "^6.2.2",
-    "typescript": "~3.9.3",
+    "typescript": "^4.5.5",
     "vue-cli-plugin-webpack-bundle-analyzer": "~2.0.0",
     "vue-template-compiler": "^2.6.11"
   },

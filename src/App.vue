@@ -49,7 +49,6 @@ import Login, { Data as LoginData } from './components/Login.vue'
 import { Vaultifier, VaultEncryptionSupport, VaultSupport, VaultInfo, VaultifierWeb, OAuthIdentityProvider, OAuthSupport, } from 'vaultifier';
 import { RoutePath } from './router';
 import { RouteParams } from "./router/routes";
-import { SchemaService } from "./services/schema-service";
 import { IStore } from "./store";
 import { ConfigService } from "./services/config-service";
 
@@ -164,9 +163,6 @@ Try looking into the browser console to gain more insights on the problem.`;
         // That's the dri of "ConfigurationItem", basically it's a key value pair
         schemaDri: '4ktjMzvwbhAeGM8Dwu67VcCnuJc52K3fVdq7V1qCPWLw',
       });
-
-      const ocaBaseUrl = configurationItems.find((x: any) => x.key === 'oca.backend.url');
-      SchemaService.setBaseUrl(ocaBaseUrl?.value)
     }
   },
   computed: {
