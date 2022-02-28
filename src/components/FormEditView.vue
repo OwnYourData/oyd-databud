@@ -39,7 +39,7 @@
     <spinner v-if="isLoading" />
     <oca-view
       ref="ocaView"
-      :data="data"
+      :data="formData"
       :schemaDri="selectedStructure ? selectedStructure.dri : undefined"
       @change="onDataChange"
     ></oca-view>
@@ -68,7 +68,7 @@ interface Data {
   suggestItems: SoyaQueryResult[],
   isLoading: boolean,
   showTypeahead: boolean,
-  data: any,
+  formData: any,
 }
 
 export default Vue.extend({
@@ -100,11 +100,8 @@ export default Vue.extend({
     suggestItems: [],
     isLoading: false,
     showTypeahead: false,
-    data: undefined,
+    formData: undefined,
   }),
-  created() {
-    this.data = this.item?.content;
-  },
   mounted() {
     if (this.schemaDri)
       this.selectStructure({
@@ -119,9 +116,9 @@ export default Vue.extend({
 
       // TODO: We should let the user decide whether DRI should be calculated automatically or not
       const postItem: VaultPostItem = {
-        content: this.data,
+        content: this.formData,
         id: this.item?.id,
-        dri: await crypto.generateHashlink(this.data),
+        dri: await crypto.generateHashlink(this.formData),
         schemaDri: this.selectedStructure.dri,
         mimeType: MimeType.JSON,
       };
@@ -145,7 +142,7 @@ export default Vue.extend({
       this.isLoading = false;
     },
     onDataChange(event: JsonFormsChangeEvent) {
-      this.data = event.data;
+      this.formData = event.data;
     }
   },
   computed: {
@@ -157,6 +154,12 @@ export default Vue.extend({
     }
   },
   watch: {
+    item: {
+      handler(value: VaultItem | undefined) {
+        this.formData = value?.content;
+      },
+      immediate: true,
+    },
     schemaDri(value?: string) {
       if (value)
         this.selectStructure({
