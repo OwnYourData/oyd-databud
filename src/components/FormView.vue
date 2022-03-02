@@ -27,6 +27,8 @@ import {
   mergeStyles,
   vanillaRenderers,
 } from "@jsonforms/vue2-vanilla";
+import { formRenderers } from './form-components';
+
 import { SoyaForm, Soya } from 'soya-js';
 import { defineComponent } from '@vue/composition-api';
 
@@ -42,6 +44,7 @@ const myStyles = mergeStyles(defaultStyles, { control: { label: "mylabel" } });
 const renderers = [
   ...vanillaRenderers,
   // here you can add custom renderers
+  ...formRenderers,
 ];
 
 export default defineComponent({

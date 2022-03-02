@@ -37,12 +37,11 @@
     </inline-group>
 
     <spinner v-if="isLoading" />
-    <oca-view
-      ref="ocaView"
+    <form-view
       :data="formData"
       :schemaDri="selectedStructure ? selectedStructure.dri : undefined"
       @change="onDataChange"
-    ></oca-view>
+    ></form-view>
   </div>
 </template>
 
@@ -50,7 +49,7 @@
 import Vue, { PropType } from 'vue';
 
 import { MimeType, VaultItem, VaultPostItem, crypto } from 'vaultifier';
-import OcaView from './FormView.vue';
+import FormView from './FormView.vue';
 import InlineGroup from './InlineGroup.vue';
 import CustomButton from './Button.vue';
 import Spinner from './Spinner.vue';
@@ -73,7 +72,7 @@ interface Data {
 
 export default Vue.extend({
   components: {
-    OcaView,
+    FormView,
     CustomButton,
     InlineGroup,
     Spinner,
