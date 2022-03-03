@@ -1,4 +1,5 @@
 import { getInstance } from '@/services';
+import { Soya } from 'soya-js';
 import { MultiResponse, Paging, Vaultifier, VaultItem, VaultItemsQuery, VaultMeta, VaultMinMeta, VaultPostItem, VaultRepo, VaultSchema, VaultTable, } from 'vaultifier';
 import Vue from 'vue';
 import Vuex, { Commit } from 'vuex'
@@ -157,7 +158,7 @@ export const getStore = () => {
           (commit, data) => {
             dispatch(ActionType.RESET_VAULT_ITEMS);
             commit(MutationType.SET_SCHEMA_DRIS, data);
-            // dispatch(ActionType.FETCH_SCHEMAS_TITLE);
+            dispatch(ActionType.FETCH_SCHEMAS_TITLE);
           },
           (store, state) => store.schemaDRI.state = state
         );
@@ -233,16 +234,18 @@ export const getStore = () => {
           (store, state) => store.vaultItem.currentState = state,
         )
       },
-      // async [ActionType.FETCH_SCHEMAS_TITLE]({ commit, state }) {
-      //   for (const schema of state.schemaDRI.all) {
-      //     SchemaService.getOverlays(schema.dri).then(overlays => {
-      //       if (overlays) {
-      //         schema.title = getTitle(overlays);
-      //         commit(MutationType.SET_SCHEMA_DRI_TITLE, schema);
-      //       }
-      //     });
-      //   }
-      // },
+      async [ActionType.FETCH_SCHEMAS_TITLE]({ commit, state }) {
+        const infos = await new Soya().info(state.schemaDRI.all.map(x => x.dri));
+
+        for (const info of infos) {
+          const schema = state.schemaDRI.all.find(x => x.dri === info.dri);
+
+          if (schema) {
+            schema.title = info.name;
+            commit(MutationType.SET_SCHEMA_DRI_TITLE, schema);
+          }
+        }
+      },
       async [ActionType.TOGGLE_UI_IS_FLUID]({ commit, state }) {
         commit(MutationType.SET_UI_IS_FLUID, !state.ui.isFluid);
       },
