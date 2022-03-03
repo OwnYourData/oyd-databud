@@ -16,11 +16,18 @@
     </b-form>
   </div>
   <b-alert
-    variant="warning"
-    v-else
+    variant="danger"
+    v-else-if="isError"
     show
   >
     Can not render a form.
+  </b-alert>
+  <b-alert
+    variant="primary"
+    v-else
+    show
+  >
+    Please select a form.
   </b-alert>
 </template>
 <script lang="ts">
@@ -41,6 +48,7 @@ interface Data {
   form?: SoyaForm,
   selectedLanguage?: string,
   isLoading: boolean,
+  isError: boolean,
 }
 
 // mergeStyles combines all classes from both styles definitions into one
@@ -56,6 +64,7 @@ export default defineComponent({
     form: undefined,
     selectedLanguage: undefined,
     isLoading: true,
+    isError: false,
     renderers: Object.freeze(renderers),
   }),
   props: {
@@ -77,11 +86,14 @@ export default defineComponent({
     async getForm() {
       this.form = undefined;
       this.isLoading = true;
+      this.isError = false;
 
       if (this.schemaDri) {
         try {
           this.form = await new Soya().getForm(this.schemaDri);
-        } catch { /* */ }
+        } catch {
+          this.isError = true;
+        }
       }
 
       this.isLoading = false;
