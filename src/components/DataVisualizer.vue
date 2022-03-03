@@ -19,14 +19,14 @@
         title="Form"
         v-if="hasSchema"
       >
-        <oca-edit-view
+        <form-edit-view
           :item="item"
           :schemaDri="schemaDri"
           :allowSelectSchema="false"
           :hasCancel="false"
           :isSaving="isSaving"
           @save="saveVaultItem"
-        ></oca-edit-view>
+        ></form-edit-view>
       </b-tab>
       <b-tab
         title="Relations"
@@ -96,7 +96,7 @@ import Vue, { PropType } from 'vue';
 import { VaultItem, VaultMinMeta, VaultPostItem } from 'vaultifier';
 import RawData from './RawData.vue';
 
-import OcaEditView from './FormEditView.vue';
+import FormEditView from './FormEditView.vue';
 import RelationsView from './RelationsView.vue';
 import HandySignaturForm from './HandySignaturForm.vue';
 
@@ -128,7 +128,7 @@ export default Vue.extend({
   }),
   components: {
     RawData,
-    OcaEditView,
+    FormEditView,
     RelationsView,
     HandySignaturForm,
     RawJson,

@@ -41,6 +41,7 @@
       :data="formData"
       :schemaDri="selectedStructure ? selectedStructure.dri : undefined"
       @change="onDataChange"
+      ref="form"
     ></form-view>
   </div>
 </template>
@@ -112,6 +113,11 @@ export default Vue.extend({
     async saveEdit() {
       if (!this.selectedStructure)
         return;
+
+      // @ts-expect-error
+      if (!(this.$refs.form).validate()) {
+        return;
+      }
 
       // TODO: We should let the user decide whether DRI should be calculated automatically or not
       const postItem: VaultPostItem = {

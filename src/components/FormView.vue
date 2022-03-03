@@ -1,7 +1,11 @@
 <template>
   <spinner v-if="isLoading" />
   <div v-else-if="hasForm">
-    <div class="row">
+    <b-form
+      class="row"
+      ref="form"
+      @submit.prevent
+    >
       <json-forms
         :data="this.data"
         :renderers="renderers"
@@ -9,7 +13,7 @@
         :uischema="form.ui"
         @change="onDataChange"
       />
-    </div>
+    </b-form>
   </div>
   <b-alert
     variant="warning"
@@ -85,6 +89,10 @@ export default defineComponent({
     onDataChange(event: JsonFormsChangeEvent) {
       this.$emit('change', event);
     },
+    validate(): boolean {
+      const form = (this.$refs.form as HTMLFormElement);
+      return form.reportValidity();
+    }
   },
   watch: {
     schemaDri() {
