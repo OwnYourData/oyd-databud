@@ -6,7 +6,9 @@
       :id="control.id + '-input'"
       :disabled="!control.enabled"
       :options="items"
-      v-model="control.data"
+      :multiple="isMultiple"
+      :select-size="selectSize"
+      v-model="model"
       @input="onChange"
     />
   </label>
@@ -22,21 +24,34 @@ import {
 import { defineComponent } from '@vue/composition-api';
 import { rendererProps, useJsonFormsControl, RendererProps } from '@jsonforms/vue2';
 
-const InputControlRenderer = defineComponent({
-  name: 'input-control-renderer',
+interface IData {
+  model: string | string[] | undefined;
+}
+
+const SelectControlRenderer = defineComponent({
+  name: 'select-control-renderer',
   props: {
     ...rendererProps(),
   },
+  data: (): IData => ({
+    model: undefined,
+  }),
   setup(props: RendererProps<ControlElement>) {
     return useJsonFormsControl(props);
   },
   methods: {
-    onChange(value: string) {
+    onChange(value: string | string[]) {
       this.handleChange(
         this.control.path,
         value,
       );
     }
+  },
+  created() {
+    if (this.isMultiple && !Array.isArray(this.control.data))
+      this.model = [];
+    else
+      this.model = this.control.data;
   },
   computed: {
     items(): { value: string, text: string }[] {
@@ -49,12 +64,18 @@ const InputControlRenderer = defineComponent({
         value,
         text: value,
       }));
-    }
+    },
+    isMultiple(): boolean {
+      return this.control.schema.type === 'array';
+    },
+    selectSize(): number {
+      return this.isMultiple ? 5 : 1;
+    },
   }
 });
-export default InputControlRenderer;
+export default SelectControlRenderer;
 export const entry: JsonFormsRendererRegistryEntry = {
-  renderer: InputControlRenderer,
+  renderer: SelectControlRenderer,
   tester: rankWith(20, isEnumControl)
 };
 </script>
