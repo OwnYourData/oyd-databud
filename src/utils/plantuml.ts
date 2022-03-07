@@ -54,6 +54,6 @@ function encode6bit(b: number) {
 }
 
 export const getPlantUmlUrl = (plantUmlString: string): string => {
-  const unescaped = unescape(encodeURIComponent(plantUmlString));
+  const unescaped = decodeURIComponent(encodeURIComponent(plantUmlString));
   return 'https://www.plantuml.com/plantuml/img/' + encode64(deflate(unescaped, 9));
 }
