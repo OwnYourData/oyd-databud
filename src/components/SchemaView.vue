@@ -41,14 +41,22 @@
         </b-list-group-item>
       </list>
     </section>
-    <oca-edit-view
-      v-if="showEditView"
-      class="col-md-12 oca-edit-view"
-      :schemaDri="editViewSchemaDri"
-      :isSaving="isSaving"
-      @save="saveVaultItem"
-      @cancel="() => _showEditView(false)"
-    ></oca-edit-view>
+    <b-container v-if="showEditView">
+      <b-alert
+        v-if="saveMessage"
+        show
+        variant="danger"
+      >
+        {{saveMessage}}
+      </b-alert>
+      <oca-edit-view
+        class="col-md-12 oca-edit-view"
+        :schemaDri="editViewSchemaDri"
+        :isSaving="isSaving"
+        @save="saveVaultItem"
+        @cancel="() => _showEditView(false)"
+      ></oca-edit-view>
+    </b-container>
   </div>
 </template>
 
@@ -57,7 +65,7 @@ import Vue from 'vue';
 import { IFetchVaultItems, IStore } from '../store';
 import List, { RefreshObj } from '../components/List.vue';
 import CustomButton from '../components/Button.vue';
-import OcaEditView from '../components/OCAEditView.vue';
+import OcaEditView from './FormEditView.vue';
 import { Vaultifier, VaultItem, VaultMinMeta, VaultPostItem, VaultSchema } from 'vaultifier/dist/module';
 import { ActionType } from '@/store/action-type';
 import { FetchState } from '@/store/fetch-state';
@@ -67,6 +75,7 @@ interface IData {
   showEditView: boolean,
   editViewSchema?: VaultSchema,
   isSaving: boolean,
+  saveMessage?: string,
 }
 
 export default Vue.extend({
@@ -78,6 +87,7 @@ export default Vue.extend({
     showEditView: false,
     editViewSchema: undefined,
     isSaving: false,
+    saveMessage: undefined,
   }),
   components: {
     CustomButton,
@@ -117,15 +127,22 @@ export default Vue.extend({
       this._showEditView(true);
     },
     async saveVaultItem(postItem: VaultPostItem) {
+      this.saveMessage = undefined;
       this.isSaving = true;
-      await this.$store.dispatch(ActionType.UPDATE_VAULT_ITEM, postItem);
+
+      try {
+        await this.$store.dispatch(ActionType.UPDATE_VAULT_ITEM, postItem);
+        this._showEditView(false);
+      } catch {
+        this.saveMessage = 'Could not save item';
+      }
 
       this.fetchVaultItems();
-      this._showEditView(false);
       this.isSaving = false;
     },
     _showEditView(show: boolean) {
       this.showEditView = show;
+      this.saveMessage = undefined;
       this.editViewSchema = this.selectedSchema;
 
       this.$emit('showEditView', this.showEditView);

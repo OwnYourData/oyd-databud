@@ -4,26 +4,25 @@
       <b-form
         inline
         @submit.prevent
-        v-if="allowSelectSchema && (showTypeahead || !hasSelectedSchemaDri)"
+        v-if="allowSelectSchema && (showTypeahead || !hasSelectedStructure)"
       >
         <b-typeahead
-          prepend="Search Schema..."
+          prepend="Search SOyA structure..."
           v-model="editableText"
-          :serializer="s => s.title"
+          :serializer="s => s.name"
           :data="suggestItems"
           @hit="selectFromTypeahead"
         >{{editableText}}</b-typeahead>
-
       </b-form>
       <b-button
         v-else
         @click="showTypeahead = true"
-      >{{selectedSchemaTitle}}</b-button>
+      >{{selectedStructureName}}</b-button>
       <div class="spacer"></div>
       <custom-button
         @click="saveEdit"
         :type="isSaving ? 'primary-outline' : undefined"
-        :disabled="!hasSelectedSchemaDri || isSaving"
+        :disabled="!hasSelectedStructure || isSaving"
       >
         <spinner v-if="isSaving" />
         <template v-else>
@@ -38,12 +37,12 @@
     </inline-group>
 
     <spinner v-if="isLoading" />
-    <oca-view
-      v-else-if="hasSelectedSchemaDri"
-      ref="ocaView"
-      :item="item"
-      :schemaDri="selectedSchemaDri"
-    ></oca-view>
+    <form-view
+      :data="formData"
+      :schemaDri="selectedStructure ? selectedStructure.dri : undefined"
+      @change="onDataChange"
+      ref="form"
+    ></form-view>
   </div>
 </template>
 
@@ -51,25 +50,30 @@
 import Vue, { PropType } from 'vue';
 
 import { MimeType, VaultItem, VaultPostItem, crypto } from 'vaultifier';
-import OcaView from './OCAView.vue';
+import FormView from './FormView.vue';
 import InlineGroup from './InlineGroup.vue';
 import CustomButton from './Button.vue';
-import { getObjectFromForm } from '@/utils';
-import { SchemaService, SuggestItem } from '@/services/schema-service';
 import Spinner from './Spinner.vue';
+import { JsonFormsChangeEvent } from '@jsonforms/vue2';
+import { Soya, SoyaQueryResult } from 'soya-js';
+
+interface SoyaStructure {
+  name?: string;
+  dri: string;
+}
 
 interface Data {
   editableText?: string,
-  selectedSchemaTitle?: string,
-  selectedSchemaDri?: string,
-  suggestItems: SuggestItem[],
+  selectedStructure?: SoyaStructure,
+  suggestItems: SoyaQueryResult[],
   isLoading: boolean,
   showTypeahead: boolean,
+  formData: any,
 }
 
 export default Vue.extend({
   components: {
-    OcaView,
+    FormView,
     CustomButton,
     InlineGroup,
     Spinner,
@@ -92,70 +96,90 @@ export default Vue.extend({
   },
   data: (): Data => ({
     editableText: '',
-    selectedSchemaTitle: undefined,
-    selectedSchemaDri: undefined,
+    selectedStructure: undefined,
     suggestItems: [],
     isLoading: false,
     showTypeahead: false,
+    formData: undefined,
   }),
   mounted() {
     if (this.schemaDri)
-      this.selectSchemaDri(this.schemaDri);
+      this.selectStructure({
+        name: undefined,
+        dri: this.schemaDri,
+      });
   },
   methods: {
     async saveEdit() {
-      if (!this.selectedSchemaDri)
+      if (!this.selectedStructure)
         return;
 
-      const objectToSave = getObjectFromForm((this.$refs.ocaView as any).form);
+      // @ts-expect-error
+      if (!(this.$refs.form).validate()) {
+        return;
+      }
 
       // TODO: We should let the user decide whether DRI should be calculated automatically or not
       const postItem: VaultPostItem = {
-        content: objectToSave,
+        content: this.formData,
         id: this.item?.id,
-        dri: await crypto.generateHashlink(objectToSave),
-        schemaDri: this.selectedSchemaDri,
+        dri: await crypto.generateHashlink(this.formData),
+        schemaDri: this.selectedStructure.dri,
         mimeType: MimeType.JSON,
       };
 
       this.$emit('save', postItem);
+
     },
     cancelEdit(): void {
       this.$emit('cancel');
     },
-    async selectSchemaDri(schemaDri?: string) {
-      this.selectedSchemaDri = schemaDri;
+    selectStructure(structure?: SoyaStructure) {
+      this.selectedStructure = structure;
 
-      this.editableText = this.selectedSchemaTitle = schemaDri ? await SchemaService.getTitle(schemaDri) : '';
       this.showTypeahead = false;
     },
-    async selectFromTypeahead(item: SuggestItem): Promise<void> {
+    async selectFromTypeahead(result: SoyaQueryResult): Promise<void> {
       this.isLoading = true;
 
-      const list = await SchemaService.getOverlaySchemaDRIsFromSchemaBase(item.schemaBaseDri);
-
-      if (list && list.length > 0)
-        this.selectSchemaDri(list[0]);
-      else
-        this.selectSchemaDri(undefined);
+      this.selectStructure(result);
 
       this.isLoading = false;
+    },
+    onDataChange(event: JsonFormsChangeEvent) {
+      this.formData = event.data;
     }
   },
   computed: {
-    hasSelectedSchemaDri(): boolean {
-      return !!this.selectedSchemaDri;
+    hasSelectedStructure(): boolean {
+      return !!this.selectedStructure;
     },
+    selectedStructureName(): string | undefined {
+      return this.selectedStructure ? (this.selectedStructure.name || this.selectedStructure.dri) : undefined;
+    }
   },
   watch: {
+    item: {
+      handler(value: VaultItem | undefined) {
+        this.formData = value?.content;
+      },
+      immediate: true,
+    },
     schemaDri(value?: string) {
-      this.selectSchemaDri(value);
+      if (value)
+        this.selectStructure({
+          name: undefined,
+          dri: value,
+        });
+      else
+        this.selectStructure(undefined);
     },
     async editableText(value: string) {
       if (!value)
         this.suggestItems = [];
-      else
-        this.suggestItems = await SchemaService.getSuggestions(value);
+      // type at least 3 characters
+      else if (value.length >= 3)
+        this.suggestItems = await new Soya().query({ name: value });
     }
   }
 })

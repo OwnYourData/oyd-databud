@@ -1,4 +1,3 @@
-export * from './oca';
 export * from './vue';
 export * from './i18n';
 
