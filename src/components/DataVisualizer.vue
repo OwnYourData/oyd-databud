@@ -3,6 +3,7 @@
     <b-tabs
       pills
       card
+      lazy
       v-model="activeTabIndex"
     >
       <b-tab
@@ -69,6 +70,9 @@
         <raw-json :data="item.raw" />
 
       </b-tab>
+      <b-tab title="Provenance">
+        <provis :item="item" />
+      </b-tab>
     </b-tabs>
   </b-card>
 </template>
@@ -99,6 +103,7 @@ import RawData from './RawData.vue';
 import FormEditView from './FormEditView.vue';
 import RelationsView from './RelationsView.vue';
 import HandySignaturForm from './HandySignaturForm.vue';
+import Provis from './Provis.vue';
 
 import { ActionType } from '@/store/action-type';
 import RawJson from './RawJson.vue';
@@ -132,6 +137,7 @@ export default Vue.extend({
     RelationsView,
     HandySignaturForm,
     RawJson,
+    Provis,
   },
   computed: {
     schemaDri(): string | undefined {
