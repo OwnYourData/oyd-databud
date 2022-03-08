@@ -1,6 +1,16 @@
 <template>
   <spinner v-if="isLoading" />
   <div v-else-if="hasForm">
+    <b-form-group
+      label="Language"
+      class="languages"
+    >
+      <b-form-select
+        v-if="hasLanguages"
+        :options="languageOptions"
+        v-model="selectedLanguage"
+      />
+    </b-form-group>
     <b-form
       class="row"
       ref="form"
@@ -90,7 +100,10 @@ export default defineComponent({
 
       if (this.schemaDri) {
         try {
-          this.form = await new Soya().getForm(this.schemaDri);
+          this.form = await new Soya().getForm(this.schemaDri, {
+            language: this.selectedLanguage,
+          });
+          this.selectedLanguage = this.selectedLanguage ?? (this.form.languages ? this.form.languages[0] : undefined);
         } catch {
           this.isError = true;
         }
@@ -109,12 +122,27 @@ export default defineComponent({
   watch: {
     schemaDri() {
       this.getForm();
+    },
+    selectedLanguage() {
+      this.getForm();
     }
   },
   computed: {
     hasForm(): boolean {
       return !!this.form;
     },
+    hasLanguages(): boolean {
+      return (this.form?.languages?.length ?? 0) > 0;
+    },
+    languageOptions(): { value: string, text: string }[] {
+      if (!this.hasLanguages || !this.form?.languages)
+        return [];
+      else
+        return this.form.languages.map(x => ({
+          value: x,
+          text: x,
+        }));
+    }
   },
   provide() {
     return {
@@ -126,6 +154,6 @@ export default defineComponent({
 
 <style scoped>
 .languages {
-  margin-bottom: 2em;
+  max-width: 8em;
 }
 </style>
