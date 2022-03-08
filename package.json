@@ -17,7 +17,7 @@
     "@vue/composition-api": "^1.4.4",
     "bootstrap-vue": "^2.19.0",
     "expression-eval": "^5.0.0",
-    "soya-js": "^0.3.8",
+    "soya-js": "^0.3.10",
     "vaultifier": "^2.9.0",
     "vue": "^2.6.12",
     "vue-bootstrap-typeahead": "^0.2.6",

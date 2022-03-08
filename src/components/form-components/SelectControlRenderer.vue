@@ -1,7 +1,8 @@
 <template>
-  <label>
-    {{control.label}}
-
+  <b-form-group
+    :label="control.label"
+    :description="control.uischema.description"
+  >
     <b-form-select
       :id="control.id + '-input'"
       :disabled="!control.enabled"
@@ -11,7 +12,7 @@
       v-model="model"
       @input="onChange"
     />
-  </label>
+  </b-form-group>
 </template>
 
 <script lang="ts">

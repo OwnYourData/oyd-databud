@@ -1,7 +1,8 @@
 <template>
-  <label>
-    {{control.label}}
-
+ <b-form-group
+    :label="control.label"
+    :description="control.uischema.description"
+  >
     <b-form-input
       :id="control.id + '-input'"
       :disabled="!control.enabled"
@@ -17,7 +18,7 @@
     <b-form-invalid-feedback>
       Input could not be validated.
     </b-form-invalid-feedback>
-  </label>
+  </b-form-group>
 </template>
 
 <script lang="ts">

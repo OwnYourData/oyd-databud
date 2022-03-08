@@ -1,14 +1,15 @@
 <template>
-  <label>
-    {{control.label}}
-
+  <b-form-group
+    :label="control.label"
+    :description="control.uischema.description"
+  >
     <b-form-datepicker
       :id="control.id + '-input'"
       :disabled="!control.enabled"
       v-model="control.data"
       @input="onChange"
     />
-  </label>
+  </b-form-group>
 </template>
 
 <script lang="ts">
