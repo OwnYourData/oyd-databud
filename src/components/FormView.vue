@@ -2,11 +2,11 @@
   <spinner v-if="isLoading" />
   <div v-else-if="hasForm">
     <b-form-group
+      v-if="hasLanguages"
       label="Language"
       class="languages"
     >
       <b-form-select
-        v-if="hasLanguages"
         :options="languageOptions"
         v-model="selectedLanguage"
       />
