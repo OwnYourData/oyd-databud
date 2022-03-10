@@ -19,15 +19,32 @@
         </slot>
       </b-list-group>
     </div>
-    <b-pagination
-      v-if="totalItems && page && pageItems"
-      :disabled="isLoading"
-      :total-rows="totalItems"
-      :per-page="pageItems"
-      v-model="page"
-      @page-click="changePage"
-      align="fill"
-    />
+    <div v-if="totalItems && page && pageItems">
+      <div>
+        <b-input-group
+          class="d-flex justify-content-center"
+          prepend="Page"
+        >
+          <b-form-input
+            :disabled="isLoading"
+            class="input-page"
+            v-model="inputPage"
+            type="number"
+            @keypress="inputPageKeydown"
+          />
+        </b-input-group>
+      </div>
+
+      <b-pagination
+        :disabled="isLoading"
+        :total-rows="totalItems"
+        :per-page="pageItems"
+        v-model="page"
+        @page-click="paginationPageChange"
+        align="fill"
+      >
+      </b-pagination>
+    </div>
   </div>
 </template>
 
@@ -44,6 +61,7 @@ export interface RefreshObj {
 
 interface Data {
   page?: number,
+  inputPage?: number,
 }
 
 export default Vue.extend({
@@ -58,6 +76,7 @@ export default Vue.extend({
   },
   data: (): Data => ({
     page: undefined,
+    inputPage: undefined,
   }),
   components: {
     Spinner,
@@ -70,16 +89,26 @@ export default Vue.extend({
   watch: {
     currentPage() {
       this.page = this.currentPage;
+    },
+    page() {
+      this.inputPage = this.page;
     }
   },
   methods: {
-    changePage(evt: BvEvent, page: number) {
+    changePage(page: number) {
       this.refresh(page);
+    },
+    paginationPageChange(_: BvEvent, page: number) {
+      this.changePage(page);
     },
     refresh(page?: number) {
       this.$emit('refresh', {
         page,
       });
+    },
+    inputPageKeydown(event: KeyboardEvent) {
+      if (this.inputPage && event.key === 'Enter')
+        this.changePage(this.inputPage);
     }
   }
 });
@@ -95,5 +124,12 @@ export default Vue.extend({
 .list > * {
   overflow-x: hidden;
   text-overflow: ellipsis;
+}
+
+.input-page {
+  max-width: 4em;
+  text-align: center;
+
+  appearance: textfield;
 }
 </style>
