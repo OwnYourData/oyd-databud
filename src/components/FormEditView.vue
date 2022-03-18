@@ -56,6 +56,7 @@ import CustomButton from './Button.vue';
 import Spinner from './Spinner.vue';
 import { JsonFormsChangeEvent } from '@jsonforms/vue2';
 import { Soya, SoyaQueryResult } from 'soya-js';
+import { IStore } from '@/store';
 
 interface SoyaStructure {
   name?: string;
@@ -136,6 +137,12 @@ export default Vue.extend({
     },
     selectStructure(structure?: SoyaStructure) {
       this.selectedStructure = structure;
+
+      if (structure && !structure.name) {
+        const item = (this.$store.state as IStore).schemaDRI.all.find(x => x.dri === structure.dri);
+        if (item)
+          structure.name = item.title;
+      }
 
       this.showTypeahead = false;
     },
