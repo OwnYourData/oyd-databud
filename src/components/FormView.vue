@@ -12,7 +12,7 @@
       />
     </b-form-group>
     <b-form
-      class="row"
+    class="form"
       ref="form"
       @submit.prevent
     >
@@ -155,5 +155,9 @@ export default defineComponent({
 <style scoped>
 .languages {
   max-width: 8em;
+}
+
+.form {
+  max-width: 30em;
 }
 </style>
