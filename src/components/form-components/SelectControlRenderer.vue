@@ -3,12 +3,24 @@
     :label="control.label"
     :description="control.uischema.description"
   >
+    <multiselect
+      v-if="isMultiple"
+      v-model="model"
+      :id="control.id + '-input'"
+      :options="items"
+      :multiple="true"
+      :disabled="!control.enabled"
+      :close-on-select="false"
+      :clear-on-select="false"
+      :preserve-search="true"
+      placeholder="Select from list"
+    />
+
     <b-form-select
+      v-else
       :id="control.id + '-input'"
       :disabled="!control.enabled"
       :options="items"
-      :multiple="isMultiple"
-      :select-size="selectSize"
       v-model="model"
       @input="onChange"
     />
@@ -40,8 +52,8 @@ const SelectControlRenderer = defineComponent({
   setup(props: RendererProps<ControlElement>) {
     return useJsonFormsControl(props);
   },
-  methods: {
-    onChange(value: string | string[]) {
+  watch: {
+    model(value?: string) {
       this.handleChange(
         this.control.path,
         value,
@@ -61,16 +73,10 @@ const SelectControlRenderer = defineComponent({
       if (!items)
         return [];
 
-      return items.map(value => ({
-        value,
-        text: value,
-      }));
+      return items.sort();
     },
     isMultiple(): boolean {
       return this.control.schema.type === 'array';
-    },
-    selectSize(): number {
-      return this.isMultiple ? 5 : 1;
     },
   }
 });
