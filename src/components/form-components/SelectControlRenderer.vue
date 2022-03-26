@@ -15,14 +15,12 @@
       :preserve-search="true"
       placeholder="Select from list"
     />
-
     <b-form-select
       v-else
       :id="control.id + '-input'"
       :disabled="!control.enabled"
       :options="items"
       v-model="model"
-      @input="onChange"
     />
   </b-form-group>
 </template>
@@ -36,6 +34,7 @@ import {
 } from '@jsonforms/core';
 import { defineComponent } from '@vue/composition-api';
 import { rendererProps, useJsonFormsControl, RendererProps } from '@jsonforms/vue2';
+import { sort } from '@/utils';
 
 interface IData {
   model: string | string[] | undefined;
@@ -73,7 +72,10 @@ const SelectControlRenderer = defineComponent({
       if (!items)
         return [];
 
-      return items.sort();
+      return sort(items, x => x.title ?? x).map(x => ({
+        text: x.title ?? x,
+        value: x.const ?? x,
+      }));
     },
     isMultiple(): boolean {
       return this.control.schema.type === 'array';
