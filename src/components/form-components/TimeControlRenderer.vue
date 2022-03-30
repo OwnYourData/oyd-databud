@@ -22,7 +22,7 @@
           :required="control.required"
           v-model="control.data"
           @input="onChange"
-          locale="en"
+          locale="de"
           button-only
           right
           show-seconds
