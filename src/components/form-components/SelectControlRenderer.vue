@@ -13,6 +13,8 @@
       :close-on-select="false"
       :clear-on-select="false"
       :preserve-search="true"
+      track-by="value"
+      label="text"
       placeholder="Select from list"
     />
     <b-form-select
@@ -37,7 +39,12 @@ import { rendererProps, useJsonFormsControl, RendererProps } from '@jsonforms/vu
 import { sort } from '@/utils';
 
 interface IData {
-  model: string | string[] | undefined;
+  model: string | string[] | SelectItem[] | undefined;
+}
+
+interface SelectItem {
+  value: string;
+  text: string;
 }
 
 const SelectControlRenderer = defineComponent({
@@ -52,21 +59,42 @@ const SelectControlRenderer = defineComponent({
     return useJsonFormsControl(props);
   },
   watch: {
-    model(value?: string) {
+    model(value?: string | string[] | SelectItem[]) {
+      let val = value;
+
+      if (Array.isArray(val))
+        val = val.map(item => {
+          // multiselect returns values as object
+          // but we only want to save the values, not the whole object
+          // therefore we extract it here
+          if (typeof item === 'object')
+            return item.value;
+          else
+            return item;
+        });
+
       this.handleChange(
         this.control.path,
-        value,
+        val,
       );
     }
   },
   created() {
-    if (this.isMultiple && !Array.isArray(this.control.data))
-      this.model = [];
+    if (this.isMultiple)
+      if (Array.isArray(this.control.data))
+        // we only save values as data
+        // however the multiselect control expects objects (including the text) as model value
+        // therefore we find the corresponding object for each value
+        this.model = this.control.data
+          .map(val => this.items.find(it => it.value === val))
+          .filter(x => x !== undefined) as SelectItem[];
+      else
+        this.model = [];
     else
       this.model = this.control.data;
   },
   computed: {
-    items(): { value: string, text: string }[] {
+    items(): SelectItem[] {
       const { enum: items } = this.control.schema;
 
       if (!items)
