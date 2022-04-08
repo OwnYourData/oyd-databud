@@ -100,7 +100,9 @@ export default defineComponent({
 
       if (this.schemaDri) {
         try {
-          this.form = await new Soya().getForm(this.schemaDri, {
+          const soya = new Soya();
+          const doc = await soya.pull(this.schemaDri);
+          this.form = await soya.getForm(doc, {
             language: this.selectedLanguage,
           });
           this.selectedLanguage = this.selectedLanguage ?? (this.form.languages ? this.form.languages[0] : undefined);
