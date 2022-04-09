@@ -94,7 +94,7 @@ export default Vue.extend({
       if (itemId && this.$router.currentRoute.path !== RoutePath.ITEM_VIEW)
         this.$router.push(RoutePath.ITEM_VIEW);
     },
-    async tryInitializeVaultifier(idp?: OAuthIdentityProvider) {
+    async tryInitializeVaultifier(credentials?: OAuthIdentityProvider | LoginData) {
       this.isInitializing = true;
 
       let vaultifier: Vaultifier | undefined = undefined;
@@ -108,10 +108,21 @@ export default Vue.extend({
         this.vaultUrl = vw.vaultifier.urls.baseUrl;
 
       try {
-        await vw.initialize({
-          oAuthType: idp,
-        });
-      } catch { /* */ }
+        if (credentials) {
+          // APP_KEY and APP_SECRET based authentication
+          if (vw.vaultifier && credentials.scope) {
+            vw.vaultifier.setCredentials(credentials);
+            await vw.vaultifier.initialize();
+          }
+          // external authentication provider
+          else
+            await vw.initialize({
+              oAuthType: credentials as OAuthIdentityProvider,
+            });
+        }
+      } catch (e) {
+        console.error(e);
+      }
 
       if (vw.vaultifier) {
         vaultifier = vw.vaultifier;
@@ -155,8 +166,7 @@ Try looking into the browser console to gain more insights on the problem.`;
       this.isInitializing = false;
     },
     logIn(credentials: LoginData) {
-      getVaultifier().setCredentials(credentials);
-      this.tryInitializeVaultifier();
+      this.tryInitializeVaultifier(credentials);
     },
     async initializeOca() {
       const { content: configurationItems } = await getVaultifier().getValues({
