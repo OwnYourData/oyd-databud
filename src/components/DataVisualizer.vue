@@ -7,16 +7,6 @@
       v-model="activeTabIndex"
     >
       <b-tab
-        title="Raw Data"
-        v-if="showRawView"
-      >
-        <raw-data
-          :item="item"
-          :isSaving="isSaving"
-          @save="saveVaultItem"
-        ></raw-data>
-      </b-tab>
-      <b-tab
         title="Form"
         v-if="hasSchema"
       >
@@ -28,6 +18,16 @@
           :isSaving="isSaving"
           @save="saveVaultItem"
         ></form-edit-view>
+      </b-tab>
+      <b-tab
+        title="Raw Data"
+        v-if="showRawView"
+      >
+        <raw-data
+          :item="item"
+          :isSaving="isSaving"
+          @save="saveVaultItem"
+        ></raw-data>
       </b-tab>
       <b-tab
         title="Relations"

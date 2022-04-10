@@ -26,6 +26,16 @@
         <template v-slot:header-end>
           <custom-button @click="addItem">New</custom-button>
           <custom-button
+            @click="addVaccinationItem"
+            :type="isAddingNewVaccination ? 'success-outline' : 'success'"
+            :disabled="isAddingNewVaccination"
+          >
+            <spinner v-if="isAddingNewVaccination" />
+            <template v-else>
+              New Vaccination
+            </template>
+          </custom-button>
+          <custom-button
             type="danger"
             @click="deleteSelectedVaultItem"
             :disabled="isDeleteButtonDisabled"
@@ -66,15 +76,19 @@ import { IFetchVaultItems, IStore } from '../store';
 import List, { RefreshObj } from '../components/List.vue';
 import CustomButton from '../components/Button.vue';
 import OcaEditView from './FormEditView.vue';
-import { Vaultifier, VaultItem, VaultMinMeta, VaultPostItem, VaultSchema } from 'vaultifier/dist/module';
+import { MimeType, VaultItem, VaultMinMeta, VaultPostItem, VaultSchema } from 'vaultifier/dist/module';
 import { ActionType } from '@/store/action-type';
 import { FetchState } from '@/store/fetch-state';
+import { getInstance } from '@/services';
+import Spinner from './Spinner.vue';
+import { ConfigService } from '@/services/config-service';
 
 interface IData {
   selectedSchema?: VaultSchema,
   showEditView: boolean,
   editViewSchema?: VaultSchema,
   isSaving: boolean,
+  isAddingNewVaccination: boolean,
   saveMessage?: string,
 }
 
@@ -87,12 +101,14 @@ export default Vue.extend({
     showEditView: false,
     editViewSchema: undefined,
     isSaving: false,
+    isAddingNewVaccination: false,
     saveMessage: undefined,
   }),
   components: {
     CustomButton,
     OcaEditView,
     List,
+    Spinner,
   },
   methods: {
     async initialize() {
@@ -125,6 +141,49 @@ export default Vue.extend({
     async addItem() {
       this.selectVaultItem(undefined);
       this._showEditView(true);
+    },
+    async addVaccinationItem() {
+      this.isAddingNewVaccination = true;
+
+      const vaultifier = getInstance();
+      const state = this.$store.state as IStore;
+      let response: VaultMinMeta;
+
+      try {
+        // TODO: enable new endpoint
+        // const response = await vaultifier.post('/api/new_vaccination', true);
+        response = await vaultifier.postItem({
+          content: { name: 'Gabriel Test' },
+          schemaDri: ConfigService.get('settings', 'vaccinationSchema'),
+          mimeType: MimeType.JSON,
+        });
+      } catch (e) {
+        console.error(e);
+        return;
+      }
+
+      // const vaultItemId = response.data.id;
+      const vaultItemId = response.id;
+
+      const vaultItem = await vaultifier.getItem({ id: vaultItemId });
+
+      if (!vaultItem.schemaDri) {
+        console.error('Vault item does not have schema DRI!');
+        return;
+      }
+
+      await this.fetchSchemas();
+      const schema = state.schemaDRI.all.find(x => x.dri === vaultItem.schemaDri);
+
+      if (!schema) {
+        console.error('Could not find schema DRI in internal list!');
+        return;
+      }
+
+      await this.selectSchema(schema);
+      await this.selectVaultItem(vaultItem);
+
+      this.isAddingNewVaccination = false;
     },
     async saveVaultItem(postItem: VaultPostItem) {
       this.saveMessage = undefined;

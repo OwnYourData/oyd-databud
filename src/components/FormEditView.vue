@@ -30,6 +30,17 @@
         </template>
       </custom-button>
       <custom-button
+        v-if="showVaccinationButton"
+        @click="vaccinate"
+        :type="isVaccinating ? 'success-outline' : 'success'"
+        :disabled="isVaccinating"
+      >
+        <spinner v-if="isVaccinating" />
+        <template v-else>
+          Vaccinate
+        </template>
+      </custom-button>
+      <custom-button
         v-if="hasCancel"
         @click="cancelEdit"
         type="danger"
@@ -57,6 +68,8 @@ import Spinner from './Spinner.vue';
 import { JsonFormsChangeEvent } from '@jsonforms/vue2';
 import { Soya, SoyaQueryResult } from 'soya-js';
 import { IStore } from '@/store';
+import { getInstance } from '@/services';
+import { ConfigService } from '@/services/config-service';
 
 interface SoyaStructure {
   name?: string;
@@ -68,6 +81,7 @@ interface Data {
   selectedStructure?: SoyaStructure,
   suggestItems: SoyaQueryResult[],
   isLoading: boolean,
+  isVaccinating: boolean,
   showTypeahead: boolean,
   formData: any,
 }
@@ -100,6 +114,7 @@ export default Vue.extend({
     selectedStructure: undefined,
     suggestItems: [],
     isLoading: false,
+    isVaccinating: false,
     showTypeahead: false,
     formData: undefined,
   }),
@@ -111,13 +126,13 @@ export default Vue.extend({
       });
   },
   methods: {
-    async saveEdit() {
+    async saveEdit(): Promise<boolean> {
       if (!this.selectedStructure)
-        return;
+        return false;
 
       // @ts-expect-error
       if (!(this.$refs.form).validate()) {
-        return;
+        return false;
       }
 
       // TODO: We should let the user decide whether DRI should be calculated automatically or not
@@ -130,7 +145,20 @@ export default Vue.extend({
       };
 
       this.$emit('save', postItem);
+      return true;
+    },
+    async vaccinate() {
+      this.isVaccinating = true;
 
+      // if saving did not work, we do not execute vaccination
+      if (this.item && await this.saveEdit())
+        try {
+          await getInstance().put(`/api/update_vaccination/${this.item.id}`);
+        } catch (e) {
+          console.error(e);
+        }
+
+      this.isVaccinating = false;
     },
     cancelEdit(): void {
       this.$emit('cancel');
@@ -163,6 +191,9 @@ export default Vue.extend({
     },
     selectedStructureName(): string | undefined {
       return this.selectedStructure ? (this.selectedStructure.name || this.selectedStructure.dri) : undefined;
+    },
+    showVaccinationButton(): boolean {
+      return this.schemaDri === ConfigService.get('settings', 'vaccinationSchema');
     }
   },
   watch: {

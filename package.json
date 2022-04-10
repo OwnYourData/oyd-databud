@@ -1,6 +1,6 @@
 {
   "name": "oyd-databud",
-  "version": "0.15.22",
+  "version": "0.15.22-idunion.1",
   "license": "MIT",
   "private": "true",
   "scripts": {
@@ -18,7 +18,7 @@
     "bootstrap-vue": "^2.19.0",
     "expression-eval": "^5.0.0",
     "soya-js": "^0.4.0",
-    "vaultifier": "^2.9.1",
+    "vaultifier": "^2.10.0",
     "vue": "^2.6.12",
     "vue-bootstrap-typeahead": "^0.2.6",
     "vue-multiselect": "^2.1.6",
