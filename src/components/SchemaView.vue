@@ -82,6 +82,7 @@ import { FetchState } from '@/store/fetch-state';
 import { getInstance } from '@/services';
 import Spinner from './Spinner.vue';
 import { ConfigService } from '@/services/config-service';
+import { NetworkResponse } from 'vaultifier/dist/module/communicator';
 
 interface IData {
   selectedSchema?: VaultSchema,
@@ -147,24 +148,16 @@ export default Vue.extend({
 
       const vaultifier = getInstance();
       const state = this.$store.state as IStore;
-      let response: VaultMinMeta;
+      let response: NetworkResponse;
 
       try {
-        // TODO: enable new endpoint
-        // const response = await vaultifier.post('/api/new_vaccination', true);
-        response = await vaultifier.postItem({
-          content: { name: 'Gabriel Test' },
-          schemaDri: ConfigService.get('settings', 'vaccinationSchema'),
-          mimeType: MimeType.JSON,
-        });
+        response = await vaultifier.post('/api/new_vaccination', true);
       } catch (e) {
         console.error(e);
         return;
       }
 
-      // const vaultItemId = response.data.id;
-      const vaultItemId = response.id;
-
+      const vaultItemId = response.data.id;
       const vaultItem = await vaultifier.getItem({ id: vaultItemId });
 
       if (!vaultItem.schemaDri) {
