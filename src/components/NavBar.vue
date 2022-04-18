@@ -92,33 +92,38 @@ export default Vue.extend({
 
       const { key, title, method, url, usesAuth } = action;
       const vaultifier = getInstance();
-      const baseUrlPlaceholder = '{{base_url}}'
+      const baseUrlPlaceholder = '{{base_url}}';
 
-      try {
-        if (url.indexOf(baseUrlPlaceholder) !== -1) {
-          const vaultifierUrl = url.replace(baseUrlPlaceholder, '');
-
-          if (method === 'POST')
-            await vaultifier.post(vaultifierUrl, usesAuth);
-          else if (method === 'GET')
-            await vaultifier.get(vaultifierUrl, usesAuth);
-          else
-            throw new Error(`Invalid method for action ${key}`);
-        }
-        else {
-          const req = await fetch(url, {
-            method,
-            headers: {
-              'Content-Type': 'application/json',
-            },
-          });
-          await req.text();
-        }
-
-        this.$bvModal.msgBoxOk(`The action "${title}" was executed succssfully.`);
-      } catch {
-        this.$bvModal.msgBoxOk(`The action "${title}" has failed.`);
+      // method `OPEN` just opens a new tab
+      if (method === 'OPEN') {
+        window.open(url, '_blank');
       }
+      else
+        try {
+          if (url.indexOf(baseUrlPlaceholder) !== -1) {
+            const vaultifierUrl = url.replace(baseUrlPlaceholder, '');
+
+            if (method === 'POST')
+              await vaultifier.post(vaultifierUrl, usesAuth);
+            else if (method === 'GET')
+              await vaultifier.get(vaultifierUrl, usesAuth);
+            else
+              throw new Error(`Invalid method for action ${key}`);
+          }
+          else {
+            const req = await fetch(url, {
+              method,
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            });
+            await req.text();
+          }
+
+          this.$bvModal.msgBoxOk(`The action "${title}" was executed succssfully.`);
+        } catch {
+          this.$bvModal.msgBoxOk(`The action "${title}" has failed.`);
+        }
 
       this.workingAction = undefined;
     },
