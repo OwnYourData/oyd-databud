@@ -9,7 +9,11 @@
   },
   "settings": {
     "actions": {
-
+      "qrConnect": {
+        "title": "QR Connect",
+        "url": "https://idunion-issuer.data-container.net/qr",
+        "method": "OPEN"
+      }
     },
     "vaccinationSchema": "zQmdXgyHrAsboGd9sgmDNdn6CNfxNEQyqH4dGCY8pSrKncQ"
   }
