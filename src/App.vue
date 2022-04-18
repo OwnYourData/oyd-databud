@@ -52,6 +52,11 @@ import { RouteParams } from "./router/routes";
 import { IStore } from "./store";
 import { ConfigService } from "./services/config-service";
 
+const isLoginData = (data: any): data is LoginData => {
+  const d = data as LoginData;
+  return d.appKey !== undefined && d.appSecret !== undefined;
+}
+
 interface IData {
   isInitializing: boolean,
   isLoggedIn: boolean,
@@ -110,7 +115,7 @@ export default Vue.extend({
       try {
         if (credentials) {
           // APP_KEY and APP_SECRET based authentication
-          if (vw.vaultifier && credentials.scope) {
+          if (vw.vaultifier && isLoginData(credentials)) {
             vw.vaultifier.setCredentials(credentials);
             await vw.vaultifier.initialize();
           }
