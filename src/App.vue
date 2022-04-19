@@ -125,6 +125,8 @@ export default Vue.extend({
               oAuthType: credentials as OAuthIdentityProvider,
             });
         }
+        else
+          await vw.initialize();
       } catch (e) {
         console.error(e);
       }
