@@ -15,6 +15,22 @@
         "method": "OPEN"
       }
     },
-    "vaccinationSchema": "zQmQwYxYDevNz8oUvLH3Yfx9XJQSFERAj4MHW2Jw3Zf5cnD"
+    "additionalListActions": {
+      "vaccination": {
+        "method": "POST",
+        "usesAuth": true,
+        "title": "New Vaccination",
+        "url": "{{base_url}}/api/new_vaccination"
+      }
+    },
+    "additionalFormActions": {
+      "vaccination": {
+        "method": "PUT",
+        "usesAuth": true,
+        "title": "Vaccinate",
+        "schemaDri": "zQmdNpyqL6eoSKUZzzq6M67imS5pgLw6iEWvFH55PUNDNVk",
+        "url": "{{base_url}}/api/update_vaccination/{{item_id}}"
+      }
+    }
   }
 }

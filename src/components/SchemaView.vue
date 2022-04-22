@@ -26,13 +26,15 @@
         <template v-slot:header-end>
           <custom-button @click="addItem">New</custom-button>
           <custom-button
-            @click="addVaccinationItem"
-            :type="isAddingNewVaccination ? 'success-outline' : 'success'"
-            :disabled="isAddingNewVaccination"
+            v-for="action of actions"
+            :key="action.key"
+            @click="executeAction(action)"
+            :type="isExecutingAction ? 'success-outline' : 'success'"
+            :disabled="isExecutingAction"
           >
-            <spinner v-if="isAddingNewVaccination" />
+            <spinner v-if="isExecutingAction" />
             <template v-else>
-              New Vaccination
+              {{action.title}}
             </template>
           </custom-button>
           <custom-button
@@ -83,13 +85,14 @@ import { getInstance } from '@/services';
 import Spinner from './Spinner.vue';
 import { ConfigService } from '@/services/config-service';
 import { NetworkResponse } from 'vaultifier/dist/module/communicator';
+import { Action, executeAction, getActionsFromConfig } from '@/utils/actions';
 
 interface IData {
   selectedSchema?: VaultSchema,
   showEditView: boolean,
   editViewSchema?: VaultSchema,
   isSaving: boolean,
-  isAddingNewVaccination: boolean,
+  isExecutingAction: boolean,
   saveMessage?: string,
 }
 
@@ -102,7 +105,7 @@ export default Vue.extend({
     showEditView: false,
     editViewSchema: undefined,
     isSaving: false,
-    isAddingNewVaccination: false,
+    isExecutingAction: false,
     saveMessage: undefined,
   }),
   components: {
@@ -143,40 +146,39 @@ export default Vue.extend({
       this.selectVaultItem(undefined);
       this._showEditView(true);
     },
-    async addVaccinationItem() {
-      this.isAddingNewVaccination = true;
+    async executeAction(action: Action) {
+      this.isExecutingAction = true;
 
       const vaultifier = getInstance();
       const state = this.$store.state as IStore;
-      let response: NetworkResponse;
+      let response: NetworkResponse | undefined;
 
       try {
-        response = await vaultifier.post('/api/new_vaccination', true);
+        response = await executeAction(action, vaultifier, this);
       } catch (e) {
         console.error(e);
-        return;
       }
 
-      const vaultItemId = response.data.id;
-      const vaultItem = await vaultifier.getItem({ id: vaultItemId });
+      if (response) {
+        const vaultItemId = response.data.id;
+        const vaultItem = await vaultifier.getItem({ id: vaultItemId });
 
-      if (!vaultItem.schemaDri) {
-        console.error('Vault item does not have schema DRI!');
-        return;
+        if (!vaultItem.schemaDri) {
+          console.error('Vault item does not have schema DRI!');
+        } else {
+          await this.fetchSchemas();
+          const schema = state.schemaDRI.all.find(x => x.dri === vaultItem.schemaDri);
+
+          if (!schema) {
+            console.error('Could not find schema DRI in internal list!');
+          } else {
+            await this.selectSchema(schema);
+            await this.selectVaultItem(vaultItem);
+          }
+        }
       }
 
-      await this.fetchSchemas();
-      const schema = state.schemaDRI.all.find(x => x.dri === vaultItem.schemaDri);
-
-      if (!schema) {
-        console.error('Could not find schema DRI in internal list!');
-        return;
-      }
-
-      await this.selectSchema(schema);
-      await this.selectVaultItem(vaultItem);
-
-      this.isAddingNewVaccination = false;
+      this.isExecutingAction = false;
     },
     async saveVaultItem(postItem: VaultPostItem) {
       this.saveMessage = undefined;
@@ -237,6 +239,9 @@ export default Vue.extend({
     vaultPageItems(): number | undefined {
       return (this.$store.state as IStore).vaultItem.paging?.pageItems;
     },
+    actions(): Action[] {
+      return getActionsFromConfig('settings', 'additionalListActions');
+    }
   }
 })
 </script>
