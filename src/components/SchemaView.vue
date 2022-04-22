@@ -26,6 +26,18 @@
         <template v-slot:header-end>
           <custom-button @click="addItem">New</custom-button>
           <custom-button
+            v-for="action of actions"
+            :key="action.key"
+            @click="executeAction(action)"
+            :type="isExecutingAction ? 'success-outline' : 'success'"
+            :disabled="isExecutingAction"
+          >
+            <spinner v-if="isExecutingAction" />
+            <template v-else>
+              {{action.title}}
+            </template>
+          </custom-button>
+          <custom-button
             type="danger"
             @click="deleteSelectedVaultItem"
             :disabled="isDeleteButtonDisabled"
@@ -69,12 +81,18 @@ import OcaEditView from './FormEditView.vue';
 import { Vaultifier, VaultItem, VaultMinMeta, VaultPostItem, VaultSchema } from 'vaultifier/dist/module';
 import { ActionType } from '@/store/action-type';
 import { FetchState } from '@/store/fetch-state';
+import { getInstance } from '@/services';
+import Spinner from './Spinner.vue';
+import { ConfigService } from '@/services/config-service';
+import { NetworkResponse } from 'vaultifier/dist/module/communicator';
+import { Action, executeAction, getActionsFromConfig } from '@/utils/actions';
 
 interface IData {
   selectedSchema?: VaultSchema,
   showEditView: boolean,
   editViewSchema?: VaultSchema,
   isSaving: boolean,
+  isExecutingAction: boolean,
   saveMessage?: string,
 }
 
@@ -87,6 +105,7 @@ export default Vue.extend({
     showEditView: false,
     editViewSchema: undefined,
     isSaving: false,
+    isExecutingAction: false,
     saveMessage: undefined,
   }),
   components: {
@@ -125,6 +144,40 @@ export default Vue.extend({
     async addItem() {
       this.selectVaultItem(undefined);
       this._showEditView(true);
+    },
+    async executeAction(action: Action) {
+      this.isExecutingAction = true;
+
+      const vaultifier = getInstance();
+      const state = this.$store.state as IStore;
+      let response: NetworkResponse | undefined;
+
+      try {
+        response = await executeAction(action, vaultifier, this);
+      } catch (e) {
+        console.error(e);
+      }
+
+      if (response) {
+        const vaultItemId = response.data.id;
+        const vaultItem = await vaultifier.getItem({ id: vaultItemId });
+
+        if (!vaultItem.schemaDri) {
+          console.error('Vault item does not have schema DRI!');
+        } else {
+          await this.fetchSchemas();
+          const schema = state.schemaDRI.all.find(x => x.dri === vaultItem.schemaDri);
+
+          if (!schema) {
+            console.error('Could not find schema DRI in internal list!');
+          } else {
+            await this.selectSchema(schema);
+            await this.selectVaultItem(vaultItem);
+          }
+        }
+      }
+
+      this.isExecutingAction = false;
     },
     async saveVaultItem(postItem: VaultPostItem) {
       this.saveMessage = undefined;
@@ -185,6 +238,9 @@ export default Vue.extend({
     vaultPageItems(): number | undefined {
       return (this.$store.state as IStore).vaultItem.paging?.pageItems;
     },
+    actions(): Action[] {
+      return getActionsFromConfig('settings', 'additionalListActions');
+    }
   }
 })
 </script>

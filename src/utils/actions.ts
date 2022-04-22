@@ -1,5 +1,6 @@
 import { ConfigService } from "@/services/config-service";
 import { Vaultifier, VaultItem } from "vaultifier";
+import { NetworkResponse } from "vaultifier/dist/module/communicator";
 import Vue from "vue";
 
 export interface Action {
@@ -10,7 +11,7 @@ export interface Action {
   method: string,
 }
 
-export const executeAction = async (action: Action, vaultifier: Vaultifier, vue?: Vue, item?: VaultItem): Promise<void> => {
+export const executeAction = async (action: Action, vaultifier: Vaultifier, vue?: Vue, item?: VaultItem): Promise<NetworkResponse | undefined> => {
   const { key, title, method, usesAuth } = action;
   let { url } = action;
 
@@ -30,11 +31,11 @@ export const executeAction = async (action: Action, vaultifier: Vaultifier, vue?
         const vaultifierUrl = url.replace(baseUrlPlaceholder, '');
 
         if (method === 'POST')
-          await vaultifier.post(vaultifierUrl, usesAuth);
+          return vaultifier.post(vaultifierUrl, usesAuth);
         else if (method === 'PUT')
-          await vaultifier.put(vaultifierUrl, usesAuth);
+          return vaultifier.put(vaultifierUrl, usesAuth);
         else if (method === 'GET')
-          await vaultifier.get(vaultifierUrl, usesAuth);
+          return vaultifier.get(vaultifierUrl, usesAuth);
         else
           throw new Error(`Invalid method for action ${key}`);
       }
