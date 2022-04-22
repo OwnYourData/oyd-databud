@@ -30,6 +30,18 @@
         </template>
       </custom-button>
       <custom-button
+        v-for="action of actions"
+        :key="action.key"
+        @click="executeAction(action)"
+        :type="isExecutingAction ? 'success-outline' : 'success'"
+        :disabled="isExecutingAction"
+      >
+        <spinner v-if="isExecutingAction" />
+        <template v-else>
+          {{action.title}}
+        </template>
+      </custom-button>
+      <custom-button
         v-if="hasCancel"
         @click="cancelEdit"
         type="danger"
@@ -57,6 +69,9 @@ import Spinner from './Spinner.vue';
 import { JsonFormsChangeEvent } from '@jsonforms/vue2';
 import { Soya, SoyaQueryResult } from 'soya-js';
 import { IStore } from '@/store';
+import { getInstance } from '@/services';
+import { ConfigService } from '@/services/config-service';
+import { Action, executeAction, getActionsFromConfig } from '@/utils/actions';
 
 interface SoyaStructure {
   name?: string;
@@ -68,6 +83,7 @@ interface Data {
   selectedStructure?: SoyaStructure,
   suggestItems: SoyaQueryResult[],
   isLoading: boolean,
+  isExecutingAction: boolean,
   showTypeahead: boolean,
   formData: any,
 }
@@ -100,6 +116,7 @@ export default Vue.extend({
     selectedStructure: undefined,
     suggestItems: [],
     isLoading: false,
+    isExecutingAction: false,
     showTypeahead: false,
     formData: undefined,
   }),
@@ -130,7 +147,21 @@ export default Vue.extend({
       };
 
       this.$emit('save', postItem);
+      return true;
+    },
+    async executeAction(action: Action) {
+      this.isExecutingAction = true;
 
+      // TODO: await saveEdit does not work
+      // if saving did not work, we do not execute vaccination
+      if (this.item && await this.saveEdit())
+        try {
+          await executeAction(action, getInstance(), this, this.item);
+        } catch (e) {
+          console.error(e);
+        }
+
+      this.isExecutingAction = false;
     },
     cancelEdit(): void {
       this.$emit('cancel');
@@ -163,6 +194,10 @@ export default Vue.extend({
     },
     selectedStructureName(): string | undefined {
       return this.selectedStructure ? (this.selectedStructure.name || this.selectedStructure.dri) : undefined;
+    },
+    actions(): Action[] {
+      // TODO: is this any nice?
+      return getActionsFromConfig('settings', 'additionalFormActions').filter(x => (x as any).schemaDri === this.schemaDri);
     }
   },
   watch: {
