@@ -59,17 +59,10 @@ import { getInstance } from '@/services';
 import { IStore } from '@/store';
 import { ActionType } from '@/store/action-type';
 import { VaultEncryptionSupport } from 'vaultifier';
+import { Action, executeAction, getActionsFromConfig } from '../utils/actions';
 import Vue, { PropType } from 'vue'
 
 import { ConfigService, PACKAGE } from '../services/config-service';
-
-interface Action {
-  key: string,
-  title: string,
-  url: string,
-  usesAuth: boolean,
-  method: string,
-}
 
 interface Data {
   workingAction?: Action,
@@ -89,42 +82,7 @@ export default Vue.extend({
   methods: {
     async executeAction(action: Action) {
       this.workingAction = action;
-
-      const { key, title, method, url, usesAuth } = action;
-      const vaultifier = getInstance();
-      const baseUrlPlaceholder = '{{base_url}}';
-
-      // method `OPEN` just opens a new tab
-      if (method === 'OPEN') {
-        window.open(url, '_blank');
-      }
-      else
-        try {
-          if (url.indexOf(baseUrlPlaceholder) !== -1) {
-            const vaultifierUrl = url.replace(baseUrlPlaceholder, '');
-
-            if (method === 'POST')
-              await vaultifier.post(vaultifierUrl, usesAuth);
-            else if (method === 'GET')
-              await vaultifier.get(vaultifierUrl, usesAuth);
-            else
-              throw new Error(`Invalid method for action ${key}`);
-          }
-          else {
-            const req = await fetch(url, {
-              method,
-              headers: {
-                'Content-Type': 'application/json',
-              },
-            });
-            await req.text();
-          }
-
-          this.$bvModal.msgBoxOk(`The action "${title}" was executed succssfully.`);
-        } catch {
-          this.$bvModal.msgBoxOk(`The action "${title}" has failed.`);
-        }
-
+      await executeAction(action, getInstance(), this);
       this.workingAction = undefined;
     },
     goHome() {
@@ -152,18 +110,7 @@ export default Vue.extend({
         return 'lock';
     },
     actions(): Action[] {
-      const actionsObj = ConfigService.get('settings', 'actions');
-      const arr: Action[] = []
-
-      for (const key in actionsObj) {
-        arr.push({
-          usesAuth: false,
-          ...actionsObj[key],
-          key,
-        });
-      }
-
-      return arr;
+      return getActionsFromConfig('settings', 'actions');
     },
     gearAnimation() {
       return this.workingAction ? 'spin' : undefined;

@@ -30,14 +30,15 @@
         </template>
       </custom-button>
       <custom-button
-        v-if="showVaccinationButton"
-        @click="vaccinate"
-        :type="isVaccinating ? 'success-outline' : 'success'"
-        :disabled="isVaccinating"
+        v-for="action of actions"
+        :key="action.key"
+        @click="executeAction(action)"
+        :type="isExecutingAction ? 'success-outline' : 'success'"
+        :disabled="isExecutingAction"
       >
-        <spinner v-if="isVaccinating" />
+        <spinner v-if="isExecutingAction" />
         <template v-else>
-          Vaccinate
+          {{action.title}}
         </template>
       </custom-button>
       <custom-button
@@ -70,6 +71,7 @@ import { Soya, SoyaQueryResult } from 'soya-js';
 import { IStore } from '@/store';
 import { getInstance } from '@/services';
 import { ConfigService } from '@/services/config-service';
+import { Action, executeAction, getActionsFromConfig } from '@/utils/actions';
 
 interface SoyaStructure {
   name?: string;
@@ -81,7 +83,7 @@ interface Data {
   selectedStructure?: SoyaStructure,
   suggestItems: SoyaQueryResult[],
   isLoading: boolean,
-  isVaccinating: boolean,
+  isExecutingAction: boolean,
   showTypeahead: boolean,
   formData: any,
 }
@@ -114,7 +116,7 @@ export default Vue.extend({
     selectedStructure: undefined,
     suggestItems: [],
     isLoading: false,
-    isVaccinating: false,
+    isExecutingAction: false,
     showTypeahead: false,
     formData: undefined,
   }),
@@ -147,18 +149,19 @@ export default Vue.extend({
       this.$emit('save', postItem);
       return true;
     },
-    async vaccinate() {
-      this.isVaccinating = true;
+    async executeAction(action: Action) {
+      this.isExecutingAction = true;
 
+      // TODO: await saveEdit does not work
       // if saving did not work, we do not execute vaccination
       if (this.item && await this.saveEdit())
         try {
-          await getInstance().put(`/api/update_vaccination/${this.item.id}`, true);
+          await executeAction(action, getInstance(), this, this.item);
         } catch (e) {
           console.error(e);
         }
 
-      this.isVaccinating = false;
+      this.isExecutingAction = false;
     },
     cancelEdit(): void {
       this.$emit('cancel');
@@ -192,8 +195,9 @@ export default Vue.extend({
     selectedStructureName(): string | undefined {
       return this.selectedStructure ? (this.selectedStructure.name || this.selectedStructure.dri) : undefined;
     },
-    showVaccinationButton(): boolean {
-      return this.schemaDri === ConfigService.get('settings', 'vaccinationSchema');
+    actions(): Action[] {
+      // TODO: is this any nice?
+      return getActionsFromConfig('settings', 'additionalFormActions').filter(x => (x as any).schemaDri === this.schemaDri);
     }
   },
   watch: {
