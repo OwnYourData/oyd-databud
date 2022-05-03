@@ -32,6 +32,9 @@ import {
   ControlElement,
   JsonFormsRendererRegistryEntry,
   rankWith,
+  or,
+  isOneOfEnumControl,
+  isOneOfControl,
   isEnumControl,
 } from '@jsonforms/core';
 import { defineComponent } from '@vue/composition-api';
@@ -95,7 +98,9 @@ const SelectControlRenderer = defineComponent({
   },
   computed: {
     items(): SelectItem[] {
-      const { enum: items } = this.control.schema;
+      const { schema } = this.control;
+      // support both `enum` and `oneOf`
+      const items: any[] | undefined = schema.enum || schema.oneOf;
 
       if (!items)
         return [];
@@ -113,6 +118,6 @@ const SelectControlRenderer = defineComponent({
 export default SelectControlRenderer;
 export const entry: JsonFormsRendererRegistryEntry = {
   renderer: SelectControlRenderer,
-  tester: rankWith(20, isEnumControl)
+  tester: rankWith(20, or(isOneOfControl, isEnumControl, isOneOfEnumControl))
 };
 </script>
