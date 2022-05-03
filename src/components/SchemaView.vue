@@ -180,7 +180,7 @@ export default Vue.extend({
 
       this.isExecutingAction = false;
     },
-    async saveVaultItem(postItem: VaultPostItem) {
+    async saveVaultItem(postItem: VaultPostItem, onComplete?: () => void) {
       this.saveMessage = undefined;
       this.isSaving = true;
 
@@ -193,6 +193,10 @@ export default Vue.extend({
 
       await this.fetchVaultItems();
       this.isSaving = false;
+
+      if (onComplete)
+        // indicate saving is complete
+        onComplete();
     },
     _showEditView(show: boolean) {
       this.showEditView = show;

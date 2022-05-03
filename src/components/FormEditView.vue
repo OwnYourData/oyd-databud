@@ -146,7 +146,11 @@ export default Vue.extend({
         mimeType: MimeType.JSON,
       };
 
-      this.$emit('save', postItem);
+      // promise ensures we really await the correct saving of the item
+      await new Promise((resolve) => {
+        this.$emit('save', postItem, resolve);
+      });
+
       return true;
     },
     async executeAction(action: Action) {
