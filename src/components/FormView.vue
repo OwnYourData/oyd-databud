@@ -1,40 +1,58 @@
 <template>
   <spinner v-if="isLoading" />
-  <div v-else-if="hasForm">
-    <b-form-group
-      label="Tag"
-      class="soya-form-option"
-      v-if="hasTags"
-    >
-      <b-form-select
-        :options="tagOptions"
-        v-model="selectedTag"
-      />
-    </b-form-group>
-    <b-form-group
-      label="Language"
-      class="soya-form-option"
-      v-if="hasLanguages"
-    >
-      <b-form-select
-        :options="languageOptions"
-        v-model="selectedLanguage"
-      />
-    </b-form-group>
-    <b-form
-      class="form"
-      ref="form"
-      @submit.prevent
-    >
-      <json-forms
-        :data="this.data"
-        :renderers="renderers"
-        :schema="form.schema"
-        :uischema="form.ui"
-        @change="onDataChange"
-      />
-    </b-form>
-  </div>
+  <!-- p-0 removes padding -->
+  <b-container
+    v-else-if="hasForm"
+    class="p-0"
+  >
+    <b-row v-if="hasTags && hasLanguages">
+      <b-col
+        v-if="hasTags"
+        md="3"
+      >
+        <b-form-group
+          label="Tag"
+          class="soya-form-option"
+        >
+          <b-form-select
+            :options="tagOptions"
+            v-model="selectedTag"
+          />
+        </b-form-group>
+      </b-col>
+      <b-col
+        v-if="hasLanguages"
+        md="3"
+      >
+        <b-form-group
+          label="Language"
+          class="soya-form-option"
+        >
+          <b-form-select
+            :options="languageOptions"
+            v-model="selectedLanguage"
+          />
+        </b-form-group>
+      </b-col>
+    </b-row>
+    <b-row>
+      <b-col>
+        <b-form
+          class="form"
+          ref="form"
+          @submit.prevent
+        >
+          <json-forms
+            :data="this.data"
+            :renderers="renderers"
+            :schema="form.schema"
+            :uischema="form.ui"
+            @change="onDataChange"
+          />
+        </b-form>
+      </b-col>
+    </b-row>
+  </b-container>
   <b-alert
     variant="danger"
     v-else-if="isError"
