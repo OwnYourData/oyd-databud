@@ -2,9 +2,19 @@
   <spinner v-if="isLoading" />
   <div v-else-if="hasForm">
     <b-form-group
-      v-if="hasLanguages"
+      label="Tag"
+      class="soya-form-option"
+      v-if="hasTags"
+    >
+      <b-form-select
+        :options="tagOptions"
+        v-model="selectedTag"
+      />
+    </b-form-group>
+    <b-form-group
       label="Language"
-      class="languages"
+      class="soya-form-option"
+      v-if="hasLanguages"
     >
       <b-form-select
         :options="languageOptions"
@@ -12,7 +22,7 @@
       />
     </b-form-group>
     <b-form
-    class="form"
+      class="form"
       ref="form"
       @submit.prevent
     >
@@ -50,13 +60,14 @@ import {
 } from "@jsonforms/vue2-vanilla";
 import { formRenderers } from './form-components';
 
-import { SoyaForm, Soya } from 'soya-js';
+import { SoyaFormResponse, Soya } from 'soya-js';
 import { defineComponent } from '@vue/composition-api';
 
 interface Data {
   renderers: readonly any[],
-  form?: SoyaForm,
-  selectedLanguage?: string,
+  form?: SoyaFormResponse,
+  selectedLanguage: string | null,
+  selectedTag: string | null,
   isLoading: boolean,
   isError: boolean,
 }
@@ -69,10 +80,28 @@ const renderers = [
   ...formRenderers,
 ];
 
+interface SelectOption {
+  value: string | null,
+  text: string,
+}
+
+const toSelectOption = (text: string): SelectOption => ({
+  value: text,
+  text,
+});
+
+const withEmpty = (options: SelectOption[]): SelectOption[] => {
+  return [
+    { value: null, text: 'Default' },
+    ...options,
+  ]
+}
+
 export default defineComponent({
   data: (): Data => ({
     form: undefined,
-    selectedLanguage: undefined,
+    selectedLanguage: null,
+    selectedTag: null,
     isLoading: true,
     isError: false,
     renderers: Object.freeze(renderers),
@@ -103,9 +132,9 @@ export default defineComponent({
           const soya = new Soya();
           const doc = await soya.pull(this.schemaDri);
           this.form = await soya.getForm(doc, {
-            language: this.selectedLanguage,
+            language: this.selectedLanguage || undefined,
+            tag: this.selectedTag || undefined,
           });
-          this.selectedLanguage = this.selectedLanguage ?? (this.form.languages ? this.form.languages[0] : undefined);
         } catch {
           this.isError = true;
         }
@@ -127,23 +156,41 @@ export default defineComponent({
     },
     selectedLanguage() {
       this.getForm();
+    },
+    selectedTag() {
+      // if-else prevents hitting the watcher twice in a row
+      // yeah, this could be solved more intelligently possibly...
+      if (this.selectedLanguage)
+        this.selectedLanguage = null;
+      else
+        this.getForm();
     }
   },
   computed: {
     hasForm(): boolean {
       return !!this.form;
     },
-    hasLanguages(): boolean {
-      return (this.form?.languages?.length ?? 0) > 0;
+    hasTags(): boolean {
+      return this._tagOptions.length > 0;
     },
-    languageOptions(): { value: string, text: string }[] {
-      if (!this.hasLanguages || !this.form?.languages)
-        return [];
-      else
-        return this.form.languages.map(x => ({
-          value: x,
-          text: x,
-        }));
+    _tagOptions(): string[] {
+      return this.form?.options
+        .filter(x => x.tag)
+        .map(x => x.tag as string) ?? [];
+    },
+    tagOptions(): SelectOption[] {
+      return withEmpty(this._tagOptions.map(x => toSelectOption(x)));
+    },
+    hasLanguages(): boolean {
+      return this._languageOptions.length > 0;
+    },
+    _languageOptions(): string[] {
+      return this.form?.options
+        .filter(x => x.language && x.tag == this.selectedTag)
+        .map(x => x.language as string) ?? [];
+    },
+    languageOptions(): SelectOption[] {
+      return withEmpty(this._languageOptions.map(x => toSelectOption(x)));
     }
   },
   provide() {
@@ -155,8 +202,8 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.languages {
-  max-width: 8em;
+.soya-form-option {
+  max-width: 12em;
 }
 
 .form {
