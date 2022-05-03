@@ -151,7 +151,7 @@ export default Vue.extend({
     }
   },
   methods: {
-    async saveVaultItem(item: VaultPostItem) {
+    async saveVaultItem(item: VaultPostItem, onComplete?: () => void) {
       this.isSaving = true;
 
       try {
@@ -161,6 +161,10 @@ export default Vue.extend({
       }
 
       this.isSaving = false;
+
+      if (onComplete)
+        // indicate saving is complete
+        onComplete();
     },
     selectVaultItem(id: number) {
       this.$emit('selectVaultItem', {
