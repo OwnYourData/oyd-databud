@@ -3,12 +3,12 @@
     <b-tabs
       pills
       card
-      lazy
       v-model="activeTabIndex"
     >
       <b-tab
         title="Form"
         v-if="hasSchema"
+        lazy
       >
         <form-edit-view
           :item="item"
@@ -19,6 +19,10 @@
           @save="saveVaultItem"
         ></form-edit-view>
       </b-tab>
+      <!-- Relations tab must not be rendered lazily -->
+      <!-- Otherwise the call to fetch existing relations will not be made -->
+      <!-- Thus leading to this tab never being enabled -->
+      <!-- TODO: Find a better way to solve this issue -->
       <b-tab
         title="Raw Data"
         v-if="showRawView"
@@ -39,7 +43,10 @@
           @selectId="selectVaultItem"
         />
       </b-tab>
-      <b-tab title="Sign">
+      <b-tab
+        title="Sign"
+        lazy
+      >
         <div class="flex-container">
           <b-img
             class="signature-logo"
@@ -70,7 +77,10 @@
         <raw-json :data="item.raw" />
 
       </b-tab>
-      <b-tab title="Provenance">
+      <b-tab
+        title="Provenance"
+        lazy
+      >
         <provis :item="item" />
       </b-tab>
     </b-tabs>

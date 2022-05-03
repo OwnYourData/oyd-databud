@@ -6,7 +6,8 @@
       show
     >{{error}}</b-alert>
     <spinner v-else-if="isLoading" />
-    <img
+    <b-img
+      class="provenance-img"
       :hidden="isLoading && !error"
       :src="src"
       @load="() => isLoading = false"
@@ -58,4 +59,7 @@ export default Vue.extend({
 </script>
 
 <style scoped>
+.provenance-img {
+  max-width: 100%;
+}
 </style>
