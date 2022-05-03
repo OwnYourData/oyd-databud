@@ -152,7 +152,7 @@ export const getStore = () => {
           commit(MutationType.SET_VAULT_ITEM, undefined);
       },
       async [ActionType.FETCH_SCHEMA_DRIS]({ commit, dispatch }) {
-        doFetch<VaultSchema[]>(
+        await doFetch<VaultSchema[]>(
           commit,
           () => getInstance().getSchemas(),
           (commit, data) => {
@@ -164,7 +164,7 @@ export const getStore = () => {
         );
       },
       async [ActionType.FETCH_REPOS]({ commit, dispatch }) {
-        doFetch<VaultRepo[] | undefined>(
+        await doFetch<VaultRepo[] | undefined>(
           commit,
           () => getInstance().getRepos(),
           (commit, data) => {
@@ -175,7 +175,7 @@ export const getStore = () => {
         );
       },
       async [ActionType.FETCH_TABLES]({ commit, dispatch }) {
-        doFetch<VaultTable[]>(
+        await doFetch<VaultTable[]>(
           commit,
           () => getInstance().getTables(),
           (commit, data) => {
@@ -189,7 +189,7 @@ export const getStore = () => {
         // reset currently selected vault item if list of vault items is refreshed
         commit(MutationType.SET_VAULT_ITEM, undefined);
 
-        doFetch<MultiResponse<VaultMeta>>(
+        await doFetch<MultiResponse<VaultMeta>>(
           commit,
           async () => {
             let query: VaultItemsQuery | undefined = {
@@ -227,7 +227,7 @@ export const getStore = () => {
         );
       },
       async [ActionType.FETCH_VAULT_ITEM]({ commit }, payload: VaultMinMeta) {
-        doFetch<VaultItem>(
+        await doFetch<VaultItem>(
           commit,
           () => getInstance().getItem({ id: payload.id }),
           (commit, data) => commit(MutationType.SET_VAULT_ITEM, data),

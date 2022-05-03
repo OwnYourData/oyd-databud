@@ -115,19 +115,19 @@ export default Vue.extend({
   },
   methods: {
     async initialize() {
-      this.fetchSchemas();
+      await this.fetchSchemas();
     },
     async selectSchema(schema: VaultSchema) {
       this.selectedSchema = schema;
 
-      this.fetchVaultItems();
+      await this.fetchVaultItems();
     },
     async selectVaultItem(item?: VaultMinMeta) {
-      this.$store.dispatch(ActionType.FETCH_VAULT_ITEM, item);
+      await this.$store.dispatch(ActionType.FETCH_VAULT_ITEM, item);
     },
     async fetchSchemas() {
       this.selectedSchema = undefined;
-      this.$store.dispatch(ActionType.FETCH_SCHEMA_DRIS);
+      await this.$store.dispatch(ActionType.FETCH_SCHEMA_DRIS);
     },
     async fetchVaultItems(refreshObj?: RefreshObj) {
       let fetchObj: IFetchVaultItems = {
@@ -135,14 +135,14 @@ export default Vue.extend({
         page: refreshObj?.page,
       };
 
-      this.$store.dispatch(ActionType.FETCH_VAULT_ITEMS, fetchObj);
+      await this.$store.dispatch(ActionType.FETCH_VAULT_ITEMS, fetchObj);
     },
     async deleteSelectedVaultItem() {
       await this.$store.dispatch(ActionType.DELETE_VAULT_ITEM, this.selectedVaultItem);
-      this.fetchSchemas();
+      await this.fetchSchemas();
     },
     async addItem() {
-      this.selectVaultItem(undefined);
+      await this.selectVaultItem(undefined);
       this._showEditView(true);
     },
     async executeAction(action: Action) {
@@ -190,7 +190,7 @@ export default Vue.extend({
         this.saveMessage = 'Could not save item';
       }
 
-      this.fetchVaultItems();
+      await this.fetchVaultItems();
       this.isSaving = false;
     },
     _showEditView(show: boolean) {
