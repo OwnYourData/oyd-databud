@@ -94,7 +94,7 @@ export default Vue.extend({
   },
   computed: {
     version() {
-      return PACKAGE.version;
+      return `${PACKAGE.version}-${PACKAGE.subVersion}`;
     },
     encryptionIcon(): string | undefined {
       if (!this.encryptionSupport)
