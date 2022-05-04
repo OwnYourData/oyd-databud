@@ -72,11 +72,20 @@ const DateControlRenderer = defineComponent({
   },
   mounted() {
     this.validate();
-
-    if (this.control.data) {
-      // split ISO date
-      const parts = this.control.data.split(/[TZ.]/g);
-      this.dateValue = parts[0];
+  },
+  watch: {
+    control: {
+      deep: true,
+      immediate: true,
+      handler: function (val) {
+        if (val?.data) {
+          // split ISO date
+          const parts = val.data.split(/[TZ.]/g);
+          this.dateValue = parts[0];
+        }
+        else
+          this.dateValue = undefined;
+      },
     }
   },
   methods: {
