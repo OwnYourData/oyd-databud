@@ -58,7 +58,7 @@
     v-else-if="isError"
     show
   >
-    Can not render a form.
+    Can not render a form. Find more information in the developer tools.
   </b-alert>
   <b-alert
     variant="primary"
@@ -153,7 +153,8 @@ export default defineComponent({
             language: this.selectedLanguage || undefined,
             tag: this.selectedTag || undefined,
           });
-        } catch {
+        } catch (e) {
+          console.error(e);
           this.isError = true;
         }
       }
