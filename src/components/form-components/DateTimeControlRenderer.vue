@@ -89,15 +89,24 @@ const DateTimeControlRenderer = defineComponent({
   },
   mounted() {
     this.validate();
-
-    if (this.control.data) {
-      // split ISO date
-      const parts = this.control.data.split(/[TZ.]/g);
-      this.dateValue = parts[0];
-      this.timeValue = parts[1];
-    }
   },
   watch: {
+    control: {
+      deep: true,
+      immediate: true,
+      handler: function (val) {
+        console.log('now');
+        console.log(!!val?.data)
+        if (val?.data) {
+          // split ISO date
+          const parts = val.data.split(/[TZ.]/g);
+          this.dateValue = parts[0];
+          this.timeValue = parts[1];
+        }
+        else
+          this.dateValue = this.timeValue = undefined;
+      },
+    },
     textValue() {
       let date: string | undefined = undefined;
 
