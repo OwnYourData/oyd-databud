@@ -154,7 +154,7 @@ export default Vue.extend({
       let response: NetworkResponse | undefined;
 
       try {
-        response = await executeAction(action, vaultifier, this);
+        response = await executeAction(action, vaultifier, undefined);
       } catch (e) {
         console.error(e);
       }

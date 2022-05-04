@@ -160,7 +160,7 @@ export default Vue.extend({
       // if saving did not work, we do not execute vaccination
       if (this.item && await this.saveEdit())
         try {
-          await executeAction(action, getInstance(), this, this.item);
+          await executeAction(action, getInstance(), undefined, this.item);
         } catch (e) {
           console.error(e);
         }
