@@ -1,7 +1,7 @@
 {
   "name": "oyd-databud",
   "version": "0.15.30",
-  "subVersion": "idunion.6",
+  "subVersion": "idunion.7",
   "license": "MIT",
   "private": "true",
   "scripts": {
