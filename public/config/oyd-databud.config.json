@@ -9,10 +9,16 @@
   },
   "settings": {
     "actions": {
-      "qrConnect": {
+      "qrConnectIssuer": {
         "title": "QR Connect",
-        "url": "https://idunion-issuer.data-container.net/qr",
+        "url": "https://idunion-verifier.data-container.net/qr",
         "method": "OPEN"
+      },
+      "schedulerIssuer": {
+        "title": "Trigger Scheduler",
+        "url": "{{base_url}}/api/scheduler/zQmUXLZUuWYCaNnxw4si2Sf3orzhpdgZGTKHPYoRPiQuoM5",
+        "usesAuth": true,
+        "method": "GET"
       }
     },
     "additionalListActions": {
