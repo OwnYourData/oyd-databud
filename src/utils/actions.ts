@@ -21,6 +21,8 @@ export const executeAction = async (action: Action, vaultifier: Vaultifier, vue?
   if (item)
     url = url.replace(vaultItemIdPlaceholder, item.id.toString());
 
+  let returnValue: NetworkResponse | undefined = undefined;
+
   // method `OPEN` just opens a new tab
   if (method === 'OPEN') {
     window.open(url, '_blank');
@@ -31,11 +33,11 @@ export const executeAction = async (action: Action, vaultifier: Vaultifier, vue?
         const vaultifierUrl = url.replace(baseUrlPlaceholder, '');
 
         if (method === 'POST')
-          return vaultifier.post(vaultifierUrl, usesAuth);
+          returnValue = await vaultifier.post(vaultifierUrl, usesAuth);
         else if (method === 'PUT')
-          return vaultifier.put(vaultifierUrl, usesAuth);
+          returnValue = await vaultifier.put(vaultifierUrl, usesAuth);
         else if (method === 'GET')
-          return vaultifier.get(vaultifierUrl, usesAuth);
+          returnValue = await vaultifier.get(vaultifierUrl, usesAuth);
         else
           throw new Error(`Invalid method for action ${key}`);
       }
@@ -57,6 +59,8 @@ export const executeAction = async (action: Action, vaultifier: Vaultifier, vue?
       if (vue)
         vue.$bvModal.msgBoxOk(`The action "${title}" has failed.`);
     }
+
+    return returnValue;
 }
 
 export const getActionsFromConfig = (...path: string[]): Action[] => {
