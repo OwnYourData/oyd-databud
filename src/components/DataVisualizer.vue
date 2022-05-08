@@ -13,7 +13,7 @@
         <form-edit-view
           :item="item"
           :schemaDri="schemaDri"
-          :allowSelectSchema="false"
+          :allowSelectSchema="true"
           :hasCancel="false"
           :isSaving="isSaving"
           @save="saveVaultItem"
