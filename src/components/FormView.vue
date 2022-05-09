@@ -5,7 +5,7 @@
     v-else-if="hasForm"
     class="p-0"
   >
-    <b-row v-if="hasTags && hasLanguages">
+    <b-row>
       <b-col
         v-if="hasTags"
         md="3"
