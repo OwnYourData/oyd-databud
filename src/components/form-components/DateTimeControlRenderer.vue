@@ -95,8 +95,6 @@ const DateTimeControlRenderer = defineComponent({
       deep: true,
       immediate: true,
       handler: function (val) {
-        console.log('now');
-        console.log(!!val?.data)
         if (val?.data) {
           // split ISO date
           const parts = val.data.split(/[TZ.]/g);
