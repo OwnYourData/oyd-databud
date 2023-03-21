@@ -66,11 +66,9 @@ import FormView from './FormView.vue';
 import InlineGroup from './InlineGroup.vue';
 import CustomButton from './Button.vue';
 import Spinner from './Spinner.vue';
-import { JsonFormsChangeEvent } from '@jsonforms/vue2';
 import { Soya, SoyaQueryResult } from 'soya-js';
 import { IStore } from '@/store';
 import { getInstance } from '@/services';
-import { ConfigService } from '@/services/config-service';
 import { Action, executeAction, getActionsFromConfig } from '@/utils/actions';
 
 interface SoyaStructure {
@@ -132,11 +130,6 @@ export default Vue.extend({
       if (!this.selectedStructure)
         return;
 
-      // @ts-expect-error
-      if (!(this.$refs.form).validate()) {
-        return;
-      }
-
       // TODO: We should let the user decide whether DRI should be calculated automatically or not
       const postItem: VaultPostItem = {
         content: this.formData,
@@ -188,7 +181,7 @@ export default Vue.extend({
 
       this.isLoading = false;
     },
-    onDataChange(event: JsonFormsChangeEvent) {
+    onDataChange(event: { data: any }) {
       this.formData = event.data;
     }
   },

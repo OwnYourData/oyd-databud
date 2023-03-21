@@ -1,128 +1,55 @@
 <template>
-  <spinner v-if="isLoading" />
-  <!-- p-0 removes padding -->
-  <b-container
-    v-else-if="hasForm"
-    class="p-0"
-  >
-    <b-row>
-      <b-col
-        v-if="hasTags"
-        md="3"
-      >
-        <b-form-group
-          label="Tag"
-          class="soya-form-option"
-        >
-          <b-form-select
-            :options="tagOptions"
-            v-model="selectedTag"
-          />
-        </b-form-group>
-      </b-col>
-      <b-col
-        v-if="hasLanguages"
-        md="3"
-      >
-        <b-form-group
-          label="Language"
-          class="soya-form-option"
-        >
-          <b-form-select
-            :options="languageOptions"
-            v-model="selectedLanguage"
-          />
-        </b-form-group>
-      </b-col>
-    </b-row>
-    <b-row>
-      <b-col>
-        <b-form
-          class="form"
-          ref="form"
-          @submit.prevent
-        >
-          <json-forms
-            :data="this.data"
-            :renderers="renderers"
-            :schema="form.schema"
-            :uischema="form.ui"
-            @change="onDataChange"
-          />
-        </b-form>
-      </b-col>
-    </b-row>
-  </b-container>
-  <b-alert
-    variant="danger"
-    v-else-if="isError"
-    show
-  >
-    Can not render a form. Find more information in the developer tools.
-  </b-alert>
-  <b-alert
-    variant="primary"
-    v-else
-    show
-  >
-    Please select a form.
-  </b-alert>
+  <div>
+    <spinner v-if="isLoading" />
+    <!-- p-0 removes padding -->
+    <b-container
+      v-show="hasSchemaDri"
+      class="p-0"
+    >
+      <b-row>
+        <b-col>
+          <b-form
+            class="form"
+            ref="form"
+            @submit.prevent
+          >
+            <iframe
+              ref="iframe"
+              class="iframe"
+              :src="iFrameSrc"
+            />
+          </b-form>
+        </b-col>
+      </b-row>
+    </b-container>
+    <b-alert
+      variant="primary"
+      v-if="!hasSchemaDri"
+      show
+    >
+      Please select a form.
+    </b-alert>
+  </div>
 </template>
+
 <script lang="ts">
 import Spinner from './Spinner.vue';
-import { JsonForms, JsonFormsChangeEvent } from "@jsonforms/vue2";
-import {
-  defaultStyles,
-  mergeStyles,
-  vanillaRenderers,
-} from "@jsonforms/vue2-vanilla";
-import { formRenderers } from './form-components';
 
-import { SoyaFormResponse, Soya } from 'soya-js';
 import { defineComponent } from '@vue/composition-api';
 
 interface Data {
-  renderers: readonly any[],
-  form?: SoyaFormResponse,
   selectedLanguage: string | null,
   selectedTag: string | null,
   isLoading: boolean,
-  isError: boolean,
-}
-
-// mergeStyles combines all classes from both styles definitions into one
-const myStyles = mergeStyles(defaultStyles, { control: { label: "mylabel" } });
-const renderers = [
-  ...vanillaRenderers,
-  // here you can add custom renderers
-  ...formRenderers,
-];
-
-interface SelectOption {
-  value: string | null,
-  text: string,
-}
-
-const toSelectOption = (text: string): SelectOption => ({
-  value: text,
-  text,
-});
-
-const withEmpty = (options: SelectOption[]): SelectOption[] => {
-  return [
-    { value: null, text: 'Default' },
-    ...options,
-  ]
+  iFrameSrc: string | null,
 }
 
 export default defineComponent({
   data: (): Data => ({
-    form: undefined,
     selectedLanguage: null,
     selectedTag: null,
-    isLoading: true,
-    isError: false,
-    renderers: Object.freeze(renderers),
+    isLoading: false,
+    iFrameSrc: null,
   }),
   props: {
     data: {
@@ -133,90 +60,51 @@ export default defineComponent({
     schemaDri: String,
   },
   components: {
-    JsonForms,
     Spinner,
   },
-  created() {
-    this.getForm();
+  mounted() {
+    window.addEventListener('message', (evt) => {
+      const iframe = (this.$refs.iframe as unknown as HTMLElement);
+
+      switch (evt.data?.type) {
+        case 'update':
+          this.isLoading = false;
+          if (iframe)
+            iframe.style.height = evt.data.documentHeight + 'px';
+          break;
+        case 'data':
+          this.$emit('change', evt.data.evt);
+          break;
+      }
+    });
   },
   methods: {
-    async getForm() {
-      this.form = undefined;
+    async reload() {
+      if (!this.schemaDri)
+        return;
+
       this.isLoading = true;
-      this.isError = false;
 
-      if (this.schemaDri) {
-        try {
-          const soya = new Soya();
-          const doc = await soya.pull(this.schemaDri);
-          this.form = await soya.getForm(doc, {
-            language: this.selectedLanguage || undefined,
-            tag: this.selectedTag || undefined,
-          });
-        } catch (e) {
-          console.error(e);
-          this.isError = true;
-        }
-      }
+      const url = new URL('https://form.ownyourdata.unterholzer.dev');
+      const { searchParams: params } = url;
 
-      this.isLoading = false;
+      params.append('viewMode', 'embedded');
+      params.append('schemaDri', this.schemaDri);
+      params.append('data', JSON.stringify(this.data));
+
+      this.iFrameSrc = url.toString();
     },
-    onDataChange(event: JsonFormsChangeEvent) {
-      this.$emit('change', event);
-    },
-    validate(): boolean {
-      const form = (this.$refs.form as HTMLFormElement);
-      return form.reportValidity();
-    }
   },
   watch: {
     schemaDri() {
-      this.getForm();
+      this.reload();
     },
-    selectedLanguage() {
-      this.getForm();
-    },
-    selectedTag() {
-      // if-else prevents hitting the watcher twice in a row
-      // yeah, this could be solved more intelligently possibly...
-      if (this.selectedLanguage)
-        this.selectedLanguage = null;
-      else
-        this.getForm();
-    }
   },
   computed: {
-    hasForm(): boolean {
-      return !!this.form;
+    hasSchemaDri(): boolean {
+      return !!this.schemaDri;
     },
-    hasTags(): boolean {
-      return this._tagOptions.length > 0;
-    },
-    _tagOptions(): string[] {
-      return this.form?.options
-        .filter(x => x.tag)
-        .map(x => x.tag as string) ?? [];
-    },
-    tagOptions(): SelectOption[] {
-      return withEmpty(this._tagOptions.map(x => toSelectOption(x)));
-    },
-    hasLanguages(): boolean {
-      return this._languageOptions.length > 0;
-    },
-    _languageOptions(): string[] {
-      return this.form?.options
-        .filter(x => x.language && x.tag == this.selectedTag)
-        .map(x => x.language as string) ?? [];
-    },
-    languageOptions(): SelectOption[] {
-      return withEmpty(this._languageOptions.map(x => toSelectOption(x)));
-    }
   },
-  provide() {
-    return {
-      styles: myStyles,
-    }
-  }
 })
 </script>
 
@@ -225,7 +113,10 @@ export default defineComponent({
   max-width: 12em;
 }
 
-.form {
-  max-width: 30em;
+.iframe {
+  width: 100%;
+  min-height: 500px;
+
+  border: none;
 }
 </style>
