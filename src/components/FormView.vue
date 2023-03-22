@@ -110,6 +110,9 @@ export default Vue.extend({
         type: 'data',
         data: this.data,
       }, '*');
+    },
+    iFrameSrc() {
+      this.$emit('iFrameSrcChange', this.iFrameSrc);
     }
   },
   computed: {

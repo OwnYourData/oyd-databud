@@ -19,6 +19,12 @@
         @click="showTypeahead = true"
       >{{selectedStructureName}}</b-button>
       <div class="spacer"></div>
+      <b-button
+        v-if="iFrameSrc"
+        :href="iFrameSrc"
+        target="_blank"
+        variant="success"
+      >Open Permalink</b-button>
       <custom-button
         @click="saveEdit"
         :type="isSaving ? 'primary-outline' : undefined"
@@ -53,6 +59,7 @@
       :data="formData"
       :schemaDri="selectedStructure ? selectedStructure.dri : undefined"
       @change="onDataChange"
+      @iFrameSrcChange="onIFrameSrcChange"
       ref="form"
     ></form-view>
   </div>
@@ -84,6 +91,7 @@ interface Data {
   isExecutingAction: boolean,
   showTypeahead: boolean,
   formData: any,
+  iFrameSrc?: string,
 }
 
 export default Vue.extend({
@@ -117,6 +125,7 @@ export default Vue.extend({
     isExecutingAction: false,
     showTypeahead: false,
     formData: undefined,
+    iFrameSrc: undefined,
   }),
   mounted() {
     if (this.schemaDri)
@@ -182,7 +191,10 @@ export default Vue.extend({
     },
     onDataChange(event: { data: any }) {
       this.formData = event.data;
-    }
+    },
+    onIFrameSrcChange(src: string) {
+      this.iFrameSrc = src;
+    },
   },
   computed: {
     hasSelectedStructure(): boolean {
