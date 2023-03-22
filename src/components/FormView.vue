@@ -65,7 +65,11 @@ export default Vue.extend({
     Spinner,
   },
   mounted() {
-    window.addEventListener('message', (evt) => {
+    window.addEventListener('message', (evt: MessageEvent) => {
+      // ignore all messages that are created from this window
+      if (evt.source === window)
+        return;
+
       const iframe = this.iframe;
 
       switch (evt.data?.type) {
