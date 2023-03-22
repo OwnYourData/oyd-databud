@@ -42,7 +42,7 @@
 
 <script lang="ts">
 import Vue from "vue";
-import { getInstance as getVaultifier, setInstance as setVaultifier } from './services';
+import { setInstance as setVaultifier } from './services';
 import Spinner from './components/Spinner.vue'
 import NavBar from './components/NavBar.vue'
 import Login, { Data as LoginData } from './components/Login.vue'
@@ -160,7 +160,6 @@ Try looking into the browser console to gain more insights on the problem.`;
 
         if (this.isLoggedIn) {
           this.vaultInfo = await vaultifier.getVaultInfo();
-          await this.initializeOca();
         }
       }
       catch {
@@ -175,12 +174,6 @@ Try looking into the browser console to gain more insights on the problem.`;
     logIn(credentials: LoginData) {
       this.tryInitializeVaultifier(credentials);
     },
-    async initializeOca() {
-      const { content: configurationItems } = await getVaultifier().getValues({
-        // That's the dri of "ConfigurationItem", basically it's a key value pair
-        schemaDri: '4ktjMzvwbhAeGM8Dwu67VcCnuJc52K3fVdq7V1qCPWLw',
-      });
-    }
   },
   computed: {
     hasMessage(): boolean {

@@ -34,13 +34,13 @@
 
       <b-textarea
         v-if="isEditable"
-        v-model="editableContent"
+        v-model="editableData"
         rows="10"
         class="textarea"
       />
       <raw-json
         v-else
-        :data="item.content"
+        :data="item.data"
       />
     </div>
   </div>
@@ -48,7 +48,7 @@
 
 <script lang="ts">
 // @ts-ignore
-import { MimeType, VaultItem, VaultPostItem } from 'vaultifier';
+import { VaultItem, VaultPostItem } from 'vaultifier';
 import Vue, { PropType } from 'vue'
 import RawJson from './RawJson.vue';
 import CustomButton from './Button.vue';
@@ -56,7 +56,7 @@ import Spinner from './Spinner.vue';
 
 interface Data {
   isEditable: boolean;
-  editableContent: string;
+  editableData: string;
 }
 
 export default Vue.extend({
@@ -75,39 +75,38 @@ export default Vue.extend({
   },
   data: (): Data => ({
     isEditable: false,
-    editableContent: '',
+    editableData: '',
   }),
   created() {
-    this.resetEditableContent();
+    this.resetEditableData();
   },
   methods: {
-    resetEditableContent() {
-      this.editableContent = JSON.stringify(this.item.content, undefined, 2);
+    resetEditableData() {
+      this.editableData = JSON.stringify(this.item.data, undefined, 2);
     },
     save() {
       console.log('save')
       const postItem: VaultPostItem = {
         ...this.item,
-        mimeType: this.item.mimeType ?? MimeType.PLAIN,
       };
 
       this.$emit('save', postItem);
     },
   },
   watch: {
-    editableContent(value: string) {
+    editableData(value: string) {
       try {
-        this.item.content = JSON.parse(value);
+        this.item.data = JSON.parse(value);
       } catch { /* */ }
     },
     item() {
-      this.resetEditableContent();
+      this.resetEditableData();
     },
   },
   computed: {
     meta(): any {
       const copy = { ...this.item };
-      delete copy.content;
+      delete copy.data;
       // @ts-ignore
       delete copy.raw;
 

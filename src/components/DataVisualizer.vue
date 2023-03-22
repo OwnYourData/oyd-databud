@@ -29,60 +29,6 @@
           @save="saveVaultItem"
         ></form-edit-view>
       </b-tab>
-      <!-- Relations tab must not be rendered lazily -->
-      <!-- Otherwise the call to fetch existing relations will not be made -->
-      <!-- Thus leading to this tab never being enabled -->
-      <!-- TODO: Find a better way to solve this issue -->
-      <b-tab
-        title="Relations"
-        :disabled="totalRelations === 0"
-      >
-        <relations-view
-          :item="item"
-          @update="(down, up) => totalRelations = down.length + up.length"
-          @selectId="selectVaultItem"
-        />
-      </b-tab>
-      <b-tab
-        title="Sign"
-        lazy
-      >
-        <div class="flex-container">
-          <b-img
-            class="signature-logo"
-            :src="handySignaturLogo"
-          />
-          <span>
-            Sign this data item with A-TRUST Handy-Signatur.<br>
-            The following data that will be signed:
-          </span>
-          <b-button
-            @click="signItem"
-            class="sign-button"
-            variant="primary"
-          >Sign
-            <b-spinner v-if="isSigning" />
-          </b-button>
-        </div>
-        <handy-signatur-form
-          ref="handySignaturForm"
-          :item="item"
-        />
-        <b-alert
-          v-model="hasSignError"
-          variant="danger"
-        >
-          There was an error while trying to sign the data item.
-        </b-alert>
-        <raw-json :data="item.raw" />
-
-      </b-tab>
-      <b-tab
-        title="Provenance"
-        lazy
-      >
-        <provis :item="item" />
-      </b-tab>
     </b-tabs>
   </b-card>
 </template>
@@ -111,19 +57,12 @@ import { VaultItem, VaultMinMeta, VaultPostItem } from 'vaultifier';
 import RawData from './RawData.vue';
 
 import FormEditView from './FormEditView.vue';
-import RelationsView from './RelationsView.vue';
-import HandySignaturForm from './HandySignaturForm.vue';
-import Provis from './Provis.vue';
 
 import { ActionType } from '@/store/action-type';
-import RawJson from './RawJson.vue';
 
 interface Data {
   isSaving: boolean;
   activeTabIndex: number;
-  totalRelations: number;
-  hasSignError: boolean;
-  isSigning: boolean;
 }
 
 export default Vue.extend({
@@ -137,28 +76,18 @@ export default Vue.extend({
   data: (): Data => ({
     isSaving: false,
     activeTabIndex: 0,
-    totalRelations: 0,
-    hasSignError: false,
-    isSigning: false,
   }),
   components: {
     RawData,
     FormEditView,
-    RelationsView,
-    HandySignaturForm,
-    RawJson,
-    Provis,
   },
   computed: {
     schemaDri(): string | undefined {
-      return this.item.schemaDri;
+      return this.item.meta.schema;
     },
     hasSchema(): boolean {
       return !!this.schemaDri;
     },
-    handySignaturLogo(): string {
-      return require('../assets/handysign_logo.jpg');
-    }
   },
   methods: {
     async saveVaultItem(item: VaultPostItem, onComplete?: () => void) {
@@ -176,26 +105,6 @@ export default Vue.extend({
         // indicate saving is complete
         onComplete();
     },
-    selectVaultItem(id: number) {
-      this.$emit('selectVaultItem', {
-        id,
-      } as VaultMinMeta);
-
-      // if new vault item was set through clicking on a relation
-      // we want to show the first tab so the user notices something has changed
-      this.activeTabIndex = 0;
-    },
-    async signItem() {
-      this.hasSignError = false;
-      this.isSigning = true;
-
-      await (this.$refs.handySignaturForm as any).sign();
-
-      // if .sign() fulfills the promise, something went wrong
-      // signing always leaves the current browser page that's why the promise will not be resolved, if everything goes according to plan :-)
-      this.hasSignError = true;
-      this.isSigning = false;
-    }
   },
 })
 </script>

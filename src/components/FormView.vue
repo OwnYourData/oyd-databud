@@ -13,9 +13,12 @@
             ref="form"
             @submit.prevent
           >
+            <!-- While loading, we only make the iframe transparent -->
+            <!-- Because if we make it invisible, it will stop loading -->
             <iframe
               ref="iframe"
               class="iframe"
+              :class="{'transparent': isLoading}"
               :src="iFrameSrc"
             />
           </b-form>
@@ -33,9 +36,8 @@
 </template>
 
 <script lang="ts">
+import Vue from 'vue';
 import Spinner from './Spinner.vue';
-
-import { defineComponent } from '@vue/composition-api';
 
 interface Data {
   selectedLanguage: string | null,
@@ -44,7 +46,7 @@ interface Data {
   iFrameSrc: string | null,
 }
 
-export default defineComponent({
+export default Vue.extend({
   data: (): Data => ({
     selectedLanguage: null,
     selectedTag: null,
@@ -64,7 +66,7 @@ export default defineComponent({
   },
   mounted() {
     window.addEventListener('message', (evt) => {
-      const iframe = (this.$refs.iframe as unknown as HTMLElement);
+      const iframe = this.iframe;
 
       switch (evt.data?.type) {
         case 'update':
@@ -99,11 +101,20 @@ export default defineComponent({
     schemaDri() {
       this.reload();
     },
+    data() {
+      this.iframe?.contentWindow?.postMessage({
+        type: 'data',
+        data: this.data,
+      }, '*');
+    }
   },
   computed: {
     hasSchemaDri(): boolean {
       return !!this.schemaDri;
     },
+    iframe(): HTMLIFrameElement | undefined {
+      return this.$refs.iframe as unknown as HTMLIFrameElement;
+    }
   },
 })
 </script>
@@ -118,5 +129,9 @@ export default defineComponent({
   min-height: 500px;
 
   border: none;
+}
+
+.transparent {
+  opacity: 0;
 }
 </style>

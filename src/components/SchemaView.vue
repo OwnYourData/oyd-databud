@@ -9,6 +9,8 @@
           v-for="item of schemaDRIs"
           :key="item.dri"
           :active="selectedSchema && item.dri === selectedSchema.dri"
+          :variant="item.dri === undefined ? 'secondary' : undefined"
+          v-b-tooltip.hover.top="item.dri === undefined ? `All data` : undefined"
           @click="() => selectSchema(item)"
         >
           {{item.title || item.dri}}
@@ -16,42 +18,62 @@
       </list>
     </section>
     <section class="col-md-8">
-      <list
-        :isLoading="isVaultItemListLoading"
-        :totalItems="totalVaultItems"
-        :currentPage="currentVaultPage"
-        :pageItems="vaultPageItems"
-        @refresh="fetchVaultItems"
+      <b-tabs
+        content-class="mt-3"
+        @activate-tab="handleActivateTab"
+        v-model="selectedTabIndex"
+        lazy
       >
-        <template v-slot:header-end>
-          <custom-button @click="addItem">New</custom-button>
-          <custom-button
-            v-for="action of actions"
-            :key="action.key"
-            @click="executeAction(action)"
-            :type="isExecutingAction ? 'success-outline' : 'success'"
-            :disabled="isExecutingAction"
+        <b-tab title="Data Items">
+          <list
+            :isLoading="isVaultItemListLoading"
+            :totalItems="totalVaultItems"
+            :currentPage="currentVaultPage"
+            :pageItems="vaultPageItems"
+            @refresh="fetchVaultItems"
           >
-            <spinner v-if="isExecutingAction" />
-            <template v-else>
-              {{action.title}}
+            <template v-slot:header-end>
+              <custom-button @click="addItem">New</custom-button>
+              <custom-button
+                v-for="action of actions"
+                :key="action.key"
+                @click="executeAction(action)"
+                :type="isExecutingAction ? 'success-outline' : 'success'"
+                :disabled="isExecutingAction"
+              >
+                <spinner v-if="isExecutingAction" />
+                <template v-else>
+                  {{action.title}}
+                </template>
+              </custom-button>
+              <custom-button
+                type="danger"
+                @click="deleteSelectedVaultItem"
+                :disabled="isDeleteButtonDisabled"
+              >Delete</custom-button>
             </template>
-          </custom-button>
-          <custom-button
-            type="danger"
-            @click="deleteSelectedVaultItem"
-            :disabled="isDeleteButtonDisabled"
-          >Delete</custom-button>
-        </template>
-        <b-list-group-item
-          v-for="item of vaultItems"
-          :key="item.id"
-          :active="selectedVaultItem && item.id === selectedVaultItem.id"
-          @click="() => selectVaultItem(item)"
-        >
-          {{item.id}}
-        </b-list-group-item>
-      </list>
+            <b-list-group-item
+              v-for="item of vaultItems"
+              :key="item.id"
+              :active="selectedVaultItem && item.id === selectedVaultItem.id"
+              @click="() => selectVaultItem(item)"
+            >
+              {{item.id}}
+            </b-list-group-item>
+          </list>
+        </b-tab>
+        <b-tab title="Charts">
+          <b-input-group prepend="Page Size">
+            <b-input v-model="dataItemCount" />
+          </b-input-group>
+          <b-input-group prepend="Page Number">
+            <b-input v-model="dataItemPage" />
+          </b-input-group>
+
+          <chart-visualizer :items="vaultItems">
+          </chart-visualizer>
+        </b-tab>
+      </b-tabs>
     </section>
     <b-container v-if="showEditView">
       <b-alert
@@ -61,13 +83,13 @@
       >
         {{saveMessage}}
       </b-alert>
-      <oca-edit-view
-        class="col-md-12 oca-edit-view"
+      <form-edit-view
+        class="col-md-12 form-edit-view"
         :schemaDri="editViewSchemaDri"
         :isSaving="isSaving"
         @save="saveVaultItem"
         @cancel="() => _showEditView(false)"
-      ></oca-edit-view>
+      ></form-edit-view>
     </b-container>
   </div>
 </template>
@@ -77,13 +99,12 @@ import Vue from 'vue';
 import { IFetchVaultItems, IStore } from '../store';
 import List, { RefreshObj } from '../components/List.vue';
 import CustomButton from '../components/Button.vue';
-import OcaEditView from './FormEditView.vue';
-import { Vaultifier, VaultItem, VaultMinMeta, VaultPostItem, VaultSchema } from 'vaultifier/dist/module';
+import ChartVisualizer from '../components/ChartVisualizer.vue';
+import FormEditView from './FormEditView.vue';
+import { VaultItem, VaultMinMeta, VaultPostItem, VaultSchema } from 'vaultifier/dist/module';
 import { ActionType } from '@/store/action-type';
 import { FetchState } from '@/store/fetch-state';
 import { getInstance } from '@/services';
-import Spinner from './Spinner.vue';
-import { ConfigService } from '@/services/config-service';
 import { NetworkResponse } from 'vaultifier/dist/module/communicator';
 import { Action, executeAction, getActionsFromConfig } from '@/utils/actions';
 
@@ -94,6 +115,11 @@ interface IData {
   isSaving: boolean,
   isExecutingAction: boolean,
   saveMessage?: string,
+
+  // charting
+  selectedTabIndex: number,
+  dataItemCount: number,
+  dataItemPage?: number,
 }
 
 export default Vue.extend({
@@ -107,11 +133,17 @@ export default Vue.extend({
     isSaving: false,
     isExecutingAction: false,
     saveMessage: undefined,
+
+    // charting
+    selectedTabIndex: 0,
+    dataItemCount: 50,
+    dataItemPage: undefined,
   }),
   components: {
     CustomButton,
-    OcaEditView,
+    FormEditView,
     List,
+    ChartVisualizer,
   },
   methods: {
     async initialize() {
@@ -130,10 +162,19 @@ export default Vue.extend({
       await this.$store.dispatch(ActionType.FETCH_SCHEMA_DRIS);
     },
     async fetchVaultItems(refreshObj?: RefreshObj) {
+      const isChart = this.selectedTabIndex === 1;
+
       let fetchObj: IFetchVaultItems = {
         schema: this.selectedSchema,
         page: refreshObj?.page,
+        // we only want to fetch all the content if we display charts
+        fetchContent: isChart,
       };
+
+      if (isChart) {
+        fetchObj.size = this.dataItemCount;
+        fetchObj.page = this.dataItemPage;
+      }
 
       await this.$store.dispatch(ActionType.FETCH_VAULT_ITEMS, fetchObj);
     },
@@ -162,11 +203,11 @@ export default Vue.extend({
         const vaultItemId = response.data.id;
         const vaultItem = await vaultifier.getItem({ id: vaultItemId });
 
-        if (!vaultItem.schemaDri) {
+        if (!vaultItem.meta.schema) {
           console.error('Vault item does not have schema DRI!');
         } else {
           await this.fetchSchemas();
-          const schema = state.schemaDRI.all.find(x => x.dri === vaultItem.schemaDri);
+          const schema = state.schemaDRI.all.find(x => x.dri === vaultItem.meta.schema);
 
           if (!schema) {
             console.error('Could not find schema DRI in internal list!');
@@ -186,7 +227,8 @@ export default Vue.extend({
       try {
         await this.$store.dispatch(ActionType.UPDATE_VAULT_ITEM, postItem);
         this._showEditView(false);
-      } catch {
+      } catch (e) {
+        console.error(e);
         this.saveMessage = 'Could not save item';
       }
 
@@ -204,10 +246,14 @@ export default Vue.extend({
 
       this.$emit('showEditView', this.showEditView);
     },
+    async handleActivateTab() {
+      this.selectedSchema = undefined;
+      this.$store.dispatch(ActionType.RESET_VAULT_ITEMS);
+    },
   },
   computed: {
-    schemaDRIs(): VaultSchema[] {
-      return this.$store.state.schemaDRI.all;
+    schemaDRIs(): (VaultSchema & { dri?: string })[] {
+      return [{ dri: undefined, title: 'Default' }, ...this.$store.state.schemaDRI.all];
     },
     isSchemaListLoading(): boolean {
       return (this.$store.state as IStore).schemaDRI.state === FetchState.FETCHING;
@@ -250,7 +296,7 @@ export default Vue.extend({
 </script>
 
 <style scoped>
-.oca-edit-view {
+.form-edit-view {
   margin-top: 2em;
 }
 </style>

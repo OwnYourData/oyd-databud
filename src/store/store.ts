@@ -1,6 +1,6 @@
 import { getInstance } from '@/services';
 import { Soya } from 'soya-js';
-import { MultiResponse, Paging, Vaultifier, VaultItem, VaultItemsQuery, VaultMeta, VaultMinMeta, VaultPostItem, VaultRepo, VaultSchema, VaultTable, } from 'vaultifier';
+import { MultiResponse, Paging, Vaultifier, VaultItem, VaultItemsQuery, VaultMeta, VaultMinMeta, VaultPostItem, VaultRepo, VaultSchema, } from 'vaultifier';
 import Vue from 'vue';
 import Vuex, { Commit } from 'vuex'
 import { ActionType } from './action-type';
@@ -10,7 +10,6 @@ import { MutationType } from './mutation-type';
 export interface IFetchVaultItems {
   page?: number;
   size?: number;
-  table?: VaultTable;
   repo?: VaultRepo;
   schema?: VaultSchema;
   fetchContent?: boolean;
@@ -20,10 +19,6 @@ export interface IStore {
     all?: VaultRepo[],
     state: FetchState,
   },
-  table: {
-    all: VaultTable[],
-    state: FetchState,
-  }
   schemaDRI: {
     all: VaultSchema[],
     state: FetchState,
@@ -70,14 +65,13 @@ async function doFetch<T>(
 
 export const getStore = () => {
   Vue.use(Vuex);
+  // soya is created only once
+  // this way we can make use of its inbuilt caching
+  const soya = new Soya();
 
   return new Vuex.Store({
     state: (): IStore => ({
       repo: {
-        all: [],
-        state: FetchState.NONE,
-      },
-      table: {
         all: [],
         state: FetchState.NONE,
       },
@@ -102,9 +96,6 @@ export const getStore = () => {
       },
       [MutationType.SET_REPOS](state, payload: VaultRepo[]) {
         state.repo.all = payload;
-      },
-      [MutationType.SET_TABLES](state, payload: VaultTable[]) {
-        state.table.all = payload;
       },
       [MutationType.SET_SCHEMA_DRIS](state, payload: VaultSchema[]) {
         state.schemaDRI.all = payload;
@@ -174,18 +165,7 @@ export const getStore = () => {
           (store, state) => store.repo.state = state
         );
       },
-      async [ActionType.FETCH_TABLES]({ commit, dispatch }) {
-        await doFetch<VaultTable[]>(
-          commit,
-          () => getInstance().getTables(),
-          (commit, data) => {
-            dispatch(ActionType.RESET_VAULT_ITEMS);
-            commit(MutationType.SET_TABLES, data);
-          },
-          (store, state) => store.table.state = state
-        );
-      },
-      async [ActionType.FETCH_VAULT_ITEMS]({ commit, state }, { page, size, table, repo, schema, fetchContent }: IFetchVaultItems) {
+      async [ActionType.FETCH_VAULT_ITEMS]({ commit, state }, { page, size, repo, schema, fetchContent }: IFetchVaultItems) {
         // reset currently selected vault item if list of vault items is refreshed
         commit(MutationType.SET_VAULT_ITEM, undefined);
 
@@ -203,12 +183,11 @@ export const getStore = () => {
             if (repo) {
               instance = await getInstance().fromRepo(repo.identifier);
             }
-            else if (schema || table) {
+            else if (schema) {
               instance = getInstance();
               query = {
                 ...query,
-                schemaDri: schema?.dri,
-                tableId: table?.id,
+                schema: schema?.dri,
               };
             }
             else
@@ -220,7 +199,7 @@ export const getStore = () => {
               return instance.getMetaItems(query);
           },
           (commit, data) => {
-            commit(MutationType.SET_VAULT_ITEMS, data.content);
+            commit(MutationType.SET_VAULT_ITEMS, data.items);
             commit(MutationType.SET_VAULT_ITEMS_PAGING, data.paging);
           },
           (store, state) => store.vaultItem.allState = state,
@@ -235,7 +214,7 @@ export const getStore = () => {
         )
       },
       async [ActionType.FETCH_SCHEMAS_TITLE]({ commit, state }) {
-        const infos = await new Soya().info(state.schemaDRI.all.map(x => x.dri));
+        const infos = await soya.info(state.schemaDRI.all.map(x => x.dri));
 
         for (const info of infos) {
           const schema = state.schemaDRI.all.find(x => x.dri === info.dri);

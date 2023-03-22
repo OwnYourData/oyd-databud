@@ -61,7 +61,7 @@
 <script lang="ts">
 import Vue, { PropType } from 'vue';
 
-import { MimeType, VaultItem, VaultPostItem, crypto } from 'vaultifier';
+import { VaultItem, VaultPostItem } from 'vaultifier';
 import FormView from './FormView.vue';
 import InlineGroup from './InlineGroup.vue';
 import CustomButton from './Button.vue';
@@ -130,13 +130,12 @@ export default Vue.extend({
       if (!this.selectedStructure)
         return;
 
-      // TODO: We should let the user decide whether DRI should be calculated automatically or not
       const postItem: VaultPostItem = {
-        content: this.formData,
+        data: this.formData,
         id: this.item?.id,
-        dri: await crypto.generateHashlink(this.formData),
-        schemaDri: this.selectedStructure.dri,
-        mimeType: MimeType.JSON,
+        meta: {
+          schema: this.selectedStructure.dri,
+        },
       };
 
       // promise ensures we really await the correct saving of the item
@@ -200,7 +199,7 @@ export default Vue.extend({
   watch: {
     item: {
       handler(value: VaultItem | undefined) {
-        this.formData = value?.content;
+        this.formData = value?.data;
       },
       immediate: true,
     },
