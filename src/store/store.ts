@@ -1,5 +1,5 @@
-import { getInstance } from '@/services';
-import { Soya } from 'soya-js';
+import { getInstance, soya } from '@/services';
+import { Soya, SoyaDocument } from 'soya-js';
 import { MultiResponse, Paging, Vaultifier, VaultItem, VaultItemsQuery, VaultMeta, VaultMinMeta, VaultPostItem, VaultRepo, VaultSchema, } from 'vaultifier';
 import Vue from 'vue';
 import Vuex, { Commit } from 'vuex'
@@ -22,6 +22,7 @@ export interface IStore {
   schemaDRI: {
     all: VaultSchema[],
     state: FetchState,
+    current?: SoyaDocument,
   },
   vaultItem: {
     all: VaultMeta[],
@@ -65,9 +66,6 @@ async function doFetch<T>(
 
 export const getStore = () => {
   Vue.use(Vuex);
-  // soya is created only once
-  // this way we can make use of its inbuilt caching
-  const soya = new Soya();
 
   return new Vuex.Store({
     state: (): IStore => ({
@@ -78,6 +76,7 @@ export const getStore = () => {
       schemaDRI: {
         all: [],
         state: FetchState.NONE,
+        current: undefined,
       },
       vaultItem: {
         all: [],
@@ -96,6 +95,9 @@ export const getStore = () => {
       },
       [MutationType.SET_REPOS](state, payload: VaultRepo[]) {
         state.repo.all = payload;
+      },
+      [MutationType.SET_CURRENT_SCHEMA](state, payload: SoyaDocument | undefined) {
+        state.schemaDRI.current = payload;
       },
       [MutationType.SET_SCHEMA_DRIS](state, payload: VaultSchema[]) {
         state.schemaDRI.all = payload;
@@ -168,6 +170,26 @@ export const getStore = () => {
       async [ActionType.FETCH_VAULT_ITEMS]({ commit, state }, { page, size, repo, schema, fetchContent }: IFetchVaultItems) {
         // reset currently selected vault item if list of vault items is refreshed
         commit(MutationType.SET_VAULT_ITEM, undefined);
+        commit(MutationType.SET_CURRENT_SCHEMA, undefined);
+
+        if (schema) {
+          try {
+            const doc = await soya.pull(schema.dri);
+            commit(MutationType.SET_CURRENT_SCHEMA, doc);
+
+            const sparql = await soya.getSparqlBuilder(doc);
+            const bindings = await sparql.query(`
+            PREFIX soya: <${doc["@context"]["@base"]}>
+            SELECT * WHERE {
+                ?base a soya:OverlayDataBudRendering .
+            }`);
+
+            // if there is an overlay for DataBudRendering
+            // we want to fetch the whole content
+            if (bindings.length > 0)
+              fetchContent = true;
+          } catch { /* if it goes wrong we don't care */ }
+        }
 
         await doFetch<MultiResponse<VaultMeta>>(
           commit,
@@ -180,18 +202,18 @@ export const getStore = () => {
             };
             let instance: Vaultifier;
 
-            if (repo) {
-              instance = await getInstance().fromRepo(repo.identifier);
-            }
-            else if (schema) {
+            if (schema) {
               instance = getInstance();
               query = {
                 ...query,
                 schema: schema?.dri,
               };
             }
+            else if (repo) {
+              instance = await getInstance().fromRepo(repo.identifier);
+            }
             else
-              throw new Error('Schema, repo and table are undefined');
+              throw new Error('Schema and repo are undefined');
 
             if (fetchContent)
               return instance.getItems(query);
@@ -205,7 +227,7 @@ export const getStore = () => {
           (store, state) => store.vaultItem.allState = state,
         );
       },
-      async [ActionType.FETCH_VAULT_ITEM]({ commit }, payload: VaultMinMeta) {
+      async[ActionType.FETCH_VAULT_ITEM]({ commit }, payload: VaultMinMeta) {
         await doFetch<VaultItem>(
           commit,
           () => getInstance().getItem({ id: payload.id }),
@@ -213,7 +235,7 @@ export const getStore = () => {
           (store, state) => store.vaultItem.currentState = state,
         )
       },
-      async [ActionType.FETCH_SCHEMAS_TITLE]({ commit, state }) {
+      async[ActionType.FETCH_SCHEMAS_TITLE]({ commit, state }) {
         const infos = await soya.info(state.schemaDRI.all.map(x => x.dri));
 
         for (const info of infos) {
@@ -225,7 +247,7 @@ export const getStore = () => {
           }
         }
       },
-      async [ActionType.TOGGLE_UI_IS_FLUID]({ commit, state }) {
+      async[ActionType.TOGGLE_UI_IS_FLUID]({ commit, state }) {
         commit(MutationType.SET_UI_IS_FLUID, !state.ui.isFluid);
       },
     }

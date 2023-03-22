@@ -58,7 +58,7 @@
               :active="selectedVaultItem && item.id === selectedVaultItem.id"
               @click="() => selectVaultItem(item)"
             >
-              {{item.id}}
+              {{getListTitle(item)}}
             </b-list-group-item>
           </list>
         </b-tab>
@@ -104,12 +104,15 @@ import FormEditView from './FormEditView.vue';
 import { VaultItem, VaultMinMeta, VaultPostItem, VaultSchema } from 'vaultifier/dist/module';
 import { ActionType } from '@/store/action-type';
 import { FetchState } from '@/store/fetch-state';
-import { getInstance } from '@/services';
+import { getInstance, soya } from '@/services';
 import { NetworkResponse } from 'vaultifier/dist/module/communicator';
 import { Action, executeAction, getActionsFromConfig } from '@/utils/actions';
+import Handlebars from 'handlebars';
 
 interface IData {
   selectedSchema?: VaultSchema,
+  selectedListLabelTemplate?: string,
+
   showEditView: boolean,
   editViewSchema?: VaultSchema,
   isSaving: boolean,
@@ -128,6 +131,8 @@ export default Vue.extend({
   },
   data: (): IData => ({
     selectedSchema: undefined,
+    selectedListLabelTemplate: undefined,
+
     showEditView: false,
     editViewSchema: undefined,
     isSaving: false,
@@ -150,9 +155,29 @@ export default Vue.extend({
       await this.fetchSchemas();
     },
     async selectSchema(schema: VaultSchema) {
+      const state = this.$store.state as IStore;
+
       this.selectedSchema = schema;
+      // reset template as it needs to be fetched anew
+      this.selectedListLabelTemplate = undefined;
 
       await this.fetchVaultItems();
+
+      const doc = state.schemaDRI.current;
+      if (doc) {
+        try {
+          const sparql = await soya.getSparqlBuilder(doc);
+          const bindings = await sparql.query(`
+  PREFIX soya: <${doc["@context"]["@base"]}>
+  SELECT * WHERE {
+      ?base a soya:OverlayDataBudRendering .
+      ?base <http://www.w3.org/2000/01/rdf-schema#label> ?label .
+  }`);
+
+          if (bindings[0])
+            this.selectedListLabelTemplate = bindings[0].get('?label') || undefined;
+        } catch { /* we don't care if this does not work */ }
+      }
     },
     async selectVaultItem(item?: VaultMinMeta) {
       await this.$store.dispatch(ActionType.FETCH_VAULT_ITEM, item);
@@ -249,6 +274,12 @@ export default Vue.extend({
     async handleActivateTab() {
       this.selectedSchema = undefined;
       this.$store.dispatch(ActionType.RESET_VAULT_ITEMS);
+    },
+    getListTitle(vaultItem: VaultItem) {
+      if (this.selectedListLabelTemplate)
+        return Handlebars.compile(this.selectedListLabelTemplate)(vaultItem.data);
+      else
+        return vaultItem.id;
     },
   },
   computed: {

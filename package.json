@@ -1,6 +1,6 @@
 {
   "name": "oyd-databud",
-  "version": "0.16.0-dev.3",
+  "version": "0.16.0-dev.4",
   "license": "MIT",
   "private": "true",
   "scripts": {
@@ -13,6 +13,7 @@
   "dependencies": {
     "bootstrap-vue": "^2.23.1",
     "expression-eval": "^5.0.0",
+    "handlebars": "^4.7.7",
     "soya-js": "^0.5.18",
     "vaultifier": "^2.10.0",
     "vue": "^2.7.14",

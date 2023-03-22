@@ -1,4 +1,5 @@
 export enum MutationType {
+  SET_CURRENT_SCHEMA = 'setCurrentSchema',
   SET_SCHEMA_DRIS = 'setSchemaDRIs',
   SET_SCHEMA_DRI_TITLE = 'setSchemaDRITitle',
   SET_REPOS = 'setRepos',
